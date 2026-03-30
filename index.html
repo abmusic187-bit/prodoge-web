@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRODOGE.BERT.COM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #F8F8F7; color: #000000; font-family: sans-serif; }
+        .tab-content { display: none; }
+        .active { display: block; }
+        .puzzle-box { width: 50px; height: 50px; border: 2px solid #000; display: inline-block; cursor: pointer; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-50 p-6 overflow-y-auto">
+        <div class="max-w-md mx-auto">
+            <h1 class="text-2xl font-black text-center mb-8">PRODOGE.BERT.COM</h1>
+            
+            <div id="auth-toggle" class="flex border-b mb-6">
+                <button onclick="toggleAuth('register')" class="flex-1 py-2 font-bold border-b-2 border-black">Register</button>
+                <button onclick="toggleAuth('login')" class="flex-1 py-2 text-gray-400">Login</button>
+            </div>
+
+            <form id="reg-form" class="space-y-4">
+                <input type="text" placeholder="Username" class="w-full p-3 rounded-xl border border-gray-200 outline-none">
+                <input type="email" placeholder="Email" class="w-full p-3 rounded-xl border border-gray-200 outline-none">
+                <input type="password" id="reg-pass" placeholder="Password" class="w-full p-3 rounded-xl border border-gray-200 outline-none">
+                <input type="password" id="reg-pass-check" placeholder="Re-type Password" class="w-full p-3 rounded-xl border border-gray-200 outline-none">
+                
+                <div class="p-4 bg-white rounded-xl border border-gray-200">
+                    <p class="text-xs text-gray-500 mb-2">Security Code Verification:</p>
+                    <p class="text-[10px] font-mono break-all bg-gray-100 p-2 mb-2">eeusjdnbdgxg#)$kj6283928kshdgx</p>
+                    <input type="text" id="sec-input" placeholder="Type the code above" class="w-full p-2 text-sm border-b outline-none">
+                </div>
+
+                <div class="p-4 bg-white rounded-xl border border-gray-200">
+                    <p class="text-xs mb-2">Visual Puzzle: Select the <span class="font-bold">Circle</span></p>
+                    <div class="flex gap-4 justify-center">
+                        <div onclick="solvePuzzle(true)" class="puzzle-box rounded-full bg-gray-200"></div>
+                        <div onclick="solvePuzzle(false)" class="puzzle-box bg-gray-200"></div>
+                    </div>
+                </div>
+
+                <button type="button" onclick="handleAuth()" class="w-full bg-black text-white p-4 rounded-xl font-bold">Create Account</button>
+            </form>
+        </div>
+    </div>
+
+    <header class="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
+        <h1 class="text-xl font-bold italic text-center">PRODOGE.BERT.COM</h1>
+    </header>
+
+    <main id="app-body" class="p-4 max-w-md mx-auto">
+        <div id="dashboard" class="tab-content active space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 text-center">
+                <p class="text-gray-500 text-sm uppercase tracking-widest">Elite Balance</p>
+                <h2 id="token-balance" class="text-5xl font-black mt-2">100</h2>
+                <p class="text-blue-600 font-bold mt-1">$ELITE</p>
+            </div>
+            <div class="bg-black text-white p-4 rounded-2xl text-center">
+                <p class="text-xs opacity-70 italic">Airdrop opens in 2 months</p>
+            </div>
+        </div>
+
+        <div id="tasks" class="tab-content space-y-4">
+            <h3 class="text-lg font-bold">Daily Tasks</h3>
+            <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-gray-100">
+                <span>Daily Claim</span>
+                <button onclick="addTokens(10)" class="bg-black text-white px-4 py-1 rounded-full text-xs">10 Elite</button>
+            </div>
+            <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-gray-100">
+                <span>YouTube Subscribe</span>
+                <button onclick="addTokens(50)" class="bg-black text-white px-4 py-1 rounded-full text-xs">50 Elite</button>
+            </div>
+            <div class="bg-white p-4 rounded-2xl flex justify-between items-center shadow-sm border border-gray-100">
+                <span>TikTok Follow</span>
+                <button onclick="addTokens(40)" class="bg-black text-white px-4 py-1 rounded-full text-xs">40 Elite</button>
+            </div>
+        </div>
+
+        <div id="create" class="tab-content">
+            <div class="bg-white p-6 rounded-2xl border border-gray-100">
+                <h3 class="text-lg font-bold mb-4">Make Your Own Task</h3>
+                <div class="space-y-4">
+                    <select class="w-full p-3 bg-[#F8F8F7] rounded-xl outline-none border border-gray-100">
+                        <option>YouTube Subscriber</option>
+                        <option>TikTok Follow</option>
+                        <option>Instagram Follow</option>
+                    </select>
+                    <input type="text" placeholder="Your Channel/Profile Link" class="w-full p-3 bg-[#F8F8F7] rounded-xl outline-none border border-gray-100">
+                    <button class="w-full bg-blue-600 text-white p-4 rounded-xl font-bold">Launch My Task</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="airdrop" class="tab-content text-center py-10">
+            <h3 class="text-2xl font-bold mb-2">Submit Tokens</h3>
+            <p class="text-gray-500 text-sm mb-6">Enter tokens to participate in the airdrop.</p>
+            <input type="number" id="submit-amt" placeholder="Amount" class="w-full text-center text-2xl font-bold mb-4 bg-transparent outline-none border-b">
+            <button onclick="alert('Tokens Submitted Successfully!')" class="w-full bg-black text-white py-4 rounded-xl font-bold">Submit for Airdrop</button>
+        </div>
+
+        <div id="profile" class="tab-content bg-white p-6 rounded-2xl text-center shadow-sm">
+            <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Prodoge" class="w-24 h-24 mx-auto rounded-full bg-gray-100 mb-4">
+            <h3 id="p-name" class="text-xl font-bold">User_77</h3>
+            <p id="p-email" class="text-gray-500 text-sm">user@prodoge.com</p>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around py-3">
+        <button onclick="showTab('dashboard')" class="text-xs font-bold">Home</button>
+        <button onclick="showTab('tasks')" class="text-xs font-bold">Tasks</button>
+        <button onclick="showTab('create')" class="text-xs font-bold">Create</button>
+        <button onclick="showTab('airdrop')" class="text-xs font-bold">Airdrop</button>
+        <button onclick="showTab('profile')" class="text-xs font-bold">Profile</button>
+    </nav>
+
+    <script>
+        let tokens = 100;
+        let puzzleSolved = false;
+        const SECRET_CODE = "eeusjdnbdgxg#)$kj6283928kshdgx";
+
+        function solvePuzzle(correct) {
+            puzzleSolved = correct;
+            if(correct) alert("Puzzle Verified!");
+            else alert("Wrong item selected!");
+        }
+
+        function handleAuth() {
+            const codeInput = document.getElementById('sec-input').value;
+            const pass = document.getElementById('reg-pass').value;
+            const passCheck = document.getElementById('reg-pass-check').value;
+
+            if (pass !== passCheck) return alert("Passwords do not match!");
+            if (codeInput !== SECRET_CODE) return alert("Security code is incorrect!");
+            if (!puzzleSolved) return alert("Please solve the visual puzzle!");
+
+            document.getElementById('auth-screen').style.display = 'none';
+        }
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function addTokens(amt) {
+            tokens += amt;
+            document.getElementById('token-balance').innerText = tokens;
+            alert("Claimed " + amt + " Elite Tokens!");
+        }
+    </script>
+</body>
+</html>
