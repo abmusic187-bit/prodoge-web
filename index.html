@@ -11,8 +11,7 @@
         .tab-content { display: none; }
         .active { display: block; }
         .puzzle-item { width: 70px; height: 70px; border: 2px solid #eee; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 28px; transition: 0.2s; }
-        .puzzle-item.selected { border-color: #000; background: #fff; transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        input:focus { border-color: #000 !important; }
+        .puzzle-item.selected { border-color: #000; background: #fff; transform: scale(1.05); }
     </style>
 </head>
 <body class="pb-28">
@@ -20,7 +19,7 @@
     <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-50 p-6 overflow-y-auto">
         <div class="max-w-md mx-auto">
             <h1 class="text-4xl font-black text-center mb-2 tracking-tighter">PRODOGE</h1>
-            <p class="text-center text-gray-400 text-xs mb-10 uppercase tracking-widest font-bold">Elite Asset Network</p>
+            <p class="text-center text-gray-400 text-[10px] mb-10 uppercase tracking-widest font-black">Elite Asset Network</p>
             
             <div class="flex bg-white p-1 rounded-2xl mb-8 border border-gray-100 shadow-sm">
                 <button onclick="toggleAuth('reg')" id="btn-reg" class="flex-1 py-3 font-black rounded-xl bg-black text-white transition">REGISTER</button>
@@ -28,14 +27,13 @@
             </div>
 
             <div class="space-y-4">
-                <div id="reg-only"><input type="text" id="username" placeholder="Username" class="w-full p-4 rounded-2xl border border-gray-200 outline-none transition-all"></div>
+                <div id="reg-only"><input type="text" id="username" placeholder="Username" class="w-full p-4 rounded-2xl border border-gray-200 outline-none"></div>
                 <input type="email" id="email" placeholder="Email Address" class="w-full p-4 rounded-2xl border border-gray-200 outline-none">
                 <input type="password" id="password" placeholder="Password" class="w-full p-4 rounded-2xl border border-gray-200 outline-none">
                 
                 <div class="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <p class="text-[10px] text-gray-400 font-black mb-1 uppercase">Security Verification Code</p>
-                    <p class="text-[10px] font-mono break-all bg-gray-50 p-3 rounded-lg mb-3 border border-gray-100">eeusjdnbdgxg#)$kj6283928kshdgx</p>
-                    <input type="text" id="sec-code" placeholder="Enter the code exactly" class="w-full p-2 border-b border-gray-100 outline-none text-sm">
+                    <p class="text-[10px] text-gray-400 font-black mb-1">CODE: <span class="text-black">eeusjdnbdgxg#)$kj6283928kshdgx</span></p>
+                    <input type="text" id="sec-code" placeholder="Verify Code" class="w-full p-2 border-b border-gray-100 outline-none text-sm">
                 </div>
 
                 <div class="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
@@ -46,104 +44,86 @@
                     </div>
                 </div>
 
-                <button onclick="submitAuth()" id="auth-btn" class="w-full bg-black text-white p-5 rounded-[2rem] font-black text-lg shadow-xl active:scale-95 transition">GET STARTED</button>
+                <button onclick="submitAuth()" id="auth-btn" class="w-full bg-black text-white p-5 rounded-[2rem] font-black text-lg shadow-xl">ENTER PLATFORM</button>
             </div>
         </div>
     </div>
 
     <header class="p-5 border-b border-gray-100 bg-white sticky top-0 z-10 flex justify-between items-center">
         <span class="font-black text-xl tracking-tighter">PRODOGE.BERT</span>
-        <div class="bg-red-50 text-red-500 px-4 py-1 rounded-full text-[10px] font-black uppercase border border-red-100" onclick="location.reload()">Exit</div>
+        <div class="bg-black text-white px-4 py-1 rounded-full text-[10px] font-black uppercase" onclick="location.reload()">Logout</div>
     </header>
 
     <main class="p-5 max-w-md mx-auto">
         <div id="dashboard" class="tab-content active space-y-6">
-            <div class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-100 text-center relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 w-24 h-24 bg-blue-500/5 rounded-full"></div>
-                <p class="text-gray-400 text-[10px] font-black tracking-[0.3em] uppercase mb-4">Available Elite</p>
+            <div class="bg-white p-12 rounded-[3rem] shadow-sm border border-gray-100 text-center relative">
+                <p class="text-gray-400 text-[10px] font-black tracking-[0.3em] uppercase mb-4">Elite Balance</p>
                 <h2 id="balance-display" class="text-7xl font-black mb-2 tracking-tighter">0</h2>
-                <div class="inline-flex items-center gap-2 bg-blue-600 text-white text-[10px] px-4 py-1.5 rounded-full font-black uppercase">
-                    <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> Network Active
-                </div>
+                <div class="bg-blue-600 text-white text-[10px] px-4 py-1.5 rounded-full font-black uppercase inline-block">Network Verified</div>
             </div>
-            
-            <div class="bg-black text-white p-6 rounded-3xl flex items-center justify-between shadow-lg">
-                <div>
-                    <p class="text-[10px] opacity-40 font-black uppercase mb-1">Airdrop Phase 1</p>
-                    <p class="text-xl font-mono">60D : 00H : 00M</p>
-                </div>
-                <div class="h-12 w-12 bg-white/10 rounded-2xl flex items-center justify-center text-2xl">🚀</div>
-            </div>
+            <div class="bg-black text-white p-6 rounded-3xl text-center font-mono uppercase text-xs tracking-widest">Mainnet Unlock in 60 Days</div>
         </div>
 
         <div id="tasks" class="tab-content space-y-3">
-            <h3 class="font-black text-xl mb-6 px-2 italic">Earn Daily</h3>
+            <h3 class="font-black text-xl mb-6">Earn Daily</h3>
             <div class="bg-white p-5 rounded-3xl flex justify-between items-center border border-gray-100 shadow-sm">
-                <div><p class="font-black text-sm uppercase">Daily Check-in</p><p class="text-[10px] text-blue-600 font-bold">+10 ELITE</p></div>
+                <div><p class="font-black text-sm uppercase">Daily Claim</p><p class="text-[10px] text-blue-600">+10 ELITE</p></div>
                 <button onclick="updateTokens(10)" class="bg-black text-white px-6 py-2.5 rounded-2xl text-[10px] font-black">CLAIM</button>
             </div>
             <div class="bg-white p-5 rounded-3xl flex justify-between items-center border border-gray-100 shadow-sm">
-                <div><p class="font-black text-sm uppercase">YouTube Subscribe</p><p class="text-[10px] text-blue-600 font-bold">+50 ELITE</p></div>
-                <button onclick="updateTokens(50)" class="bg-black text-white px-6 py-2.5 rounded-2xl text-[10px] font-black">50 ELITE</button>
+                <div><p class="font-black text-sm uppercase">YouTube Task</p><p class="text-[10px] text-blue-600">+50 ELITE</p></div>
+                <button onclick="updateTokens(50)" class="bg-black text-white px-6 py-2.5 rounded-2xl text-[10px] font-black">CLAIM</button>
             </div>
             <div class="bg-white p-5 rounded-3xl flex justify-between items-center border border-gray-100 shadow-sm">
-                <div><p class="font-black text-sm uppercase">Social Follow Task</p><p class="text-[10px] text-blue-600 font-bold">+40 ELITE</p></div>
-                <button onclick="updateTokens(40)" class="bg-black text-white px-6 py-2.5 rounded-2xl text-[10px] font-black">40 ELITE</button>
+                <div><p class="font-black text-sm uppercase">Social Task</p><p class="text-[10px] text-blue-600">+40 ELITE</p></div>
+                <button onclick="updateTokens(40)" class="bg-black text-white px-6 py-2.5 rounded-2xl text-[10px] font-black">CLAIM</button>
             </div>
         </div>
 
         <div id="create" class="tab-content">
-            <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm">
-                <h3 class="font-black text-xl mb-8">Launch Campaign</h3>
-                <div class="space-y-5">
-                    <select id="t-type" onchange="calc()" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black text-xs uppercase border-none">
-                        <option value="50">YouTube Subs (50 Elite/ea)</option>
-                        <option value="40">TikTok Follow (40 Elite/ea)</option>
-                        <option value="40">Instagram Follow (40 Elite/ea)</option>
-                    </select>
-                    <input type="number" id="t-qty" oninput="calc()" placeholder="Number of Followers" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black text-sm">
-                    <div class="p-5 bg-blue-50 rounded-2xl flex justify-between items-center border border-blue-100">
-                        <span class="text-[10px] font-black text-blue-600 uppercase">Cost:</span> 
-                        <span id="cost" class="font-black text-blue-600 text-2xl">0</span>
-                    </div>
-                    <button onclick="payTask()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black shadow-lg">LAUNCH NOW</button>
+            <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-5">
+                <h3 class="font-black text-xl mb-3">Launch Campaign</h3>
+                <select id="t-type" onchange="calc()" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black text-xs uppercase">
+                    <option value="50">YouTube Subs (50 Elite)</option>
+                    <option value="40">TikTok Follow (40 Elite)</option>
+                    <option value="40">Instagram Follow (40 Elite)</option>
+                </select>
+                <input type="number" id="t-qty" oninput="calc()" placeholder="Quantity" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black text-sm">
+                <div class="p-5 bg-blue-50 rounded-2xl flex justify-between items-center text-blue-600">
+                    <span class="text-[10px] font-black uppercase">Cost:</span> 
+                    <span id="cost" class="font-black text-2xl">0</span>
                 </div>
+                <button onclick="payTask()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black">PAY & LAUNCH</button>
             </div>
         </div>
 
         <div id="airdrop" class="tab-content text-center py-12">
-            <div class="w-20 h-20 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-xl">💎</div>
-            <h3 class="text-3xl font-black mb-3 italic tracking-tighter">Pool Submission</h3>
-            <p class="text-gray-400 text-xs mb-10 px-10 font-medium">Submit your locked assets to qualify for the community distribution event.</p>
+            <h3 class="text-3xl font-black mb-10 italic">Airdrop Pool</h3>
             <div class="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
                 <input type="number" placeholder="0.00" class="w-full text-center text-5xl font-black mb-8 outline-none bg-transparent">
-                <button onclick="alert('Submission received!')" class="w-full bg-black text-white py-5 rounded-[2rem] font-black shadow-lg">LOCK ASSETS</button>
+                <button onclick="alert('Submitted!')" class="w-full bg-black text-white py-5 rounded-[2rem] font-black">SUBMIT ASSETS</button>
             </div>
         </div>
 
-        <div id="profile" class="tab-content">
-            <div class="bg-white p-12 rounded-[3rem] text-center border border-gray-100 shadow-sm">
-                <div class="w-28 h-28 bg-gray-50 rounded-[2.5rem] mx-auto mb-6 flex items-center justify-center text-5xl border-4 border-[#F8F8F7] shadow-inner">👤</div>
-                <h3 id="p-user" class="text-3xl font-black tracking-tighter">Explorer</h3>
-                <p id="p-mail" class="text-gray-400 text-sm mb-10">user@network.com</p>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-5 rounded-3xl"><p class="text-[9px] text-gray-400 font-black uppercase">Status</p><p class="font-black text-xs">ELITE</p></div>
-                    <div class="bg-gray-50 p-5 rounded-3xl"><p class="text-[9px] text-gray-400 font-black uppercase">Rank</p><p class="font-black text-xs">#001</p></div>
-                </div>
+        <div id="profile" class="tab-content text-center">
+            <div class="bg-white p-12 rounded-[3rem] border border-gray-100 shadow-sm">
+                <div class="w-24 h-24 bg-gray-50 rounded-[2rem] mx-auto mb-6 flex items-center justify-center text-4xl border border-gray-100">👤</div>
+                <h3 id="p-user" class="text-2xl font-black tracking-tighter">Explorer</h3>
+                <p id="p-mail" class="text-gray-400 text-xs mb-8">Not Logged In</p>
+                <div class="bg-gray-50 p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest text-blue-600">Official Participant</div>
             </div>
         </div>
     </main>
 
-    <nav class="fixed bottom-6 left-6 right-6 bg-white/80 backdrop-blur-md border border-gray-100 flex justify-around py-4 rounded-[2.5rem] shadow-2xl z-20">
-        <button onclick="show('dashboard')" class="nav-btn flex flex-col items-center gap-1 active:scale-90 transition"><span class="text-lg">🏠</span><span class="text-[8px] font-black">HOME</span></button>
-        <button onclick="show('tasks')" class="nav-btn flex flex-col items-center gap-1 text-gray-300 opacity-60"><span class="text-lg">💰</span><span class="text-[8px] font-black">EARN</span></button>
-        <button onclick="show('create')" class="nav-btn flex flex-col items-center gap-1 text-gray-300 opacity-60"><span class="text-lg">➕</span><span class="text-[8px] font-black">CREATE</span></button>
-        <button onclick="show('airdrop')" class="nav-btn flex flex-col items-center gap-1 text-gray-300 opacity-60"><span class="text-lg">🚀</span><span class="text-[8px] font-black">DROP</span></button>
-        <button onclick="show('profile')" class="nav-btn flex flex-col items-center gap-1 text-gray-300 opacity-60"><span class="text-lg">👤</span><span class="text-[8px] font-black">ME</span></button>
+    <nav class="fixed bottom-6 left-6 right-6 bg-white border border-gray-100 flex justify-around py-5 rounded-[2.5rem] shadow-2xl z-20">
+        <button onclick="show('dashboard')" class="flex flex-col items-center gap-1"><span class="text-lg">🏠</span><span class="text-[8px] font-black">HOME</span></button>
+        <button onclick="show('tasks')" class="flex flex-col items-center gap-1"><span class="text-lg">💰</span><span class="text-[8px] font-black">EARN</span></button>
+        <button onclick="show('create')" class="flex flex-col items-center gap-1"><span class="text-lg">➕</span><span class="text-[8px] font-black">CREATE</span></button>
+        <button onclick="show('airdrop')" class="flex flex-col items-center gap-1"><span class="text-lg">🚀</span><span class="text-[8px] font-black">DROP</span></button>
+        <button onclick="show('profile')" class="flex flex-col items-center gap-1"><span class="text-lg">👤</span><span class="text-[8px] font-black">ME</span></button>
     </nav>
 
     <script>
-        // --- SUPABASE CONFIGURATION ---
         const SB_URL = "https://cnskfvzyfqovovhzkjcs.supabase.co";
         const SB_KEY = "sb_publishable_7pwXdWzNC1zJ2dICjiHmUQ_lUNrbmnr"; 
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
@@ -171,17 +151,15 @@
             const pass = document.getElementById('password').value;
             const user = document.getElementById('username').value;
             
-            if(document.getElementById('sec-code').value !== SEC_CODE) return alert("Invalid Security Code");
-            if(selectedPuz !== 'circle') return alert("Verification Puzzle Failed");
+            if(document.getElementById('sec-code').value !== SEC_CODE) return alert("Security Code Error");
+            if(selectedPuz !== 'circle') return alert("Puzzle Failed");
 
             if(authMode === 'reg') {
                 const { data, error } = await supabaseClient.auth.signUp({ 
-                    email, 
-                    password: pass, 
-                    options: { data: { username: user } } 
+                    email, password: pass, options: { data: { username: user } } 
                 });
                 if(error) return alert(error.message);
-                alert("Account created! Check email for confirmation.");
+                if(data.user) loadProfile(data.user);
             } else {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
                 if(error) return alert(error.message);
@@ -190,21 +168,29 @@
         }
 
         async function loadProfile(user) {
-            const { data } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
-            currentUser = data;
-            document.getElementById('balance-display').innerText = data.tokens;
-            document.getElementById('p-user').innerText = data.username;
-            document.getElementById('p-mail').innerText = data.email;
-            document.getElementById('auth-screen').style.display = 'none';
+            // Give the database a moment to create the profile row
+            let attempts = 0;
+            const interval = setInterval(async () => {
+                const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+                if(data) {
+                    clearInterval(interval);
+                    currentUser = data;
+                    document.getElementById('balance-display').innerText = data.tokens;
+                    document.getElementById('p-user').innerText = data.username;
+                    document.getElementById('p-mail').innerText = data.email;
+                    document.getElementById('auth-screen').style.display = 'none';
+                }
+                if(attempts++ > 5) clearInterval(interval);
+            }, 1000);
         }
 
         async function updateTokens(amt) {
-            const newTotal = currentUser.tokens + amt;
+            const newTotal = parseInt(currentUser.tokens) + amt;
             const { error } = await supabaseClient.from('profiles').update({ tokens: newTotal }).eq('id', currentUser.id);
             if(!error) {
                 currentUser.tokens = newTotal;
                 document.getElementById('balance-display').innerText = newTotal;
-                alert(`Balance Updated: +${amt} Elite!`);
+                alert("Elite Earned!");
             }
         }
 
@@ -220,20 +206,14 @@
                 await supabaseClient.from('profiles').update({ tokens: newTotal }).eq('id', currentUser.id);
                 currentUser.tokens = newTotal;
                 document.getElementById('balance-display').innerText = newTotal;
-                alert("Campaign Launched Successfully!");
+                alert("Campaign Launched!");
             } else {
-                alert("Insufficient Elite Tokens");
+                alert("Insufficient Elite");
             }
         }
 
         function show(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.add('text-gray-300', 'opacity-60');
-                b.classList.remove('text-black', 'opacity-100');
-            });
-            event.currentTarget.classList.remove('text-gray-300', 'opacity-60');
-            event.currentTarget.classList.add('text-black', 'opacity-100');
             document.getElementById(id).classList.add('active');
         }
     </script>
