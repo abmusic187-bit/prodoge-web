@@ -12,6 +12,7 @@
         .active { display: block; }
         .captcha-box { user-select: none; font-style: italic; letter-spacing: 5px; background: repeating-linear-gradient(45deg, #f9f9f9, #f9f9f9 10px, #ffffff 10px, #ffffff 20px); text-decoration: line-through; }
         input::placeholder { font-weight: 700; color: #ccc; text-transform: uppercase; font-size: 10px; }
+        .nav-btn.active { opacity: 1 !important; transform: scale(1.1); }
     </style>
 </head>
 <body class="pb-28">
@@ -30,6 +31,7 @@
                 <div id="reg-only" class="space-y-4">
                     <input type="text" id="username" placeholder="Username" class="w-full p-4 rounded-2xl border border-gray-100 outline-none font-bold">
                     <div class="p-4 bg-white rounded-2xl border border-gray-100">
+                        <p class="text-[9px] font-black text-gray-400 mb-2 uppercase tracking-tighter">Secret Network Pin</p>
                         <input type="password" id="sec-code" placeholder="Enter Security Pin" class="w-full p-1 border-b border-gray-100 outline-none text-center font-mono">
                     </div>
                 </div>
@@ -42,17 +44,17 @@
                         <div id="captcha-display" class="captcha-box px-6 py-2 border border-gray-100 font-black text-xl text-black"></div>
                         <button onclick="genCaptcha()" class="text-xl">🔄</button>
                     </div>
-                    <input type="text" id="captcha-input" placeholder="Enter Code Above" class="w-full p-3 bg-gray-50 rounded-xl outline-none text-center font-black uppercase border border-gray-100">
+                    <input type="text" id="captcha-input" placeholder="Type Captcha Above" class="w-full p-3 bg-gray-50 rounded-xl outline-none text-center font-black uppercase border border-gray-100">
                 </div>
 
-                <button onclick="submitAuth()" id="auth-btn" class="w-full bg-black text-white p-5 rounded-[2rem] font-black text-lg shadow-xl active:scale-95 transition">AUTHENTICATE</button>
+                <button onclick="submitAuth()" id="auth-btn" class="w-full bg-black text-white p-5 rounded-[2rem] font-black text-lg shadow-xl active:scale-95 transition">ENTER PLATFORM</button>
             </div>
         </div>
     </div>
 
     <header class="p-5 border-b border-gray-100 bg-white sticky top-0 z-10 flex justify-between items-center">
         <span class="font-black text-xl tracking-tighter">PRODOGE.BERT</span>
-        <button onclick="handleLogout()" class="text-[10px] font-black uppercase text-red-500 bg-red-50 px-3 py-1 rounded-full">Log Out</button>
+        <button onclick="handleLogout()" class="text-[10px] font-black uppercase text-red-500 bg-red-50 px-3 py-1 rounded-full border border-red-100">Log Out</button>
     </header>
 
     <main class="p-5 max-w-md mx-auto">
@@ -60,49 +62,49 @@
             <div class="bg-white p-12 rounded-[3.5rem] shadow-sm border border-gray-100">
                 <p class="text-gray-400 text-[10px] font-black tracking-[0.3em] uppercase mb-4">Elite Balance</p>
                 <h2 id="balance-display" class="text-7xl font-black mb-2 tracking-tighter">0</h2>
-                <div class="bg-blue-600 text-white text-[10px] px-4 py-1.5 rounded-full font-black uppercase inline-block italic tracking-widest">Verified Account</div>
+                <div class="bg-blue-600 text-white text-[10px] px-4 py-1.5 rounded-full font-black uppercase inline-block italic tracking-widest">Mainnet Verified</div>
             </div>
-            <div class="bg-black text-white p-6 rounded-3xl font-mono text-[10px] tracking-widest">MINING POOL ACTIVE</div>
+            <div class="bg-black text-white p-6 rounded-3xl font-mono text-[10px] tracking-widest uppercase">Mining Pool Active: 60 Days Left</div>
         </div>
 
         <div id="tasks" class="tab-content space-y-3">
             <h3 class="font-black text-xl mb-6 italic px-2">Earn Daily</h3>
             <div class="bg-white p-5 rounded-3xl flex justify-between items-center border border-gray-100">
-                <div><p class="font-black text-sm uppercase italic">Daily Claim</p><p class="text-[10px] text-blue-600">+10 ELITE</p></div>
+                <div><p class="font-black text-sm uppercase italic">Daily Bonus</p><p class="text-[10px] text-blue-600">+10 ELITE</p></div>
                 <button id="claim-btn-daily" onclick="updateTokens(10, 'daily')" class="bg-black text-white px-6 py-2.5 rounded-2xl text-[10px] font-black disabled:opacity-20">CLAIM</button>
             </div>
         </div>
 
         <div id="create" class="tab-content">
             <div class="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
-                <h3 class="font-black text-xl mb-2 italic">Ad Services</h3>
+                <h3 class="font-black text-xl mb-2 italic">Ad Launchpad</h3>
                 <select id="t-type" onchange="calc()" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black text-[10px]">
                     <option value="50">YouTube Subs (50 Elite)</option>
-                    <option value="40">TikTok Follow (40 Elite)</option>
+                    <option value="40">TikTok Followers (40 Elite)</option>
                 </select>
-                <input type="number" id="t-qty" oninput="calc()" placeholder="Quantity" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black">
-                <div class="p-4 bg-blue-50 rounded-2xl flex justify-between items-center text-blue-600 font-black">
-                    <span class="text-[10px]">COST:</span> <span id="cost">0</span>
+                <input type="number" id="t-qty" oninput="calc()" placeholder="Amount Needed" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-black">
+                <div class="p-4 bg-blue-50 rounded-2xl flex justify-between items-center text-blue-600 font-black border border-blue-100">
+                    <span class="text-[10px]">CAMPAIGN COST:</span> <span id="cost">0</span>
                 </div>
-                <button onclick="payTask()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black">LAUNCH</button>
+                <button onclick="payTask()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black shadow-lg">PAY & LAUNCH</button>
             </div>
         </div>
 
         <div id="profile" class="tab-content">
             <div class="bg-white p-10 rounded-[3rem] text-center border border-gray-100 shadow-sm">
-                <div class="w-20 h-20 bg-gray-50 rounded-3xl mx-auto mb-6 flex items-center justify-center text-3xl font-black">👤</div>
-                <h3 id="p-user" class="text-2xl font-black tracking-tighter italic">Explorer</h3>
+                <div class="w-20 h-20 bg-gray-100 rounded-3xl mx-auto mb-6 flex items-center justify-center text-3xl font-black">👤</div>
+                <h3 id="p-user" class="text-2xl font-black tracking-tighter italic text-gray-800">User</h3>
                 <p id="p-mail" class="text-gray-400 text-xs mb-8">Email</p>
-                <div class="p-3 bg-gray-50 rounded-xl font-black text-[9px] uppercase text-gray-400 tracking-widest italic">Airdrop Phase 1</div>
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl font-black text-[9px] uppercase tracking-widest italic border border-blue-100">Tier: Elite Participant</div>
             </div>
         </div>
     </main>
 
-    <nav class="fixed bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md border border-gray-100 flex justify-around py-5 rounded-[2.5rem] shadow-2xl z-20">
-        <button onclick="showTab('dashboard')" class="flex flex-col items-center gap-1"><span class="text-lg">🏠</span><span class="text-[8px] font-black">HOME</span></button>
-        <button onclick="showTab('tasks')" class="flex flex-col items-center gap-1 opacity-30"><span class="text-lg">💰</span><span class="text-[8px] font-black">EARN</span></button>
-        <button onclick="showTab('create')" class="flex flex-col items-center gap-1 opacity-30"><span class="text-lg">➕</span><span class="text-[8px] font-black">LAUNCH</span></button>
-        <button onclick="showTab('profile')" class="flex flex-col items-center gap-1 opacity-30"><span class="text-lg">👤</span><span class="text-[8px] font-black">ME</span></button>
+    <nav class="fixed bottom-6 left-6 right-6 bg-white/95 backdrop-blur-sm border border-gray-100 flex justify-around py-5 rounded-[2.5rem] shadow-2xl z-20">
+        <button onclick="showTab('dashboard')" class="nav-btn flex flex-col items-center gap-1 active"><span class="text-lg">🏠</span><span class="text-[8px] font-black">HOME</span></button>
+        <button onclick="showTab('tasks')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-lg">💰</span><span class="text-[8px] font-black">EARN</span></button>
+        <button onclick="showTab('create')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-lg">⚡</span><span class="text-[8px] font-black">LAUNCH</span></button>
+        <button onclick="showTab('profile')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-lg">👤</span><span class="text-[8px] font-black">ME</span></button>
     </nav>
 
     <script>
@@ -113,7 +115,7 @@
         let currentUser = null;
         let authMode = "reg";
         let captchaText = "";
-        const REQUIRED_PIN = "eeusjdnbdgxg#)$kj6283928kshdgx"; // THIS IS THE PIN THE USER MUST TYPE
+        const REQUIRED_PIN = "eeusjdnbdgxg#)$kj6283928kshdgx";
 
         window.onload = async () => {
             genCaptcha();
@@ -142,18 +144,17 @@
             const pass = document.getElementById('password').value;
             const user = document.getElementById('username').value;
             const pinEntered = document.getElementById('sec-code').value;
+            const capEntered = document.getElementById('captcha-input').value.toUpperCase();
             
-            if(authMode === 'reg') {
-                if(pinEntered !== REQUIRED_PIN) return alert("Security Pin is Incorrect");
-            }
-            if(document.getElementById('captcha-input').value.toUpperCase() !== captchaText) return alert("Captcha Failed");
+            if(capEntered !== captchaText) return alert("Captcha Failed");
+            if(authMode === 'reg' && pinEntered !== REQUIRED_PIN) return alert("Security Pin Invalid");
 
             if(authMode === 'reg') {
                 const { data, error } = await supabaseClient.auth.signUp({ 
                     email, password: pass, options: { data: { username: user } } 
                 });
                 if(error) return alert(error.message);
-                alert("Account created! You can now log in.");
+                alert("Account created successfully!");
                 toggleAuth('log');
             } else {
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
@@ -195,6 +196,7 @@
             if(!error) {
                 currentUser.tokens = newTotal;
                 document.getElementById('balance-display').innerText = newTotal;
+                alert("Tokens Added!");
             }
         }
 
@@ -209,9 +211,9 @@
                 await supabaseClient.from('profiles').update({ tokens: newTotal }).eq('id', currentUser.id);
                 currentUser.tokens = newTotal;
                 document.getElementById('balance-display').innerText = newTotal;
-                alert("Campaign Verified!");
+                alert("Campaign Launched!");
             } else {
-                alert("Insufficient Elite");
+                alert("Insufficient Elite Tokens");
             }
         }
 
@@ -223,9 +225,11 @@
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            const btns = document.querySelectorAll('nav button');
+            const btns = document.querySelectorAll('.nav-btn');
             btns.forEach(b => b.classList.add('opacity-30'));
+            btns.forEach(b => b.classList.remove('active'));
             event.currentTarget.classList.remove('opacity-30');
+            event.currentTarget.classList.add('active');
         }
     </script>
 </body>
