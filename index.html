@@ -7,9 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #F8F8F7; color: #000; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #F8F8F7; color: #000; font-family: sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         .tab-content { display: none; }
-        .active { display: block; }
+        .active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .nav-btn.active-tab { opacity: 1 !important; transform: scale(1.1); color: #2563eb; }
         #splash-loader { transition: opacity 0.5s ease; }
         .pulse-logo { animation: pulse 1.5s infinite ease-in-out; }
@@ -22,24 +23,24 @@
 
     <div id="splash-loader" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center">
         <h1 class="text-white text-4xl font-black italic pulse-logo tracking-tighter">PRODOGE</h1>
-        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase text-center">Elite P2P Network<br>Loading Assets...</p>
+        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase">Syncing Protocol...</p>
     </div>
 
     <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-50 p-6 overflow-y-auto hidden text-center">
         <div class="max-w-md mx-auto">
             <h1 class="text-5xl font-black mb-10 tracking-tighter italic">PRODOGE</h1>
-            <div class="flex bg-white p-1 rounded-2xl mb-8 border border-gray-100 shadow-sm">
+            <div class="flex bg-white p-1 rounded-2xl mb-8 border border-gray-100">
                 <button onclick="toggleAuth('reg')" id="btn-reg" class="flex-1 py-4 font-black rounded-xl bg-black text-white">REGISTER</button>
                 <button onclick="toggleAuth('log')" id="btn-log" class="flex-1 py-4 font-black text-gray-400">LOGIN</button>
             </div>
             <div class="space-y-4">
                 <div id="reg-only" class="space-y-4">
                     <input type="text" id="username" placeholder="Username" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
-                    <input type="password" id="sec-code" placeholder="Master Pin (Required)" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold text-center">
                 </div>
+                <input type="password" id="sec-code" placeholder="Enter Network Pin" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold text-center">
                 <input type="email" id="email" placeholder="Email" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
                 <input type="password" id="password" placeholder="Password" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
-                <button onclick="submitAuth(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 transition uppercase">Connect Account</button>
+                <button id="auth-submit-btn" onclick="submitAuth(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 transition uppercase">Connect</button>
             </div>
         </div>
     </div>
@@ -50,63 +51,68 @@
     </header>
 
     <main class="p-6 max-w-md mx-auto">
-        <div id="dashboard" class="tab-content active text-center">
+        <div id="dashboard" class="tab-content text-center">
             <div class="bg-white p-12 rounded-[4rem] shadow-sm border border-gray-100">
-                <p class="text-gray-400 text-[10px] font-black uppercase mb-4 tracking-[0.4em]">Available Tokens</p>
+                <p class="text-gray-400 text-[10px] font-black uppercase mb-4 tracking-[0.4em]">Balance</p>
                 <h2 id="balance-display" class="text-8xl font-black mb-4 tracking-tighter">0</h2>
-                <div class="bg-blue-600 text-white text-[10px] px-6 py-2 rounded-full font-black uppercase italic tracking-widest inline-block">Verified Elite</div>
+                <div class="bg-blue-600 text-white text-[10px] px-6 py-2 rounded-full font-black uppercase italic tracking-widest inline-block">Elite Account</div>
             </div>
         </div>
 
         <div id="tasks" class="tab-content space-y-4">
-            <h3 class="font-black text-2xl mb-6 italic px-2">Task Hub</h3>
+            <h3 class="font-black text-2xl mb-6 italic px-2">Earning Center</h3>
             <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex justify-between items-center">
                 <div><p class="font-black text-sm uppercase italic">Daily Claim</p><p class="text-[10px] text-blue-600 font-black">+10 ELITE</p></div>
                 <button id="claim-btn-daily" onclick="updateTokens(10, 'daily', this)" class="bg-black text-white px-8 py-3 rounded-2xl text-[10px] font-black disabled:opacity-20">CLAIM</button>
             </div>
-            <div id="community-tasks" class="space-y-4">
-                </div>
+            <div id="community-tasks" class="space-y-4"></div>
         </div>
 
         <div id="create" class="tab-content">
             <div class="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm space-y-6">
-                <h3 class="font-black text-2xl mb-2 italic">Promote Profile</h3>
+                <h3 class="font-black text-2xl mb-2 italic">Launch Campaign</h3>
                 <div class="space-y-4">
                     <select id="ad-type" onchange="calcAd()" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black text-[11px] uppercase border border-gray-100">
-                        <option value="30">YouTube Subscriber (Cost: 30)</option>
-                        <option value="20">TikTok Follower (Cost: 20)</option>
-                        <option value="20">Instagram Follower (Cost: 20)</option>
+                        <option value="30">YouTube Subscriber (30)</option>
+                        <option value="20">TikTok Follower (20)</option>
+                        <option value="20">Instagram Follower (20)</option>
                     </select>
-                    <input type="text" id="ad-url" placeholder="Paste Social Link" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100">
-                    <input type="number" id="ad-qty" oninput="calcAd()" placeholder="Quantity (Min 1)" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100">
+                    <input type="text" id="ad-url" placeholder="Social Link" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100">
+                    <input type="number" id="ad-qty" oninput="calcAd()" placeholder="Quantity" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100">
                     <div class="p-5 bg-blue-50 rounded-2xl flex justify-between items-center text-blue-600 font-black border border-blue-100">
-                        <span class="text-[10px] uppercase">Deduction:</span> <span id="ad-cost" class="text-2xl">0</span>
+                        <span class="text-[10px] uppercase">Cost:</span> <span id="ad-cost" class="text-2xl">0</span>
                     </div>
                     <button onclick="deployAd(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black shadow-2xl active:scale-95 transition uppercase">Deploy Ad</button>
                 </div>
             </div>
         </div>
 
+        <div id="admin" class="tab-content space-y-4">
+            <h3 class="font-black text-2xl mb-6 italic text-red-600">Master Control</h3>
+            <div id="admin-task-list" class="space-y-3"></div>
+        </div>
+
         <div id="leaderboard" class="tab-content space-y-3">
-            <h3 class="font-black text-2xl mb-6 italic px-2">Top Miners</h3>
+            <h3 class="font-black text-2xl mb-6 italic px-2">Top Holders</h3>
             <div id="leaderboard-list"></div>
         </div>
 
         <div id="wallet" class="tab-content">
             <div class="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm space-y-6 text-center">
-                <h3 class="font-black text-2xl italic">Elite Payout</h3>
+                <h3 class="font-black text-2xl italic">Withdrawal</h3>
                 <input type="text" id="wallet-addr" placeholder="Wallet Address" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-mono text-center font-bold">
-                <button onclick="saveWallet(this)" class="w-full bg-blue-600 text-white p-5 rounded-[2rem] font-black uppercase tracking-widest">Update Address</button>
+                <button onclick="saveWallet(this)" class="w-full bg-blue-600 text-white p-5 rounded-[2rem] font-black uppercase tracking-widest">Update Wallet</button>
             </div>
         </div>
     </main>
 
     <nav class="fixed bottom-8 left-6 right-6 bg-white/95 backdrop-blur-md border border-gray-100 flex justify-around py-6 rounded-[3rem] shadow-2xl z-20">
-        <button onclick="showTab('dashboard')" class="nav-btn flex flex-col items-center gap-1 active-tab"><span class="text-xl">🏠</span><span class="text-[8px] font-black">HOME</span></button>
-        <button onclick="showTab('leaderboard')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">🏆</span><span class="text-[8px] font-black">RANKS</span></button>
-        <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">💳</span><span class="text-[8px] font-black">WALLET</span></button>
-        <button onclick="showTab('tasks')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">💰</span><span class="text-[8px] font-black">MINE</span></button>
-        <button onclick="showTab('create')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">⚡</span><span class="text-[8px] font-black">ADS</span></button>
+        <button id="nav-dashboard" onclick="showTab('dashboard')" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🏠</span><span class="text-[8px] font-black">HOME</span></button>
+        <button id="nav-leaderboard" onclick="showTab('leaderboard')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">🏆</span><span class="text-[8px] font-black">RANKS</span></button>
+        <button id="nav-wallet" onclick="showTab('wallet')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">💳</span><span class="text-[8px] font-black">WALLET</span></button>
+        <button id="nav-tasks" onclick="showTab('tasks')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">💰</span><span class="text-[8px] font-black">MINE</span></button>
+        <button id="nav-create" onclick="showTab('create')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">⚡</span><span class="text-[8px] font-black">ADS</span></button>
+        <button id="admin-nav-btn" onclick="showTab('admin')" class="nav-btn flex flex-col items-center gap-1 opacity-30 hidden"><span class="text-xl">⚙️</span><span class="text-[8px] font-black">ADMIN</span></button>
     </nav>
 
     <script>
@@ -116,13 +122,24 @@
 
         let currentUser = null;
         let authMode = "reg";
-        const MASTER_PIN = "eeusjdnbdgxg#)$kj6283928kshdgx";
+        const USER_PIN = "&#$)$-: sksgs";
+        const ADMIN_PIN = "3378$&$&#&";
 
         window.onload = async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) { await loadProfile(session.user); } 
-            else { document.getElementById('auth-screen').classList.remove('hidden'); }
-            setTimeout(() => { document.getElementById('splash-loader').style.opacity = '0'; setTimeout(() => document.getElementById('splash-loader').classList.add('hidden'), 500); }, 1200);
+            if (session) { 
+                await loadProfile(session.user); 
+                // PERSIST TAB ON REFRESH
+                const lastTab = localStorage.getItem('current_tab') || 'dashboard';
+                showTab(lastTab);
+            } 
+            else { 
+                document.getElementById('auth-screen').classList.remove('hidden'); 
+            }
+            setTimeout(() => { 
+                document.getElementById('splash-loader').style.opacity = '0'; 
+                setTimeout(() => document.getElementById('splash-loader').classList.add('hidden'), 500); 
+            }, 1200);
         };
 
         async function loadProfile(user) {
@@ -132,17 +149,61 @@
                 document.getElementById('balance-display').innerText = data.tokens;
                 document.getElementById('wallet-addr').value = data.wallet_address || "";
                 document.getElementById('auth-screen').classList.add('hidden');
+                
+                if(data.is_admin || localStorage.getItem('is_admin') === 'true') {
+                    document.getElementById('admin-nav-btn').classList.remove('hidden');
+                }
                 checkDaily();
                 loadCommunityTasks();
                 loadLeaderboard();
             }
         }
 
-        // --- P2P AD LOGIC ---
-        function calcAd() {
-            const price = parseInt(document.getElementById('ad-type').value);
-            const qty = parseInt(document.getElementById('ad-qty').value) || 0;
-            document.getElementById('ad-cost').innerText = (price * qty);
+        function showTab(id) {
+            localStorage.setItem('current_tab', id); // Save current tab
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => { 
+                b.classList.add('opacity-30'); 
+                b.classList.remove('active-tab'); 
+            });
+            
+            const activeBtn = document.getElementById('nav-' + id) || document.getElementById('admin-nav-btn');
+            if(activeBtn) {
+                activeBtn.classList.remove('opacity-30');
+                activeBtn.classList.add('active-tab');
+            }
+            if(id === 'admin') loadAdminPanel();
+        }
+
+        async function submitAuth(btn) {
+            const pin = document.getElementById('sec-code').value;
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            const user = document.getElementById('username').value;
+
+            if(authMode === 'reg') {
+                if(pin !== USER_PIN && pin !== ADMIN_PIN) return alert("Wrong Access Pin!");
+                if(pin === ADMIN_PIN) localStorage.setItem('is_admin', 'true');
+            } else {
+                if(pin === ADMIN_PIN) localStorage.setItem('is_admin', 'true');
+            }
+
+            btn.innerHTML = '<div class="loader-spin"></div>';
+            const { data, error } = authMode === 'reg' ? 
+                await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: user } } }) :
+                await supabaseClient.auth.signInWithPassword({ email, password: pass });
+            
+            if(!error) {
+                if(authMode === 'reg' && pin === ADMIN_PIN) {
+                    await supabaseClient.from('profiles').update({ is_admin: true }).eq('id', data.user.id);
+                }
+                loadProfile(data.user);
+            } else {
+                alert(error.message);
+                btn.innerText = "Connect";
+            }
         }
 
         async function deployAd(btn) {
@@ -150,48 +211,38 @@
             const url = document.getElementById('ad-url').value;
             const typeText = document.getElementById('ad-type').options[document.getElementById('ad-type').selectedIndex].text.split(' ')[0];
             const rewardAmt = parseInt(document.getElementById('ad-type').value);
+            const qty = parseInt(document.getElementById('ad-qty').value);
 
-            if(currentUser.tokens < cost || !url || cost <= 0) return alert("Verify URL, balance, and quantity.");
+            if(currentUser.tokens < cost || !url || isNaN(qty)) return alert("Check balance/fields");
 
             btn.innerHTML = '<div class="loader-spin"></div>';
-            
-            // 1. Deduct tokens
             await supabaseClient.from('profiles').update({ tokens: currentUser.tokens - cost }).eq('id', currentUser.id);
-            
-            // 2. Insert task
             await supabaseClient.from('user_tasks').insert({
                 creator_id: currentUser.id,
                 type: typeText,
                 url: url,
                 reward: rewardAmt,
-                remaining: parseInt(document.getElementById('ad-qty').value)
+                remaining: qty
             });
-
-            alert("Ad Deployed Successfully!");
+            alert("Success!");
             location.reload();
         }
 
         async function loadCommunityTasks() {
-            const { data, error } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0);
-            
+            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0);
             if (data) {
-                // Only show tasks created by OTHERS
                 const others = data.filter(t => t.creator_id !== currentUser.id);
-                
-                if (others.length === 0) {
-                    document.getElementById('community-tasks').innerHTML = `<p class="text-center opacity-30 text-[10px] font-black uppercase py-10">No new missions found</p>`;
-                    return;
-                }
-
-                document.getElementById('community-tasks').innerHTML = others.map(task => `
+                document.getElementById('community-tasks').innerHTML = others.length === 0 ? 
+                `<p class="text-center opacity-20 text-[10px] py-10">NO TASKS AVAILABLE</p>` :
+                others.map(task => `
                     <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
-                            <div><p class="font-black text-sm italic uppercase">${task.type} Mission</p><p class="text-[9px] text-gray-400 font-black uppercase">Spots Left: ${task.remaining}</p></div>
-                            <span class="text-xs font-black text-blue-600 uppercase">+${task.reward} Elite</span>
+                            <div><p class="font-black text-sm italic uppercase">${task.type}</p><p class="text-[9px] text-gray-400 font-black uppercase">Spots: ${task.remaining}</p></div>
+                            <span class="text-xs font-black text-blue-600">+${task.reward}</span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="window.open('${task.url}', '_blank'); document.getElementById('claim-${task.id}').disabled=false" class="flex-1 bg-gray-50 py-4 rounded-2xl text-[10px] font-black uppercase italic active:scale-95 transition">Visit</button>
-                            <button id="claim-${task.id}" onclick="completeTask('${task.id}', ${task.reward}, this)" disabled class="flex-1 bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase italic disabled:opacity-10 active:scale-95 transition">Claim</button>
+                            <button onclick="window.open('${task.url}', '_blank'); document.getElementById('claim-${task.id}').disabled=false" class="flex-1 bg-gray-50 py-4 rounded-2xl text-[10px] font-black uppercase italic">Visit</button>
+                            <button id="claim-${task.id}" onclick="completeTask('${task.id}', ${task.reward}, this)" disabled class="flex-1 bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase italic disabled:opacity-10">Claim</button>
                         </div>
                     </div>
                 `).join('');
@@ -200,38 +251,30 @@
 
         async function completeTask(taskId, reward, btn) {
             btn.innerHTML = '<div class="loader-spin"></div>';
-            
-            // Fetch fresh remaining count
             const { data: task } = await supabaseClient.from('user_tasks').select('remaining').eq('id', taskId).single();
-            if(!task || task.remaining <= 0) return alert("Task expired!");
-
             const newTotal = parseInt(currentUser.tokens) + reward;
-            
-            // Update user balance
             await supabaseClient.from('profiles').update({ tokens: newTotal }).eq('id', currentUser.id);
-            // Update task count
             await supabaseClient.from('user_tasks').update({ remaining: task.remaining - 1 }).eq('id', taskId);
-
             currentUser.tokens = newTotal;
             document.getElementById('balance-display').innerText = newTotal;
-            btn.innerText = "VERIFIED";
+            btn.innerText = "DONE";
             btn.disabled = true;
         }
 
-        // --- AUTH & CORE ---
-        async function submitAuth(btn) {
-            const user = document.getElementById('username').value;
-            const pin = document.getElementById('sec-code').value;
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
+        async function loadAdminPanel() {
+            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0);
+            if(data) {
+                document.getElementById('admin-task-list').innerHTML = data.map(task => `
+                    <div class="bg-white p-4 rounded-3xl border border-red-50 flex justify-between items-center">
+                        <div><p class="font-black text-[10px] uppercase">${task.type}</p><p class="text-[8px] truncate max-w-[100px]">${task.url}</p></div>
+                        <button onclick="adminDelete('${task.id}')" class="bg-red-500 text-white text-[8px] px-4 py-2 rounded-full font-black">REMOVE</button>
+                    </div>
+                `).join('');
+            }
+        }
 
-            if(authMode === 'reg' && pin !== MASTER_PIN) return alert("Invalid Master Pin");
-
-            const { data, error } = authMode === 'reg' ? 
-                await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: user } } }) :
-                await supabaseClient.auth.signInWithPassword({ email, password: pass });
-            
-            if(!error) loadProfile(data.user); else alert(error.message);
+        async function adminDelete(id) {
+            if(confirm("Delete ad?")) { await supabaseClient.from('user_tasks').delete().eq('id', id); loadAdminPanel(); }
         }
 
         async function updateTokens(amt, type, btn) {
@@ -252,14 +295,6 @@
             }
         }
 
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.add('opacity-30'); b.classList.remove('active-tab'); });
-            event.currentTarget.classList.remove('opacity-30');
-            event.currentTarget.classList.add('active-tab');
-        }
-
         async function loadLeaderboard() {
             const { data } = await supabaseClient.from('profiles').select('username, tokens').order('tokens', { ascending: false }).limit(5);
             if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `<div class="bg-white p-5 rounded-3xl flex justify-between border border-gray-50 mb-2 font-black italic text-xs uppercase shadow-sm"><span>#${i+1} ${u.username}</span><span class="text-blue-600">${u.tokens}</span></div>`).join('');
@@ -268,10 +303,14 @@
         function toggleAuth(mode) {
             authMode = mode;
             document.getElementById('reg-only').style.display = mode === 'reg' ? 'block' : 'none';
+            document.getElementById('btn-reg').className = mode === 'reg' ? "flex-1 py-4 font-black rounded-xl bg-black text-white" : "flex-1 py-4 font-black text-gray-400";
+            document.getElementById('btn-log').className = mode === 'log' ? "flex-1 py-4 font-black rounded-xl bg-black text-white" : "flex-1 py-4 font-black text-gray-400";
         }
 
-        async function handleLogout() { localStorage.clear(); await supabaseClient.auth.signOut(); location.reload(); }
-        async function saveWallet(btn) { btn.innerHTML = '<div class="loader-spin"></div>'; await supabaseClient.from('profiles').update({ wallet_address: document.getElementById('wallet-addr').value }).eq('id', currentUser.id); btn.innerText = "SAVED"; }
-    </script>
-</body>
-    </html>
+        function calcAd() {
+            const price = parseInt(document.getElementById('ad-type').value);
+            const qty = parseInt(document.getElementById('ad-qty').value) || 0;
+            document.getElementById('ad-cost').innerText = (price * qty);
+        }
+
+        async function handleLogout() { localStorage.clear(); await sup
