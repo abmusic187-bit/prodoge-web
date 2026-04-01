@@ -7,36 +7,65 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #F8F8F7; color: #000; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #F8F8F7; color: #000; font-family: sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         .tab-content { display: none; }
         .active { display: block; }
+        
+        /* Splash & Overlays */
         #splash-loader { transition: opacity 0.5s ease; z-index: 100; }
-        .pulse-logo { animation: pulse 1.5s infinite ease-in-out; }
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.98); } }
-        .spin-slow { animation: spin 10s linear infinite; }
+        #verify-overlay { display: none; background: rgba(0,0,0,0.95); backdrop-blur: 10px; }
+        
+        /* Scanner Animation */
+        .scanner-box { position: relative; overflow: hidden; border: 1px solid rgba(37, 99, 235, 0.3); }
+        .scan-line { 
+            position: absolute; width: 100%; height: 2px; 
+            background: #2563eb; box-shadow: 0 0 15px #2563eb;
+            animation: scan-move 2s linear infinite;
+        }
+        @keyframes scan-move { 0% { top: 0; } 100% { top: 100%; } }
+        
+        /* UI Elements */
+        .spin-slow { animation: spin 12s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .loader-spin { border: 2px solid #ccc; border-top: 2px solid #2563eb; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; display: inline-block; }
         .nav-btn.active-tab { opacity: 1 !important; transform: scale(1.1); color: #2563eb; }
+        .loader-spin { border: 2px solid #f3f3f3; border-top: 2px solid #2563eb; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; display: inline-block; }
     </style>
 </head>
 <body class="pb-32">
 
     <div id="splash-loader" class="fixed inset-0 bg-black flex flex-col items-center justify-center">
-        <h1 class="text-white text-5xl font-black italic pulse-logo tracking-tighter">PRODOGE</h1>
-        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-6 uppercase">Initializing Elite Node...</p>
+        <h1 class="text-white text-5xl font-black italic tracking-tighter animate-pulse">PRODOGE</h1>
+        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-6 uppercase">Syncing Security Protocol...</p>
+    </div>
+
+    <div id="verify-overlay" class="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 text-center">
+        <div class="scanner-box w-full max-w-xs aspect-video bg-gray-900 rounded-3xl mb-6">
+            <div class="scan-line"></div>
+            <div class="h-full flex items-center justify-center flex-col p-4">
+                <div class="loader-spin mb-4"></div>
+                <p id="verify-status" class="text-blue-500 font-mono text-[10px] uppercase">Initial Connection...</p>
+            </div>
+        </div>
+        <h2 class="text-white font-black text-xl italic mb-2 uppercase">Verifying Task</h2>
+        <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden mb-10">
+            <div id="verify-progress" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
+        </div>
+        <button id="final-claim-btn" disabled onclick="executeClaim()" class="w-full bg-blue-600 text-white p-6 rounded-[2rem] font-black uppercase text-xs opacity-20">
+            Scanning Activity...
+        </button>
     </div>
 
     <div class="fixed top-6 right-6 z-30 bg-white/90 backdrop-blur-md border border-gray-100 px-4 py-2 rounded-2xl shadow-sm flex items-center gap-2">
-        <span class="text-[9px] font-black text-blue-600 uppercase">Balance</span>
+        <span class="text-[9px] font-black text-blue-600 uppercase">Elite</span>
         <span id="balance-display" class="text-lg font-black tracking-tighter">0</span>
     </div>
 
     <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-50 p-6 hidden text-center overflow-y-auto">
         <div class="max-w-md mx-auto pt-16">
-            <h1 class="text-5xl font-black mb-10 italic tracking-tighter">PRODOGE</h1>
+            <h1 class="text-5xl font-black mb-10 italic">PRODOGE</h1>
             <div class="flex bg-white p-1 rounded-2xl mb-8 border border-gray-100">
-                <button onclick="toggleAuth('reg')" id="btn-reg" class="flex-1 py-4 font-black rounded-xl bg-black text-white">REGISTER</button>
-                <button onclick="toggleAuth('log')" id="btn-log" class="flex-1 py-4 font-black text-gray-400">LOGIN</button>
+                <button onclick="toggleAuth('reg')" id="btn-reg" class="flex-1 py-4 font-black rounded-xl bg-black text-white">REG</button>
+                <button onclick="toggleAuth('log')" id="btn-log" class="flex-1 py-4 font-black text-gray-400">LOG</button>
             </div>
             <div class="space-y-4">
                 <div id="reg-only" class="space-y-4">
@@ -45,45 +74,54 @@
                 </div>
                 <input type="email" id="email" placeholder="Email" class="w-full p-5 rounded-2xl border outline-none font-bold">
                 <input type="password" id="password" placeholder="Password" class="w-full p-5 rounded-2xl border outline-none font-bold">
-                <button onclick="submitAuth(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-sm">Access Network</button>
+                <button onclick="submitAuth(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-sm">Access</button>
             </div>
         </div>
     </div>
 
     <main class="pt-20 p-6 max-w-md mx-auto">
         
-        <div id="dashboard" class="tab-content text-center active">
+        <div id="dashboard" class="tab-content active text-center">
             <div class="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm mb-6">
                 <div class="relative w-52 h-52 mx-auto mb-8">
                     <div class="absolute inset-0 rounded-full border-4 border-dashed border-blue-600/20 spin-slow"></div>
                     <div class="absolute inset-4 bg-gray-50 rounded-full flex flex-col items-center justify-center border shadow-inner">
-                        <span class="text-3xl animate-pulse">💎</span>
-                        <p class="text-[7px] font-black text-blue-600 mt-2 tracking-[0.3em] uppercase">Mining Yield</p>
-                        <h2 id="live-yield" class="text-2xl font-black mt-1">+0.000000</h2>
+                        <span class="text-3xl animate-bounce">💎</span>
+                        <h2 id="live-yield" class="text-2xl font-black mt-2">+0.000000</h2>
                     </div>
                 </div>
-                <div class="space-y-1">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Locked in Machine</p>
-                    <div class="flex justify-center items-baseline gap-1">
-                        <span id="staked-display" class="text-4xl font-black">0</span>
-                        <span class="text-xs font-bold text-blue-600 uppercase">Elite</span>
-                    </div>
+                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Staked Balance</p>
+                <div class="flex justify-center items-baseline gap-1">
+                    <span id="staked-display" class="text-4xl font-black">0</span>
+                    <span class="text-xs font-bold text-blue-600 uppercase">ELITE</span>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="startMining()" class="bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[9px]">Start Machine</button>
-                <button onclick="unlockMining()" class="bg-white text-blue-600 p-5 rounded-[2rem] font-black uppercase text-[9px] border border-blue-100">Unlock & Claim</button>
+                <button onclick="startMining()" class="bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[9px]">Start Mine</button>
+                <button onclick="unlockMining()" class="bg-white text-blue-600 p-5 rounded-[2rem] font-black uppercase text-[9px] border">Unlock</button>
             </div>
         </div>
 
-        <div id="leaderboard" class="tab-content space-y-3">
-            <h3 class="font-black text-2xl italic px-2">Top Miners</h3>
-            <div id="leaderboard-list"></div>
+        <div id="tasks" class="tab-content space-y-4">
+            <h3 class="font-black text-2xl italic px-2">Earn Elite</h3>
+            <div id="community-tasks" class="space-y-4"></div>
         </div>
 
-        <div id="tasks" class="tab-content space-y-4">
-            <h3 class="font-black text-2xl italic px-2">Mission Hub</h3>
-            <div id="community-tasks" class="space-y-4"></div>
+        <div id="create" class="tab-content space-y-6">
+            <div class="bg-white p-8 rounded-[3.5rem] border border-gray-100 shadow-sm space-y-5">
+                <h3 class="font-black text-2xl italic">Promote</h3>
+                <select id="ad-type" onchange="calcAd()" class="w-full p-5 bg-gray-50 rounded-2xl font-black text-[10px] uppercase outline-none border">
+                    <option value="30">YouTube Subscriber (30 ELITE)</option>
+                    <option value="20">TikTok Follower (20 ELITE)</option>
+                </select>
+                <input type="text" id="ad-url" placeholder="Paste Profile Link" class="w-full p-5 bg-gray-50 rounded-2xl font-bold border text-xs outline-none">
+                <input type="number" id="ad-qty" oninput="calcAd()" placeholder="Quantity" class="w-full p-5 bg-gray-50 rounded-2xl font-bold border outline-none">
+                <div class="p-5 bg-blue-50 rounded-2xl flex justify-between text-blue-600 font-black text-[10px]">
+                    <span>COST:</span> <span id="ad-cost" class="text-2xl">0</span>
+                </div>
+                <button onclick="deployAd(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-xs">Launch Ad</button>
+            </div>
+            <div id="my-tasks-list" class="space-y-3"></div>
         </div>
 
         <div id="wallet" class="tab-content">
@@ -92,42 +130,18 @@
                 <h3 id="display-username" class="font-black text-2xl uppercase tracking-tighter">USER</h3>
                 <p id="display-email" class="text-[9px] text-gray-400 font-bold mb-8 italic">loading...</p>
                 <input type="text" id="wallet-addr" placeholder="Wallet Address" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-mono text-center font-bold text-[10px] border mb-4">
-                <button onclick="saveWallet(this)" class="w-full bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[9px]">Save Changes</button>
-                <hr class="my-6 border-gray-50">
-                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 p-5 rounded-[2rem] font-black uppercase text-[9px] border border-red-100">Log Out Session</button>
-            </div>
-        </div>
-
-        <div id="create" class="tab-content space-y-8">
-            <div class="bg-white p-8 rounded-[3.5rem] border border-gray-100 shadow-sm space-y-6">
-                <h3 class="font-black text-2xl italic">Promote</h3>
-                <div class="space-y-4">
-                    <select id="ad-type" onchange="calcAd()" class="w-full p-5 bg-gray-50 rounded-2xl font-black text-[11px] border outline-none">
-                        <option value="30">YouTube Subscriber (30 ELITE)</option>
-                        <option value="20">TikTok Follower (20 ELITE)</option>
-                        <option value="20">Instagram Follower (20 ELITE)</option>
-                    </select>
-                    <input type="text" id="ad-url" placeholder="Paste Link" class="w-full p-5 bg-gray-50 rounded-2xl font-bold border text-xs outline-none">
-                    <input type="number" id="ad-qty" oninput="calcAd()" placeholder="Quantity" class="w-full p-5 bg-gray-50 rounded-2xl font-bold border outline-none">
-                    <div class="p-5 bg-blue-50 rounded-2xl flex justify-between text-blue-600 font-black text-[10px]">
-                        <span>COST:</span> <span id="ad-cost" class="text-2xl">0</span>
-                    </div>
-                    <button onclick="deployAd(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-xs">Deploy Campaign</button>
-                </div>
-            </div>
-            <div class="space-y-4">
-                <h3 class="font-black text-xl italic px-2">My Progress</h3>
-                <div id="my-tasks-list" class="space-y-3"></div>
+                <button onclick="saveWallet(this)" class="w-full bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[9px]">Update</button>
+                <hr class="my-6">
+                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 p-5 rounded-[2rem] font-black uppercase text-[9px]">Logout</button>
             </div>
         </div>
     </main>
 
     <nav class="fixed bottom-8 left-6 right-6 bg-white/95 backdrop-blur-2xl border flex justify-around items-center py-4 rounded-[3rem] shadow-2xl z-20">
         <button onclick="showTab('dashboard')" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🏠</span><span class="text-[8px] font-black">HOME</span></button>
-        <button onclick="showTab('leaderboard')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">🏆</span><span class="text-[8px] font-black">RANKS</span></button>
-        <button onclick="showTab('tasks')" id="mine-btn-central" class="nav-btn -mt-12 bg-black text-white w-16 h-16 rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-[#F8F8F7]"><span class="text-2xl">💰</span><span class="text-[7px] font-black">MINE</span></button>
-        <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">👤</span><span class="text-[8px] font-black">USER</span></button>
+        <button onclick="showTab('tasks')" id="mine-btn-central" class="nav-btn -mt-12 bg-black text-white w-16 h-16 rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-[#F8F8F7]"><span class="text-2xl">💰</span><span class="text-[7px] font-black">EARN</span></button>
         <button onclick="showTab('create')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">⚡</span><span class="text-[8px] font-black">ADS</span></button>
+        <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">👤</span><span class="text-[8px] font-black">USER</span></button>
     </nav>
 
     <script>
@@ -136,9 +150,10 @@
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let currentUser = null;
         let authMode = "reg";
+        let activeTaskId = null;
         const MASTER_PIN = "eeusjdnbdgxg#)$kj6283928kshdgx";
 
-        // Splash Timeout
+        // 1. Core Lifecycle
         setTimeout(() => {
             const splash = document.getElementById('splash-loader');
             splash.style.opacity = '0';
@@ -151,7 +166,7 @@
             else document.getElementById('auth-screen').classList.remove('hidden');
             
             const savedTab = localStorage.getItem('activeTab') || 'dashboard';
-            silentTabSwitch(savedTab);
+            showTab(savedTab);
             setInterval(updateLiveYield, 1000);
         };
 
@@ -165,10 +180,11 @@
                 document.getElementById('display-email').innerText = user.email;
                 document.getElementById('user-initial').innerText = (data.username || "P").charAt(0).toUpperCase();
                 document.getElementById('auth-screen').classList.add('hidden');
-                loadCommunityTasks(); loadLeaderboard(); loadMyAds();
+                loadTasks(); loadMyAds();
             }
         }
 
+        // 2. Mining Logic
         function updateLiveYield() {
             if (!currentUser || !currentUser.staked_tokens || currentUser.staked_tokens <= 0) {
                 document.getElementById('live-yield').innerText = "+0.000000";
@@ -180,56 +196,72 @@
         }
 
         async function startMining() {
-            if (currentUser.tokens <= 0) return alert("Balance Low");
-            const { error } = await supabaseClient.from('profiles')
-                .update({ staked_tokens: currentUser.tokens, tokens: 0, last_sync_time: new Date().toISOString() })
-                .eq('id', currentUser.id);
-            if (!error) location.reload();
+            if (currentUser.tokens <= 0) return alert("Insufficient Tokens");
+            await supabaseClient.from('profiles').update({ staked_tokens: currentUser.tokens, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', currentUser.id);
+            location.reload();
         }
 
         async function unlockMining() {
-            if (currentUser.staked_tokens <= 0) return;
             const { data, error } = await supabaseClient.rpc('process_mining_claim');
             if (!error) { alert(`Unlocked +${data.profit} Profit!`); location.reload(); }
         }
 
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            silentTabSwitch(id);
+        // 3. Screen Reader Verification Logic
+        async function loadTasks() {
+            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0).neq('creator_id', currentUser.id);
+            if (data) document.getElementById('community-tasks').innerHTML = data.map(t => `
+                <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 flex justify-between items-center shadow-sm">
+                    <div><p class="font-black text-sm uppercase">${t.type}</p><p class="text-[9px] text-blue-600 font-black">+${t.reward} ELITE</p></div>
+                    <button onclick="startVerification('${t.id}', '${t.url}')" class="bg-black text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase">Start</button>
+                </div>`).join('');
         }
 
-        function silentTabSwitch(id) {
-            localStorage.setItem('activeTab', id);
-            document.querySelectorAll('.nav-btn').forEach(b => { 
-                b.classList.add('opacity-30'); b.classList.remove('active-tab');
-                if(b.id === 'mine-btn-central') b.classList.replace('bg-blue-600', 'bg-black');
-            });
-            const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(`'${id}'`));
-            if(activeBtn) {
-                activeBtn.classList.remove('opacity-30'); activeBtn.classList.add('active-tab');
-                if(activeBtn.id === 'mine-btn-central') activeBtn.classList.replace('bg-black', 'bg-blue-600');
-            }
+        function startVerification(id, url) {
+            activeTaskId = id;
+            window.open(url, '_blank');
+            const overlay = document.getElementById('verify-overlay');
+            overlay.style.display = 'flex';
+            
+            let prog = 0;
+            const status = document.getElementById('verify-status');
+            const fill = document.getElementById('verify-progress');
+            const btn = document.getElementById('final-claim-btn');
+
+            const timer = setInterval(() => {
+                prog += 10;
+                fill.style.width = prog + '%';
+                if(prog === 20) status.innerText = "Analyzing User ID...";
+                if(prog === 50) status.innerText = "Reading Session Data...";
+                if(prog === 80) status.innerText = "Interaction Found...";
+                
+                if(prog >= 100) {
+                    clearInterval(timer);
+                    status.innerText = "SCREEN READ SUCCESSFUL";
+                    status.classList.add('text-green-500');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-20');
+                    btn.innerText = "EXECUTE CLAIM";
+                }
+            }, 1200);
         }
 
-        async function submitAuth(btn) {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            const user = document.getElementById('username').value;
-            if(authMode === 'reg' && document.getElementById('sec-code').value !== MASTER_PIN) return alert("Invalid Pin");
-            const { data, error } = authMode === 'reg' ? 
-                await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: user } } }) :
-                await supabaseClient.auth.signInWithPassword({ email, password: pass });
-            if(!error) loadProfile(data.user); else alert(error.message);
+        async function executeClaim() {
+            const btn = document.getElementById('final-claim-btn');
+            btn.innerHTML = '<div class="loader-spin"></div>';
+            const { data, error } = await supabaseClient.rpc('verify_social_task', { target_task_id: activeTaskId });
+            if(error) alert(error.message);
+            else alert("Verified! Tokens Added.");
+            location.reload();
         }
 
+        // 4. Ads Promotion Logic
         async function deployAd(btn) {
             const cost = parseInt(document.getElementById('ad-cost').innerText);
             const url = document.getElementById('ad-url').value;
             const qty = parseInt(document.getElementById('ad-qty').value);
             const type = document.getElementById('ad-type').options[document.getElementById('ad-type').selectedIndex].text.split(' (')[0];
-            if(!url || qty <= 0 || currentUser.tokens < cost) return alert("Check Balance/Input");
-            btn.innerHTML = '<div class="loader-spin"></div>';
+            if(!url || qty <= 0 || currentUser.tokens < cost) return alert("Verify Balance/Link");
+            btn.disabled = true;
             await supabaseClient.from('profiles').update({ tokens: currentUser.tokens - cost }).eq('id', currentUser.id);
             await supabaseClient.from('user_tasks').insert({ creator_id: currentUser.id, type, url, reward: parseInt(document.getElementById('ad-type').value), remaining: qty, total_requested: qty });
             location.reload();
@@ -240,20 +272,34 @@
             if (data) document.getElementById('my-tasks-list').innerHTML = data.map(t => `
                 <div class="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
                     <div class="flex justify-between text-[10px] font-black uppercase mb-2"><span>${t.type}</span><span class="text-blue-600">${t.total_requested - t.remaining}/${t.total_requested}</span></div>
-                    <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-blue-600 h-full" style="width: ${((t.total_requested - t.remaining)/t.total_requested)*100}%"></div>
-                    </div>
+                    <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden"><div class="bg-blue-600 h-full" style="width: ${((t.total_requested - t.remaining)/t.total_requested)*100}%"></div></div>
                 </div>`).join('');
         }
 
-        async function loadLeaderboard() {
-            const { data } = await supabaseClient.from('profiles').select('username, tokens').order('tokens', { ascending: false }).limit(5);
-            if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `<div class="bg-white p-5 rounded-3xl flex justify-between border mb-2 font-black italic text-xs uppercase shadow-sm"><span>#${i+1} ${u.username}</span><span class="text-blue-600">${u.tokens}</span></div>`).join('');
+        // 5. Utility
+        function showTab(id) {
+            localStorage.setItem('activeTab', id);
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => { 
+                b.classList.add('opacity-30'); b.classList.remove('active-tab');
+                if(b.id === 'mine-btn-central') b.classList.replace('bg-blue-600', 'bg-black');
+            });
+            const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(`'${id}'`));
+            if(btn) {
+                btn.classList.remove('opacity-30'); btn.classList.add('active-tab');
+                if(btn.id === 'mine-btn-central') btn.classList.replace('bg-black', 'bg-blue-600');
+            }
         }
 
-        async function loadCommunityTasks() {
-            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0).neq('creator_id', currentUser.id);
-            if (data) document.getElementById('community-tasks').innerHTML = data.map(t => `<div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 flex justify-between items-center"><div><p class="font-black text-sm uppercase">${t.type}</p><p class="text-[9px] text-blue-600 font-black">+${t.reward} ELITE</p></div><button onclick="window.open('${t.url}')" class="bg-black text-white px-6 py-2 rounded-xl text-[8px] font-black">GO</button></div>`).join('');
+        async function submitAuth(btn) {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if(authMode === 'reg' && document.getElementById('sec-code').value !== MASTER_PIN) return alert("Pin Error");
+            const { data, error } = authMode === 'reg' ? 
+                await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: document.getElementById('username').value } } }) :
+                await supabaseClient.auth.signInWithPassword({ email, password: pass });
+            if(!error) loadProfile(data.user); else alert(error.message);
         }
 
         function toggleAuth(mode) { authMode = mode; document.getElementById('reg-only').style.display = mode === 'reg' ? 'block' : 'none'; }
@@ -262,4 +308,4 @@
         function calcAd() { document.getElementById('ad-cost').innerText = (parseInt(document.getElementById('ad-type').value) * (parseInt(document.getElementById('ad-qty').value) || 0)); }
     </script>
 </body>
-    </html>
+                                                          </html>
