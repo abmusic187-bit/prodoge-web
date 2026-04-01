@@ -10,8 +10,7 @@
         body { background-color: #F8F8F7; color: #000; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
         .tab-content { display: none; }
         .active { display: block; }
-        .nav-btn.active-tab { opacity: 1 !important; transform: scale(1.1); color: #2563eb; }
-        #splash-loader, #tab-loader { transition: opacity 0.4s ease; }
+        #splash-loader { transition: opacity 0.5s ease, visibility 0.5s; }
         .pulse-logo { animation: pulse 1.5s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
         .spin-slow { animation: spin 8s linear infinite; }
@@ -26,10 +25,6 @@
         <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase">Initializing Node...</p>
     </div>
 
-    <div id="tab-loader" class="fixed inset-0 bg-[#F8F8F7]/80 backdrop-blur-md z-[60] hidden flex items-center justify-center">
-        <div class="loader-spin !w-10 !h-10 !border-t-blue-600"></div>
-    </div>
-
     <div class="fixed top-6 right-6 z-30 bg-white/90 backdrop-blur-md border border-gray-100 px-4 py-2 rounded-2xl shadow-sm flex items-center gap-2">
         <span class="text-[9px] font-black text-blue-600">BAL</span>
         <span id="balance-display" class="text-lg font-black tracking-tighter">0</span>
@@ -38,7 +33,7 @@
     <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-50 p-6 hidden text-center overflow-y-auto">
         <div class="max-w-md mx-auto pt-16">
             <h1 class="text-5xl font-black mb-10 italic">PRODOGE</h1>
-            <div class="flex bg-white p-1 rounded-2xl mb-8 border border-gray-100 shadow-sm">
+            <div class="flex bg-white p-1 rounded-2xl mb-8 border border-gray-100">
                 <button onclick="toggleAuth('reg')" id="btn-reg" class="flex-1 py-4 font-black rounded-xl bg-black text-white">REG</button>
                 <button onclick="toggleAuth('log')" id="btn-log" class="flex-1 py-4 font-black text-gray-400">LOG</button>
             </div>
@@ -65,7 +60,6 @@
                         <h2 id="live-yield" class="text-2xl font-black mt-1">+0.000000</h2>
                     </div>
                 </div>
-                
                 <div class="space-y-1">
                     <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Locked in Machine</p>
                     <div class="flex justify-center items-baseline gap-1">
@@ -74,9 +68,8 @@
                     </div>
                 </div>
             </div>
-
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="startMining()" class="bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[9px] shadow-xl">Start Machine</button>
+                <button onclick="startMining()" class="bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[9px]">Start Machine</button>
                 <button onclick="unlockMining()" class="bg-white text-blue-600 p-5 rounded-[2rem] font-black uppercase text-[9px] border border-blue-100">Unlock & Claim</button>
             </div>
         </div>
@@ -95,7 +88,7 @@
             <div class="bg-white p-8 rounded-[3.5rem] border border-gray-100 text-center">
                 <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-black shadow-lg" id="user-initial">P</div>
                 <h3 id="display-username" class="font-black text-2xl uppercase tracking-tighter">USER</h3>
-                <p id="display-email" class="text-[9px] text-gray-400 font-bold mb-8 italic italic">loading...</p>
+                <p id="display-email" class="text-[9px] text-gray-400 font-bold mb-8 italic">loading...</p>
                 <input type="text" id="wallet-addr" placeholder="Wallet Address" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-mono text-center font-bold text-[10px] border mb-4">
                 <button onclick="saveWallet(this)" class="w-full bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[9px]">Save Changes</button>
                 <hr class="my-6 border-gray-50">
@@ -120,16 +113,21 @@
         let authMode = "reg";
         const MASTER_PIN = "eeusjdnbdgxg#)$kj6283928kshdgx";
 
+        // FORCE-STOP SPLASH LOGIC
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-loader');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 500);
+            }, 1500); // Stop after 1.5 seconds exactly
+        });
+
         window.onload = async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) { await loadProfile(session.user); } 
             else { document.getElementById('auth-screen').classList.remove('hidden'); }
-            
             const savedTab = localStorage.getItem('activeTab') || 'dashboard';
             silentTabSwitch(savedTab);
-            setTimeout(() => { document.getElementById('splash-loader').style.opacity = '0'; setTimeout(() => document.getElementById('splash-loader').style.display='none', 500); }, 1200);
-            
-            // Start Visual Timer
             setInterval(updateLiveYield, 1000);
         };
 
@@ -152,14 +150,13 @@
                 document.getElementById('live-yield').innerText = "+0.000000";
                 return;
             }
-            const startTime = new Date(currentUser.last_sync_time);
-            const seconds = (new Date() - startTime) / 1000;
-            const yield = (currentUser.staked_tokens * 0.04 * seconds) / 86400;
-            document.getElementById('live-yield').innerText = "+" + yield.toFixed(6);
+            const seconds = (new Date() - new Date(currentUser.last_sync_time)) / 1000;
+            const yieldAmt = (currentUser.staked_tokens * 0.04 * seconds) / 86400;
+            document.getElementById('live-yield').innerText = "+" + yieldAmt.toFixed(6);
         }
 
         async function startMining() {
-            if (currentUser.tokens <= 0) return alert("Balance too low!");
+            if (currentUser.tokens <= 0) return alert("No tokens available!");
             const { error } = await supabaseClient.from('profiles')
                 .update({ staked_tokens: currentUser.tokens, tokens: 0, last_sync_time: new Date().toISOString() })
                 .eq('id', currentUser.id);
@@ -173,29 +170,29 @@
         }
 
         function showTab(id) {
-            const loader = document.getElementById('tab-loader');
-            loader.classList.remove('hidden');
-            setTimeout(() => { silentTabSwitch(id); setTimeout(() => loader.classList.add('hidden'), 300); }, 250);
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            silentTabSwitch(id);
         }
 
         function silentTabSwitch(id) {
             localStorage.setItem('activeTab', id);
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
             document.querySelectorAll('.nav-btn').forEach(b => { 
-                b.classList.add('opacity-30'); b.classList.remove('active-tab');
-                if(b.id === 'mine-btn-central') { b.classList.remove('opacity-30'); b.classList.replace('bg-blue-600', 'bg-black'); }
+                b.classList.add('opacity-30'); 
+                if(b.id === 'mine-btn-central') b.classList.replace('bg-blue-600', 'bg-black');
             });
             const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(`'${id}'`));
-            if(activeBtn) { activeBtn.classList.remove('opacity-30'); activeBtn.classList.add('active-tab'); if(activeBtn.id === 'mine-btn-central') activeBtn.classList.replace('bg-black', 'bg-blue-600'); }
+            if(activeBtn) {
+                activeBtn.classList.remove('opacity-30');
+                if(activeBtn.id === 'mine-btn-central') activeBtn.classList.replace('bg-black', 'bg-blue-600');
+            }
         }
 
         async function submitAuth(btn) {
-            const pin = document.getElementById('sec-code').value;
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             const user = document.getElementById('username').value;
-            if(authMode === 'reg' && pin !== MASTER_PIN) return alert("Pin Incorrect");
+            if(authMode === 'reg' && document.getElementById('sec-code').value !== MASTER_PIN) return alert("Pin Error");
             const { data, error } = authMode === 'reg' ? 
                 await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: user } } }) :
                 await supabaseClient.auth.signInWithPassword({ email, password: pass });
@@ -204,12 +201,12 @@
 
         async function loadLeaderboard() {
             const { data } = await supabaseClient.from('profiles').select('username, tokens').order('tokens', { ascending: false }).limit(5);
-            if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `<div class="bg-white p-5 rounded-3xl flex justify-between border mb-2 font-black italic text-xs uppercase shadow-sm"><span>#${i+1} ${u.username}</span><span class="text-blue-600">${u.tokens}</span></div>`).join('');
+            if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `<div class="bg-white p-5 rounded-3xl flex justify-between border mb-2 font-black italic text-xs uppercase"><span>#${i+1} ${u.username}</span><span class="text-blue-600">${u.tokens}</span></div>`).join('');
         }
 
         async function loadCommunityTasks() {
             const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0);
-            if (data) document.getElementById('community-tasks').innerHTML = data.map(t => `<div class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center"><div><p class="font-black text-sm uppercase">${t.type}</p><p class="text-[9px] text-blue-600 font-black">+${t.reward} ELITE</p></div><button onclick="window.open('${t.url}')" class="bg-black text-white px-6 py-2 rounded-xl text-[8px] font-black">GO</button></div>`).join('');
+            if (data) document.getElementById('community-tasks').innerHTML = data.map(t => `<div class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center shadow-sm"><div><p class="font-black text-sm uppercase">${t.type}</p><p class="text-[9px] text-blue-600 font-black">+${t.reward} ELITE</p></div><button onclick="window.open('${t.url}')" class="bg-black text-white px-6 py-2 rounded-xl text-[8px] font-black">GO</button></div>`).join('');
         }
 
         function toggleAuth(mode) { authMode = mode; document.getElementById('reg-only').style.display = mode === 'reg' ? 'block' : 'none'; }
@@ -217,4 +214,4 @@
         async function saveWallet(btn) { await supabaseClient.from('profiles').update({ wallet_address: document.getElementById('wallet-addr').value }).eq('id', currentUser.id); btn.innerText = "SAVED"; }
     </script>
 </body>
-                                                                                                                  </html>
+                    </html>
