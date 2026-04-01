@@ -12,7 +12,7 @@
         .active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .nav-btn.active-tab { opacity: 1 !important; transform: scale(1.1); color: #2563eb; }
-        #splash-loader { transition: opacity 0.5s ease; }
+        #splash-loader { transition: opacity 0.5s ease, visibility 0.5s; }
         .pulse-logo { animation: pulse 1.5s infinite ease-in-out; }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
         .loader-spin { border: 2px solid #ccc; border-top: 2px solid #000; border-radius: 50%; width: 14px; height: 14px; animation: spin 0.8s linear infinite; display: inline-block; }
@@ -23,7 +23,7 @@
 
     <div id="splash-loader" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center">
         <h1 class="text-white text-4xl font-black italic pulse-logo tracking-tighter">PRODOGE</h1>
-        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase">Syncing Protocol...</p>
+        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase">Initializing Elite Protocol</p>
     </div>
 
     <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-50 p-6 overflow-y-auto hidden text-center">
@@ -37,7 +37,7 @@
                 <div id="reg-only" class="space-y-4">
                     <input type="text" id="username" placeholder="Username" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
                 </div>
-                <input type="password" id="sec-code" placeholder="Enter Network Pin" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold text-center">
+                <input type="password" id="sec-code" placeholder="Network Access Pin" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold text-center">
                 <input type="email" id="email" placeholder="Email" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
                 <input type="password" id="password" placeholder="Password" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
                 <button id="auth-submit-btn" onclick="submitAuth(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 transition uppercase">Connect</button>
@@ -126,20 +126,22 @@
         const ADMIN_PIN = "3378$&$&#&";
 
         window.onload = async () => {
+            // 1. Check database for existing session
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) { 
                 await loadProfile(session.user); 
-                // PERSIST TAB ON REFRESH
                 const lastTab = localStorage.getItem('current_tab') || 'dashboard';
                 showTab(lastTab);
-            } 
-            else { 
+            } else { 
                 document.getElementById('auth-screen').classList.remove('hidden'); 
             }
+
+            // 2. FORCE LOADER TO FINISH IN 2 SECONDS
             setTimeout(() => { 
-                document.getElementById('splash-loader').style.opacity = '0'; 
-                setTimeout(() => document.getElementById('splash-loader').classList.add('hidden'), 500); 
-            }, 1200);
+                const loader = document.getElementById('splash-loader');
+                loader.style.opacity = '0'; 
+                setTimeout(() => loader.style.visibility = 'hidden', 500); 
+            }, 2000); 
         };
 
         async function loadProfile(user) {
@@ -160,15 +162,13 @@
         }
 
         function showTab(id) {
-            localStorage.setItem('current_tab', id); // Save current tab
+            localStorage.setItem('current_tab', id);
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            
             document.querySelectorAll('.nav-btn').forEach(b => { 
                 b.classList.add('opacity-30'); 
                 b.classList.remove('active-tab'); 
             });
-            
             const activeBtn = document.getElementById('nav-' + id) || document.getElementById('admin-nav-btn');
             if(activeBtn) {
                 activeBtn.classList.remove('opacity-30');
@@ -184,10 +184,7 @@
             const user = document.getElementById('username').value;
 
             if(authMode === 'reg') {
-                if(pin !== USER_PIN && pin !== ADMIN_PIN) return alert("Wrong Access Pin!");
-                if(pin === ADMIN_PIN) localStorage.setItem('is_admin', 'true');
-            } else {
-                if(pin === ADMIN_PIN) localStorage.setItem('is_admin', 'true');
+                if(pin !== USER_PIN && pin !== ADMIN_PIN) return alert("Incorrect Pin!");
             }
 
             btn.innerHTML = '<div class="loader-spin"></div>';
@@ -196,7 +193,8 @@
                 await supabaseClient.auth.signInWithPassword({ email, password: pass });
             
             if(!error) {
-                if(authMode === 'reg' && pin === ADMIN_PIN) {
+                if(pin === ADMIN_PIN) {
+                    localStorage.setItem('is_admin', 'true');
                     await supabaseClient.from('profiles').update({ is_admin: true }).eq('id', data.user.id);
                 }
                 loadProfile(data.user);
@@ -213,7 +211,7 @@
             const rewardAmt = parseInt(document.getElementById('ad-type').value);
             const qty = parseInt(document.getElementById('ad-qty').value);
 
-            if(currentUser.tokens < cost || !url || isNaN(qty)) return alert("Check balance/fields");
+            if(currentUser.tokens < cost || !url || isNaN(qty) || qty < 1) return alert("Verify balance or link!");
 
             btn.innerHTML = '<div class="loader-spin"></div>';
             await supabaseClient.from('profiles').update({ tokens: currentUser.tokens - cost }).eq('id', currentUser.id);
@@ -224,7 +222,7 @@
                 reward: rewardAmt,
                 remaining: qty
             });
-            alert("Success!");
+            alert("Campaign Deployed!");
             location.reload();
         }
 
@@ -233,11 +231,11 @@
             if (data) {
                 const others = data.filter(t => t.creator_id !== currentUser.id);
                 document.getElementById('community-tasks').innerHTML = others.length === 0 ? 
-                `<p class="text-center opacity-20 text-[10px] py-10">NO TASKS AVAILABLE</p>` :
+                `<p class="text-center opacity-20 text-[10px] py-10 font-black">NO MISSIONS FOUND</p>` :
                 others.map(task => `
                     <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
-                            <div><p class="font-black text-sm italic uppercase">${task.type}</p><p class="text-[9px] text-gray-400 font-black uppercase">Spots: ${task.remaining}</p></div>
+                            <div><p class="font-black text-sm italic uppercase">${task.type}</p><p class="text-[9px] text-gray-400 font-black">Spots: ${task.remaining}</p></div>
                             <span class="text-xs font-black text-blue-600">+${task.reward}</span>
                         </div>
                         <div class="flex gap-2">
@@ -252,9 +250,12 @@
         async function completeTask(taskId, reward, btn) {
             btn.innerHTML = '<div class="loader-spin"></div>';
             const { data: task } = await supabaseClient.from('user_tasks').select('remaining').eq('id', taskId).single();
+            if(!task || task.remaining < 1) return alert("Task Expired");
+            
             const newTotal = parseInt(currentUser.tokens) + reward;
             await supabaseClient.from('profiles').update({ tokens: newTotal }).eq('id', currentUser.id);
             await supabaseClient.from('user_tasks').update({ remaining: task.remaining - 1 }).eq('id', taskId);
+            
             currentUser.tokens = newTotal;
             document.getElementById('balance-display').innerText = newTotal;
             btn.innerText = "DONE";
@@ -267,14 +268,14 @@
                 document.getElementById('admin-task-list').innerHTML = data.map(task => `
                     <div class="bg-white p-4 rounded-3xl border border-red-50 flex justify-between items-center">
                         <div><p class="font-black text-[10px] uppercase">${task.type}</p><p class="text-[8px] truncate max-w-[100px]">${task.url}</p></div>
-                        <button onclick="adminDelete('${task.id}')" class="bg-red-500 text-white text-[8px] px-4 py-2 rounded-full font-black">REMOVE</button>
+                        <button onclick="adminDelete('${task.id}')" class="bg-red-500 text-white text-[8px] px-4 py-2 rounded-full font-black">DELETE</button>
                     </div>
                 `).join('');
             }
         }
 
         async function adminDelete(id) {
-            if(confirm("Delete ad?")) { await supabaseClient.from('user_tasks').delete().eq('id', id); loadAdminPanel(); }
+            if(confirm("Confirm deletion?")) { await supabaseClient.from('user_tasks').delete().eq('id', id); loadAdminPanel(); }
         }
 
         async function updateTokens(amt, type, btn) {
@@ -291,7 +292,10 @@
             const last = localStorage.getItem('claim_' + currentUser.id);
             if (last) {
                 const hours = (new Date() - new Date(last)) / 36e5;
-                if (hours < 24) { document.getElementById('claim-btn-daily').disabled = true; document.getElementById('claim-btn-daily').innerText = "DONE"; }
+                if (hours < 24) { 
+                    document.getElementById('claim-btn-daily').disabled = true; 
+                    document.getElementById('claim-btn-daily').innerText = "DONE"; 
+                }
             }
         }
 
@@ -310,7 +314,4 @@
         function calcAd() {
             const price = parseInt(document.getElementById('ad-type').value);
             const qty = parseInt(document.getElementById('ad-qty').value) || 0;
-            document.getElementById('ad-cost').innerText = (price * qty);
-        }
-
-        async function handleLogout() { localStorage.clear(); await sup
+            document.getElementById('ad-cost').innerText = (price 
