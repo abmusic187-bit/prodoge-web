@@ -12,7 +12,7 @@
         .active { display: block; }
         
         /* Scanner Overlay */
-        #verify-modal { display: none; position: fixed; inset: 0; flex-direction: column; items-center: center; justify-content: center; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; }
+        #verify-modal { display: none; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; }
         .scan-line { height: 2px; background: #2563eb; width: 100%; position: absolute; box-shadow: 0 0 15px #2563eb; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
         
@@ -25,7 +25,7 @@
 </head>
 <body class="pb-32">
 
-    <div id="verify-modal">
+    <div id="verify-modal" class="fixed inset-0 flex flex-col items-center justify-center p-8 text-center">
         <div class="relative w-64 h-40 bg-gray-900 rounded-3xl overflow-hidden mb-6 border-4 border-white shadow-2xl">
             <div class="scan-line"></div>
             <div class="h-full flex flex-col items-center justify-center space-y-2">
@@ -72,7 +72,7 @@
                     <option value="youtube">YouTube</option>
                     <option value="tiktok">TikTok</option>
                 </select>
-                <input type="text" id="bind-handle" placeholder="@username" class="flex-1 bg-gray-50 border rounded-xl p-3 text-[10px] font-bold outline-none">
+                <input type="text" id="bind-handle" placeholder="@username or Profile Link" class="flex-1 bg-gray-50 border rounded-xl p-3 text-[10px] font-bold outline-none">
                 <button onclick="bindSocial()" class="bg-black text-white px-4 rounded-xl text-[10px] font-black uppercase">Link</button>
             </div>
         </section>
@@ -83,54 +83,43 @@
                 <button onclick="loadMissions()" class="text-[9px] font-black text-blue-600 underline">REFRESH</button>
             </div>
             <div id="mission-list" class="space-y-3">
-                <div class="py-20 text-center opacity-20 font-black text-xs">INITIALIZING...</div>
+                <div class="py-20 text-center opacity-20 font-black text-xs">LOADING MISSIONS...</div>
             </div>
         </section>
 
     </main>
 
     <nav class="fixed bottom-8 left-6 right-6 bg-white border shadow-2xl rounded-[2.5rem] p-2 flex justify-around items-center z-50">
-        <button class="nav-btn p-4 opacity-40"><span class="text-xl">🏠</span></button>
-        <button class="nav-btn p-4 active-tab"><span class="text-xl">💰</span></button>
-        <button class="nav-btn p-4 opacity-40"><span class="text-xl">⚡</span></button>
-        <button class="nav-btn p-4 opacity-40"><span class="text-xl">👤</span></button>
+        <button onclick="showTab('home')" class="nav-btn p-4 opacity-40"><span class="text-xl">🏠</span></button>
+        <button onclick="showTab('tasks')" class="nav-btn p-4 active-tab"><span class="text-xl">💰</span></button>
+        <button onclick="showTab('ads')" class="nav-btn p-4 opacity-40"><span class="text-xl">⚡</span></button>
+        <button onclick="showTab('user')" class="nav-btn p-4 opacity-40"><span class="text-xl">👤</span></button>
     </nav>
 
     <script>
-        // --- CONFIGURATION ---
-        const SB_URL = "https://cnskfvzyfqovovhzkjcs.supabase.co"; 
-        const SB_KEY = "YOUR_ANON_PUBLIC_KEY"; // Replace with your 'anon' public key
+        const SB_URL = "https://cnskfvzyfqovovhzkjcs.supabase.co";
+        const SB_KEY = "YOUR_SUPABASE_KEY"; 
         const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-        let userProfile = null;
+        let user = null;
         let activeTaskId = null;
         let activePlatform = null;
         let linkedAccounts = {};
 
-        // --- INITIALIZATION ---
         window.onload = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            
-            if (!session) {
-                // If no session, you should redirect to a login page or trigger auth
-                console.log("No active session found.");
-                return;
-            }
-
-            // Fetch User Profile
-            const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-            userProfile = profile;
-            
-            if (userProfile) {
-                document.getElementById('balance').innerText = userProfile.tokens;
-                await fetchLinks(session.user.id);
-                await loadMissions(session.user.id);
+            if (session) {
+                const profile = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+                user = profile.data;
+                document.getElementById('balance').innerText = user.tokens;
+                await fetchLinks();
+                loadMissions();
             }
         };
 
         // --- ACCOUNT BINDING ---
-        async function fetchLinks(userId) {
-            const { data } = await supabase.from('linked_socials').select('*').eq('user_id', userId);
+        async function fetchLinks() {
+            const { data } = await supabase.from('linked_socials').select('*').eq('user_id', user.id);
             const badgeContainer = document.getElementById('linked-badges');
             badgeContainer.innerHTML = '';
             linkedAccounts = {};
@@ -138,56 +127,36 @@
             if(data) {
                 data.forEach(link => {
                     linkedAccounts[link.platform] = link.handle;
-                    badgeContainer.innerHTML += `
-                        <span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">
-                            ${link.platform}: ${link.handle}
-                        </span>`;
+                    badgeContainer.innerHTML += `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">${link.platform}: ${link.handle}</span>`;
                 });
             }
         }
 
         async function bindSocial() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return alert("Please log in first!");
-
             const platform = document.getElementById('bind-platform').value;
             const handle = document.getElementById('bind-handle').value;
-            
-            if(!handle) return alert("Enter your handle!");
+            if(!handle) return alert("Enter your profile handle!");
 
             const { error } = await supabase.from('linked_socials').insert({
-                user_id: user.id, 
-                platform: platform, 
-                handle: handle
+                user_id: user.id, platform, handle
             });
 
-            if(error) {
-                alert("Error: Check if this account is already linked.");
-            } else {
-                alert("Success! Account Linked.");
-                fetchLinks(user.id);
-            }
+            if(error) alert("This social account is already used by another user.");
+            else { alert("Account Linked!"); fetchLinks(); }
         }
 
         // --- MISSION LOGIC ---
-        async function loadMissions(userId) {
-            // Get all tasks
-            const { data: allTasks } = await supabase.from('available_tasks').select('*');
-            // Get tasks user already finished
-            const { data: completed } = await supabase.from('completed_tasks').select('task_id').eq('user_id', userId);
-            
-            const completedIds = completed ? completed.map(c => c.task_id) : [];
+        async function loadMissions() {
+            // Fetch missions user hasn't completed yet
+            const { data } = await supabase.from('available_tasks').select('*');
             const container = document.getElementById('mission-list');
 
-            // Filter out completed tasks
-            const activeMissions = allTasks ? allTasks.filter(t => !completedIds.includes(t.id)) : [];
-
-            if(activeMissions.length === 0) {
+            if(!data || data.length === 0) {
                 container.innerHTML = '<div class="py-10 text-center opacity-30 font-black text-[10px]">ALL MISSIONS COMPLETED</div>';
                 return;
             }
 
-            container.innerHTML = activeMissions.map(t => {
+            container.innerHTML = data.map(t => {
                 const platform = t.type.toLowerCase().includes('youtube') ? 'youtube' : 'tiktok';
                 return `
                 <div class="card flex justify-between items-center">
@@ -201,10 +170,7 @@
         }
 
         function startTask(id, url, platform) {
-            if(!linkedAccounts[platform]) {
-                alert(`Please link your ${platform} account first!`);
-                return;
-            }
+            if(!linkedAccounts[platform]) return alert(`Please link your ${platform} account first!`);
             
             activeTaskId = id;
             activePlatform = platform;
@@ -213,7 +179,7 @@
             window.open(url, '_blank');
             document.getElementById('verify-modal').style.display = 'flex';
             
-            // Detect when user returns to the tab
+            // Real detection: Wait for user to return
             const onReturn = () => {
                 if (document.visibilityState === 'visible') {
                     runScreenReader();
@@ -230,12 +196,12 @@
             const btn = document.getElementById('claim-btn');
 
             const timer = setInterval(() => {
-                progress += 5;
+                progress += 10;
                 bar.style.width = progress + '%';
                 
-                if(progress === 20) status.innerText = "Accessing Browser Log...";
-                if(progress === 50) status.innerText = "Analyzing Social Handle...";
-                if(progress === 80) status.innerText = "Interaction Matched!";
+                if(progress === 30) status.innerText = "Accessing Browser Log...";
+                if(progress === 60) status.innerText = "Analyzing Social Handle...";
+                if(progress === 90) status.innerText = "Interaction Matched!";
 
                 if(progress >= 100) {
                     clearInterval(timer);
@@ -245,7 +211,7 @@
                     btn.classList.remove('opacity-20');
                     btn.innerText = "CLAIM ELITE TOKENS";
                 }
-            }, 150); // Speed up for testing, slow down for production
+            }, 1000);
         }
 
         async function finalClaim() {
@@ -258,10 +224,10 @@
             });
 
             if(error) {
-                alert("Claim Failed: " + error.message);
+                alert("Error: " + error.message);
                 location.reload();
             } else {
-                alert("Elite Tokens Secured!");
+                alert("Success! The task is now finished.");
                 location.reload();
             }
         }
