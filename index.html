@@ -62,10 +62,9 @@
             <h3 class="font-black text-2xl mb-6 italic px-2">Task Hub</h3>
             <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex justify-between items-center">
                 <div><p class="font-black text-sm uppercase italic">Daily Claim</p><p class="text-[10px] text-blue-600 font-black">+10 ELITE</p></div>
-                <button id="claim-btn-daily" onclick="updateTokens(10, 'daily', this)" class="bg-black text-white px-8 py-3 rounded-2xl text-[10px] font-black disabled:opacity-20">CLAIM</button>
+                <button id="claim-btn-daily" onclick="updateTokensDaily(10, this)" class="bg-black text-white px-8 py-3 rounded-2xl text-[10px] font-black disabled:opacity-20">CLAIM</button>
             </div>
-            <div id="community-tasks" class="space-y-4">
-                </div>
+            <div id="community-tasks" class="space-y-4"></div>
         </div>
 
         <div id="create" class="tab-content">
@@ -122,7 +121,15 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) { await loadProfile(session.user); } 
             else { document.getElementById('auth-screen').classList.remove('hidden'); }
-            setTimeout(() => { document.getElementById('splash-loader').style.opacity = '0'; setTimeout(() => document.getElementById('splash-loader').classList.add('hidden'), 500); }, 1200);
+            
+            // Tab Restoration Logic
+            const savedTab = localStorage.getItem('activeTab') || 'dashboard';
+            showTab(savedTab);
+
+            setTimeout(() => { 
+                document.getElementById('splash-loader').style.opacity = '0'; 
+                setTimeout(() => document.getElementById('splash-loader').classList.add('hidden'), 500); 
+            }, 1200);
         };
 
         async function loadProfile(user) {
@@ -138,7 +145,59 @@
             }
         }
 
-        // --- P2P AD LOGIC ---
+        function showTab(id) {
+            localStorage.setItem('activeTab', id);
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.add('opacity-30'); b.classList.remove('active-tab'); });
+            
+            // Highlight the correct button
+            const btns = document.querySelectorAll('.nav-btn');
+            btns.forEach(btn => {
+                if(btn.getAttribute('onclick').includes(id)) {
+                    btn.classList.remove('opacity-30');
+                    btn.classList.add('active-tab');
+                }
+            });
+        }
+
+        // --- TASK LOGIC ---
+        async function loadCommunityTasks() {
+            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0).order('created_at', {ascending: false});
+            if (data) {
+                const container = document.getElementById('community-tasks');
+                if (data.length === 0) {
+                    container.innerHTML = `<p class="text-center opacity-20 py-10 font-black text-[10px]">NO MISSIONS FOUND</p>`;
+                    return;
+                }
+                container.innerHTML = data.map(task => `
+                    <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div><p class="font-black text-sm italic uppercase">${task.type} Mission</p><p class="text-[9px] text-gray-400 font-black">REMAINING: ${task.remaining}</p></div>
+                            <span class="text-xs font-black text-blue-600 uppercase">+${task.reward} ELITE</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="window.open('${task.url}', '_blank'); document.getElementById('claim-${task.id}').disabled=false" class="flex-1 bg-gray-50 py-4 rounded-2xl text-[10px] font-black uppercase italic">Visit</button>
+                            <button id="claim-${task.id}" onclick="completeTask('${task.id}', this)" disabled class="flex-1 bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase italic disabled:opacity-10">Claim</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function completeTask(taskId, btn) {
+            btn.innerHTML = '<div class="loader-spin"></div>';
+            const { data, error } = await supabaseClient.rpc('complete_task_secure', { target_task_id: taskId });
+            if(error) { alert(error.message); btn.innerText = "FAILED"; }
+            else {
+                currentUser.tokens = data.new_balance;
+                document.getElementById('balance-display').innerText = data.new_balance;
+                btn.innerText = "VERIFIED";
+                btn.disabled = true;
+            }
+        }
+
+        // --- ADS LOGIC ---
         function calcAd() {
             const price = parseInt(document.getElementById('ad-type').value);
             const qty = parseInt(document.getElementById('ad-qty').value) || 0;
@@ -148,74 +207,16 @@
         async function deployAd(btn) {
             const cost = parseInt(document.getElementById('ad-cost').innerText);
             const url = document.getElementById('ad-url').value;
-            const typeText = document.getElementById('ad-type').options[document.getElementById('ad-type').selectedIndex].text.split(' ')[0];
+            const typeText = document.getElementById('ad-type').options[document.getElementById('ad-type').selectedIndex].text.split(' (')[0];
             const rewardAmt = parseInt(document.getElementById('ad-type').value);
 
-            if(currentUser.tokens < cost || !url || cost <= 0) return alert("Verify URL, balance, and quantity.");
+            if(currentUser.tokens < cost || !url || cost <= 0) return alert("Check balance and URL");
 
             btn.innerHTML = '<div class="loader-spin"></div>';
-            
-            // 1. Deduct tokens
             await supabaseClient.from('profiles').update({ tokens: currentUser.tokens - cost }).eq('id', currentUser.id);
-            
-            // 2. Insert task
-            await supabaseClient.from('user_tasks').insert({
-                creator_id: currentUser.id,
-                type: typeText,
-                url: url,
-                reward: rewardAmt,
-                remaining: parseInt(document.getElementById('ad-qty').value)
-            });
-
-            alert("Ad Deployed Successfully!");
+            await supabaseClient.from('user_tasks').insert({ creator_id: currentUser.id, type: typeText, url: url, reward: rewardAmt, remaining: parseInt(document.getElementById('ad-qty').value) });
+            alert("Mission Deployed!");
             location.reload();
-        }
-
-        async function loadCommunityTasks() {
-            const { data, error } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0);
-            
-            if (data) {
-                // Only show tasks created by OTHERS
-                const others = data.filter(t => t.creator_id !== currentUser.id);
-                
-                if (others.length === 0) {
-                    document.getElementById('community-tasks').innerHTML = `<p class="text-center opacity-30 text-[10px] font-black uppercase py-10">No new missions found</p>`;
-                    return;
-                }
-
-                document.getElementById('community-tasks').innerHTML = others.map(task => `
-                    <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
-                        <div class="flex justify-between items-center">
-                            <div><p class="font-black text-sm italic uppercase">${task.type} Mission</p><p class="text-[9px] text-gray-400 font-black uppercase">Spots Left: ${task.remaining}</p></div>
-                            <span class="text-xs font-black text-blue-600 uppercase">+${task.reward} Elite</span>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="window.open('${task.url}', '_blank'); document.getElementById('claim-${task.id}').disabled=false" class="flex-1 bg-gray-50 py-4 rounded-2xl text-[10px] font-black uppercase italic active:scale-95 transition">Visit</button>
-                            <button id="claim-${task.id}" onclick="completeTask('${task.id}', ${task.reward}, this)" disabled class="flex-1 bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase italic disabled:opacity-10 active:scale-95 transition">Claim</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        async function completeTask(taskId, reward, btn) {
-            btn.innerHTML = '<div class="loader-spin"></div>';
-            
-            // Fetch fresh remaining count
-            const { data: task } = await supabaseClient.from('user_tasks').select('remaining').eq('id', taskId).single();
-            if(!task || task.remaining <= 0) return alert("Task expired!");
-
-            const newTotal = parseInt(currentUser.tokens) + reward;
-            
-            // Update user balance
-            await supabaseClient.from('profiles').update({ tokens: newTotal }).eq('id', currentUser.id);
-            // Update task count
-            await supabaseClient.from('user_tasks').update({ remaining: task.remaining - 1 }).eq('id', taskId);
-
-            currentUser.tokens = newTotal;
-            document.getElementById('balance-display').innerText = newTotal;
-            btn.innerText = "VERIFIED";
-            btn.disabled = true;
         }
 
         // --- AUTH & CORE ---
@@ -234,7 +235,7 @@
             if(!error) loadProfile(data.user); else alert(error.message);
         }
 
-        async function updateTokens(amt, type, btn) {
+        async function updateTokensDaily(amt, btn) {
             btn.innerHTML = '<div class="loader-spin"></div>';
             localStorage.setItem('claim_' + currentUser.id, new Date().toISOString());
             const newTotal = parseInt(currentUser.tokens) + amt;
@@ -252,14 +253,6 @@
             }
         }
 
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.add('opacity-30'); b.classList.remove('active-tab'); });
-            event.currentTarget.classList.remove('opacity-30');
-            event.currentTarget.classList.add('active-tab');
-        }
-
         async function loadLeaderboard() {
             const { data } = await supabaseClient.from('profiles').select('username, tokens').order('tokens', { ascending: false }).limit(5);
             if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `<div class="bg-white p-5 rounded-3xl flex justify-between border border-gray-50 mb-2 font-black italic text-xs uppercase shadow-sm"><span>#${i+1} ${u.username}</span><span class="text-blue-600">${u.tokens}</span></div>`).join('');
@@ -274,4 +267,4 @@
         async function saveWallet(btn) { btn.innerHTML = '<div class="loader-spin"></div>'; await supabaseClient.from('profiles').update({ wallet_address: document.getElementById('wallet-addr').value }).eq('id', currentUser.id); btn.innerText = "SAVED"; }
     </script>
 </body>
-                        </html>
+                    </html>
