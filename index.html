@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #F8F8F7; color: #000; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #F8F8F7; color: #000; font-family: sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         .tab-content { display: none; }
         .active { display: block; }
         .nav-btn.active-tab { opacity: 1 !important; transform: scale(1.1); color: #2563eb; }
@@ -16,121 +16,129 @@
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
         .loader-spin { border: 2px solid #ccc; border-top: 2px solid #000; border-radius: 50%; width: 14px; height: 14px; animation: spin 0.8s linear infinite; display: inline-block; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Hide scrollbar but allow scrolling */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-40">
 
     <div id="splash-loader" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center">
         <h1 class="text-white text-4xl font-black italic pulse-logo tracking-tighter">PRODOGE</h1>
-        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase text-center">Elite P2P Network<br>Loading Assets...</p>
+        <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase text-center">Elite P2P Network<br>Initializing Node...</p>
     </div>
 
-    <div id="tab-loader" class="fixed inset-0 bg-[#F8F8F7]/80 backdrop-blur-md z-[60] hidden flex items-center justify-center">
+    <div id="tab-loader" class="fixed inset-0 bg-[#F8F8F7]/90 backdrop-blur-md z-[60] hidden flex items-center justify-center">
         <div class="flex flex-col items-center">
             <div class="loader-spin !w-10 !h-10 !border-t-blue-600"></div>
-            <p class="text-[8px] font-black uppercase mt-4 tracking-widest text-blue-600">Syncing Node...</p>
+            <p class="text-[8px] font-black uppercase mt-4 tracking-widest text-blue-600">Syncing Data...</p>
         </div>
     </div>
 
-    <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-50 p-6 overflow-y-auto hidden text-center">
-        <div class="max-w-md mx-auto">
-            <h1 class="text-5xl font-black mb-10 tracking-tighter italic">PRODOGE</h1>
-            <div class="flex bg-white p-1 rounded-2xl mb-8 border border-gray-100 shadow-sm">
-                <button onclick="toggleAuth('reg')" id="btn-reg" class="flex-1 py-4 font-black rounded-xl bg-black text-white">REGISTER</button>
-                <button onclick="toggleAuth('log')" id="btn-log" class="flex-1 py-4 font-black text-gray-400">LOGIN</button>
+    <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-[70] p-6 overflow-y-auto hidden text-center">
+        <div class="max-w-md mx-auto pt-10">
+            <h1 class="text-6xl font-black mb-12 tracking-tighter italic">PRODOGE</h1>
+            <div class="flex bg-white p-1 rounded-3xl mb-8 border border-gray-100 shadow-sm">
+                <button onclick="toggleAuth('reg')" id="btn-reg" class="flex-1 py-4 font-black rounded-2xl bg-black text-white transition-all">REGISTER</button>
+                <button onclick="toggleAuth('log')" id="btn-log" class="flex-1 py-4 font-black text-gray-400 transition-all">LOGIN</button>
             </div>
             <div class="space-y-4">
                 <div id="reg-only" class="space-y-4">
                     <input type="text" id="username" placeholder="Username" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
-                    <input type="password" id="sec-code" placeholder="Master Pin (Required)" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold text-center">
+                    <input type="password" id="sec-code" placeholder="Master Pin" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold text-center">
                 </div>
                 <input type="email" id="email" placeholder="Email" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
                 <input type="password" id="password" placeholder="Password" class="w-full p-5 rounded-2xl border border-gray-100 outline-none font-bold">
-                <button onclick="submitAuth(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 transition uppercase">Connect Account</button>
+                <button onclick="submitAuth(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black text-xl shadow-2xl active:scale-95 transition uppercase">Connect</button>
             </div>
         </div>
     </div>
 
-    <main class="pt-12 p-6 max-w-md mx-auto">
+    <main class="pt-16 p-6 max-w-md mx-auto">
         
         <div id="dashboard" class="tab-content text-center">
-            <div class="bg-white p-12 rounded-[4rem] shadow-sm border border-gray-100">
-                <p class="text-gray-400 text-[10px] font-black uppercase mb-4 tracking-[0.4em]">Available Tokens</p>
+            <div class="bg-white p-12 rounded-[4.5rem] shadow-sm border border-gray-100">
+                <p class="text-gray-400 text-[10px] font-black uppercase mb-4 tracking-[0.4em]">Node Balance</p>
                 <h2 id="balance-display" class="text-8xl font-black mb-4 tracking-tighter">0</h2>
-                <div class="bg-blue-600 text-white text-[10px] px-6 py-2 rounded-full font-black uppercase italic tracking-widest inline-block">Verified Elite</div>
+                <div class="bg-blue-600 text-white text-[10px] px-6 py-2 rounded-full font-black uppercase italic tracking-widest inline-block shadow-lg shadow-blue-200">Verified Elite</div>
             </div>
         </div>
 
-        <div id="leaderboard" class="tab-content space-y-3">
-            <h3 class="font-black text-2xl mb-6 italic px-2">Top Miners</h3>
+        <div id="leaderboard" class="tab-content space-y-4">
+            <h3 class="font-black text-3xl mb-6 italic px-2 tracking-tighter">Network Ranks</h3>
             <div id="leaderboard-list"></div>
         </div>
 
-        <div id="tasks" class="tab-content space-y-4">
-            <h3 class="font-black text-2xl mb-6 italic px-2">Mining Hub</h3>
+        <div id="tasks" class="tab-content space-y-5">
+            <h3 class="font-black text-3xl mb-6 italic px-2 tracking-tighter">Mining Center</h3>
             <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm flex justify-between items-center">
-                <div><p class="font-black text-sm uppercase italic">Daily Claim</p><p class="text-[10px] text-blue-600 font-black">+10 ELITE</p></div>
-                <button id="claim-btn-daily" onclick="updateTokensDaily(10, this)" class="bg-black text-white px-8 py-3 rounded-2xl text-[10px] font-black disabled:opacity-20">CLAIM</button>
+                <div><p class="font-black text-sm uppercase italic">Daily Node Reward</p><p class="text-[10px] text-blue-600 font-black">+10 ELITE</p></div>
+                <button id="claim-btn-daily" onclick="updateTokensDaily(10, this)" class="bg-black text-white px-8 py-4 rounded-2xl text-[10px] font-black disabled:opacity-20 active:scale-90 transition">CLAIM</button>
             </div>
             <div id="community-tasks" class="space-y-4"></div>
         </div>
 
         <div id="wallet" class="tab-content space-y-6">
-            <div class="bg-white p-8 rounded-[3.5rem] border border-gray-100 shadow-sm text-center">
-                <div class="w-20 h-20 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-black shadow-lg">
+            <div class="bg-white p-8 rounded-[4rem] border border-gray-100 shadow-sm text-center">
+                <div class="w-24 h-24 bg-black rounded-full mx-auto mb-4 flex items-center justify-center text-white text-4xl font-black shadow-xl border-4 border-gray-50">
                     <span id="user-initial">P</span>
                 </div>
-                <h3 id="display-username" class="font-black text-2xl italic uppercase tracking-tighter">USER</h3>
-                <p id="display-email" class="text-[9px] text-gray-400 font-bold mb-6">loading...</p>
+                <h3 id="display-username" class="font-black text-3xl italic uppercase tracking-tighter mb-1">USER</h3>
+                <p id="display-email" class="text-[10px] text-gray-400 font-bold mb-8">id: syncing...</p>
                 
                 <div class="grid grid-cols-2 gap-3 mb-8">
-                    <div class="bg-gray-50 p-4 rounded-3xl border border-gray-100">
-                        <p class="text-[7px] font-black text-gray-400 uppercase">Status</p>
-                        <p class="text-[10px] font-black text-blue-600">ELITE NODE</p>
+                    <div class="bg-gray-50 p-5 rounded-[2rem] border border-gray-100">
+                        <p class="text-[8px] font-black text-gray-400 uppercase mb-1">Status</p>
+                        <p class="text-xs font-black text-blue-600">ELITE</p>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-3xl border border-gray-100">
-                        <p class="text-[7px] font-black text-gray-400 uppercase">Rank</p>
-                        <p class="text-[10px] font-black">TOP TIERS</p>
+                    <div class="bg-gray-50 p-5 rounded-[2rem] border border-gray-100">
+                        <p class="text-[8px] font-black text-gray-400 uppercase mb-1">Node</p>
+                        <p class="text-xs font-black text-green-600">ACTIVE</p>
                     </div>
                 </div>
 
-                <div class="space-y-4 text-left">
-                    <label class="text-[9px] font-black uppercase ml-2 text-gray-400">P2P Wallet Address</label>
-                    <input type="text" id="wallet-addr" placeholder="Address" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-mono text-center font-bold text-[10px] border border-gray-100">
-                    <button onclick="saveWallet(this)" class="w-full bg-black text-white p-5 rounded-[2rem] font-black uppercase tracking-widest text-[9px]">Update Storage</button>
+                <div class="space-y-4 text-left px-2">
+                    <label class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Payout Address</label>
+                    <input type="text" id="wallet-addr" placeholder="Wallet Address" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-mono text-center font-bold text-[11px] border border-gray-100">
+                    <button onclick="saveWallet(this)" class="w-full bg-black text-white p-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] active:scale-95 transition">Update Storage</button>
                 </div>
 
-                <hr class="my-8 border-gray-50">
-                <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 p-5 rounded-[2rem] font-black uppercase tracking-widest text-[9px] border border-red-100">Log Out Session</button>
+                <div class="mt-12">
+                    <button onclick="handleLogout()" class="w-full bg-red-50 text-red-500 p-5 rounded-[2rem] font-black uppercase tracking-widest text-[10px] border border-red-100 active:scale-95 transition">Log Out Account</button>
+                </div>
             </div>
         </div>
 
         <div id="create" class="tab-content">
-            <div class="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm space-y-6">
-                <h3 class="font-black text-2xl mb-2 italic">Promote Profile</h3>
+            <div class="bg-white p-10 rounded-[4rem] border border-gray-100 shadow-sm space-y-6">
+                <h3 class="font-black text-2xl mb-2 italic tracking-tighter">Promote Profile</h3>
                 <div class="space-y-4">
-                    <select id="ad-type" onchange="calcAd()" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black text-[11px] uppercase border border-gray-100">
-                        <option value="30">YouTube Subscriber (Cost: 30)</option>
-                        <option value="20">TikTok Follower (Cost: 20)</option>
-                        <option value="20">Instagram Follower (Cost: 20)</option>
+                    <select id="ad-type" onchange="calcAd()" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-black text-[12px] uppercase border border-gray-100">
+                        <option value="30">YouTube Sub (Cost: 30)</option>
+                        <option value="20">TikTok Follow (Cost: 20)</option>
+                        <option value="20">Instagram Follow (Cost: 20)</option>
                     </select>
-                    <input type="text" id="ad-url" placeholder="Social Link" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100 text-xs">
-                    <input type="number" id="ad-qty" oninput="calcAd()" placeholder="Quantity" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100">
-                    <div class="p-5 bg-blue-50 rounded-2xl flex justify-between items-center text-blue-600 font-black border border-blue-100 text-[10px]">
-                        <span>DEDUCTION:</span> <span id="ad-cost" class="text-2xl">0</span>
+                    <input type="text" id="ad-url" placeholder="Social Profile Link" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100 text-xs">
+                    <input type="number" id="ad-qty" oninput="calcAd()" placeholder="Quantity (Min 1)" class="w-full p-5 bg-gray-50 rounded-2xl outline-none font-bold border border-gray-100">
+                    <div class="p-6 bg-blue-50 rounded-3xl flex justify-between items-center text-blue-600 font-black border border-blue-100">
+                        <span class="text-[10px] tracking-widest">DEDUCTION:</span> <span id="ad-cost" class="text-3xl">0</span>
                     </div>
-                    <button onclick="deployAd(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black shadow-2xl active:scale-95 transition uppercase text-xs">Deploy Mission</button>
+                    <button onclick="deployAd(this)" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black shadow-2xl active:scale-95 transition uppercase text-sm">Deploy Mission</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <nav class="fixed bottom-8 left-6 right-6 bg-white/95 backdrop-blur-2xl border border-gray-100 flex justify-around items-center py-4 rounded-[3rem] shadow-2xl z-20">
-        <button onclick="showTab('dashboard')" class="nav-btn flex flex-col items-center gap-1"><span class="text-xl">🏠</span><span class="text-[8px] font-black">HOME</span></button>
-        <button onclick="showTab('leaderboard')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">🏆</span><span class="text-[8px] font-black">RANKS</span></button>
-        <button onclick="showTab('tasks')" id="mine-btn-central" class="nav-btn -mt-12 bg-black text-white w-16 h-16 rounded-full flex flex-col items-center justify-center shadow-xl border-4 border-[#F8F8F7] active:scale-90 transition-all"><span class="text-2xl">💰</span><span class="text-[7px] font-black">MINE</span></button>
-        <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">💳</span><span class="text-[8px] font-black">USER</span></button>
-        <button onclick="showTab('create')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-xl">⚡</span><span class="text-[8px] font-black">ADS</span></button>
+    <nav class="fixed bottom-10 left-6 right-6 bg-white/95 backdrop-blur-2xl border border-gray-100 flex justify-around items-center py-5 rounded-[3.5rem] shadow-2xl z-[50]">
+        <button onclick="showTab('dashboard')" class="nav-btn flex flex-col items-center gap-1"><span class="text-2xl">🏠</span><span class="text-[8px] font-black">HOME</span></button>
+        <button onclick="showTab('leaderboard')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-2xl">🏆</span><span class="text-[8px] font-black">RANKS</span></button>
+        
+        <button onclick="showTab('tasks')" id="mine-btn-central" class="nav-btn -mt-16 bg-black text-white w-20 h-20 rounded-full flex flex-col items-center justify-center shadow-2xl border-8 border-[#F8F8F7] active:scale-90 transition-all">
+            <span class="text-3xl">💰</span>
+            <span class="text-[8px] font-black mt-1">MINE</span>
+        </button>
+
+        <button onclick="showTab('wallet')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-2xl">👤</span><span class="text-[8px] font-black">USER</span></button>
+        <button onclick="showTab('create')" class="nav-btn flex flex-col items-center gap-1 opacity-30"><span class="text-2xl">⚡</span><span class="text-[8px] font-black">ADS</span></button>
     </nav>
 
     <script>
@@ -147,13 +155,14 @@
             if (session) { await loadProfile(session.user); } 
             else { document.getElementById('auth-screen').classList.remove('hidden'); }
             
+            // Tab Persistence logic
             const savedTab = localStorage.getItem('activeTab') || 'dashboard';
             silentTabSwitch(savedTab);
 
             setTimeout(() => { 
                 document.getElementById('splash-loader').style.opacity = '0'; 
                 setTimeout(() => document.getElementById('splash-loader').classList.add('hidden'), 500); 
-            }, 1200);
+            }, 1500);
         };
 
         async function loadProfile(user) {
@@ -161,7 +170,7 @@
             if(data) {
                 currentUser = data;
                 document.getElementById('balance-display').innerText = data.tokens;
-                document.getElementById('display-username').innerText = data.username || "Anonymous User";
+                document.getElementById('display-username').innerText = data.username || "Member";
                 document.getElementById('display-email').innerText = user.email;
                 document.getElementById('user-initial').innerText = (data.username || "P").charAt(0).toUpperCase();
                 document.getElementById('wallet-addr').value = data.wallet_address || "";
@@ -175,9 +184,14 @@
         function showTab(id) {
             const loader = document.getElementById('tab-loader');
             loader.classList.remove('hidden');
+            loader.style.opacity = '1';
+
             setTimeout(() => {
                 silentTabSwitch(id);
-                setTimeout(() => { loader.classList.add('hidden'); }, 300);
+                setTimeout(() => { 
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.classList.add('hidden'), 400); 
+                }, 300);
             }, 250);
         }
 
@@ -215,18 +229,18 @@
             if (data) {
                 const container = document.getElementById('community-tasks');
                 if (data.length === 0) {
-                    container.innerHTML = `<p class="text-center opacity-20 py-10 font-black text-[10px]">NO MISSIONS FOUND</p>`;
+                    container.innerHTML = `<p class="text-center opacity-20 py-20 font-black text-xs uppercase tracking-[0.3em]">No Missions Found</p>`;
                     return;
                 }
                 container.innerHTML = data.map(task => `
                     <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
-                            <div><p class="font-black text-sm italic uppercase">${task.type} Mission</p><p class="text-[9px] text-gray-400 font-black uppercase">REMAINING: ${task.remaining}</p></div>
-                            <span class="text-xs font-black text-blue-600 uppercase">+${task.reward}</span>
+                            <div><p class="font-black text-sm italic uppercase">${task.type}</p><p class="text-[9px] text-gray-400 font-black uppercase">Quota: ${task.remaining}</p></div>
+                            <span class="text-xs font-black text-blue-600">+${task.reward} ELITE</span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="window.open('${task.url}', '_blank'); document.getElementById('claim-${task.id}').disabled=false" class="flex-1 bg-gray-50 py-4 rounded-2xl text-[10px] font-black uppercase italic">Visit</button>
-                            <button id="claim-${task.id}" onclick="completeTask('${task.id}', this)" disabled class="flex-1 bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase italic disabled:opacity-10">Claim</button>
+                            <button onclick="window.open('${task.url}', '_blank'); document.getElementById('claim-${task.id}').disabled=false" class="flex-1 bg-gray-50 py-4 rounded-2xl text-[10px] font-black uppercase italic active:bg-gray-100 transition">Visit</button>
+                            <button id="claim-${task.id}" onclick="completeTask('${task.id}', this)" disabled class="flex-1 bg-black text-white py-4 rounded-2xl text-[10px] font-black uppercase italic disabled:opacity-10 active:scale-95 transition">Claim</button>
                         </div>
                     </div>
                 `).join('');
@@ -257,7 +271,7 @@
             const typeText = document.getElementById('ad-type').options[document.getElementById('ad-type').selectedIndex].text.split(' (')[0];
             const rewardAmt = parseInt(document.getElementById('ad-type').value);
 
-            if(currentUser.tokens < cost || !url || cost <= 0) return alert("Verify URL and Balance");
+            if(currentUser.tokens < cost || !url || cost <= 0) return alert("Verify Balance/Link");
 
             btn.innerHTML = '<div class="loader-spin"></div>';
             await supabaseClient.from('profiles').update({ tokens: currentUser.tokens - cost }).eq('id', currentUser.id);
@@ -303,14 +317,6 @@
         }
 
         async function loadLeaderboard() {
-            const { data } = await supabaseClient.from('profiles').select('username, tokens').order('tokens', { ascending: false }).limit(5);
-            if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `<div class="bg-white p-5 rounded-3xl flex justify-between border border-gray-50 mb-2 font-black italic text-xs uppercase shadow-sm"><span>#${i+1} ${u.username}</span><span class="text-blue-600">${u.tokens}</span></div>`).join('');
-        }
-
-        function toggleAuth(mode) {
-            authMode = mode;
-            document.getElementById('reg-only').style.display = mode === 'reg' ? 'block' : 'none';
-        }
-
-        async function handleLogout() { localStorage.clear(); await supabaseClient.auth.signOut(); location.reload(); }
-        async function saveWallet(btn) { btn.innerHTML = '<div class="loader-spin"></div>'; await supabaseClient.from('profiles').update({ wallet_address: document.getElementById('wall
+            const { data } = await supabaseClient.from('profiles').select('username, tokens').order('tokens', { ascending: false }).limit(8);
+            if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `
+      
