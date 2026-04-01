@@ -3,47 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRODOGE ELITE</title>
+    <title>PRODOGE ELITE | TASK HUB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #F9FAFB; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        #verify-modal { display: none; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; }
+        body { background-color: #F8F9FA; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .tab-content { display: none; }
+        .active { display: block; }
+        
+        /* Scanner Overlay */
+        #verify-modal { display: none; position: fixed; inset: 0; flex-direction: column; items-center: center; justify-content: center; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); z-index: 1000; }
         .scan-line { height: 2px; background: #2563eb; width: 100%; position: absolute; box-shadow: 0 0 15px #2563eb; animation: scan 2s linear infinite; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
-        .card { background: white; border-radius: 2rem; border: 1px solid #edf2f7; padding: 1.5rem; }
+        
+        /* UI Components */
+        .card { background: white; border-radius: 2rem; border: 1px solid #edf2f7; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+        .nav-btn.active-tab { color: #2563eb; transform: scale(1.1); opacity: 1 !important; }
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="pb-32">
 
-    <div id="verify-modal" class="fixed inset-0 flex flex-col items-center justify-center p-8 text-center">
+    <div id="verify-modal">
         <div class="relative w-64 h-40 bg-gray-900 rounded-3xl overflow-hidden mb-6 border-4 border-white shadow-2xl">
             <div class="scan-line"></div>
             <div class="h-full flex flex-col items-center justify-center space-y-2">
                 <div class="loader"></div>
-                <p id="scan-status" class="text-blue-400 font-mono text-[10px] uppercase">Waiting for Return...</p>
+                <p id="scan-status" class="text-blue-400 font-mono text-[10px] uppercase tracking-widest">Awaiting Return...</p>
             </div>
         </div>
-        <h2 class="font-black text-xl uppercase italic">Verifying Task</h2>
-        <p class="text-gray-400 text-[10px] font-bold mt-2 uppercase">Account: <span id="active-handle" class="text-blue-600">...</span></p>
-        <div class="w-full max-w-xs bg-gray-100 h-1.5 rounded-full mt-8 overflow-hidden"><div id="scan-progress" class="bg-blue-600 h-full w-0 transition-all duration-500"></div></div>
-        <button id="claim-btn" disabled onclick="finalClaim()" class="mt-8 w-full max-w-xs bg-blue-600 text-white p-5 rounded-2xl font-black uppercase text-xs opacity-20">Analyzing Interaction...</button>
-        <button onclick="location.reload()" class="mt-4 text-[10px] font-black text-gray-400 uppercase">Cancel & Refresh</button>
+        <h2 class="font-black text-xl italic uppercase">Verifying Interaction</h2>
+        <p class="text-gray-400 text-[10px] font-bold mt-2 uppercase tracking-tighter">Checking Linked Account: <span id="active-handle" class="text-blue-600">...</span></p>
+        
+        <div class="w-full max-w-xs bg-gray-100 h-1.5 rounded-full mt-8 overflow-hidden">
+            <div id="scan-progress" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
+        </div>
+        
+        <button id="claim-btn" disabled onclick="finalClaim()" class="mt-8 w-full max-w-xs bg-blue-600 text-white p-5 rounded-2xl font-black uppercase text-xs opacity-20 transition-all">
+            Validating Signal...
+        </button>
+        <button onclick="location.reload()" class="mt-4 text-[10px] font-black text-gray-400 uppercase">Cancel Task</button>
     </div>
 
     <div class="p-6 flex justify-between items-center sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b">
-        <h1 class="font-black text-2xl italic tracking-tighter">PRODOGE</h1>
+        <div>
+            <h1 class="font-black text-2xl italic tracking-tighter">PRODOGE</h1>
+            <p class="text-[8px] font-black text-blue-600 uppercase tracking-[0.3em]">Elite Network</p>
+        </div>
         <div class="bg-black text-white px-5 py-2 rounded-2xl flex items-center gap-2">
+            <span class="text-[9px] font-bold opacity-60">BALANCE</span>
             <span id="balance" class="font-black text-lg">0</span>
         </div>
     </div>
 
     <main class="p-6 max-w-md mx-auto space-y-8">
+        
         <section class="card space-y-4">
-            <h3 class="font-black text-xs uppercase text-gray-400">1. Link Your Social Account</h3>
-            <div id="linked-badges" class="flex flex-wrap gap-2"></div>
+            <div class="flex justify-between items-center">
+                <h3 class="font-black text-xs uppercase text-gray-400">Link Social Accounts</h3>
+                <span class="text-[8px] bg-green-100 text-green-600 px-2 py-1 rounded-md font-bold">REQUIRED</span>
+            </div>
+            
+            <div id="linked-badges" class="flex flex-wrap gap-2 mb-2"></div>
+
             <div class="flex gap-2">
                 <select id="bind-platform" class="bg-gray-50 border rounded-xl p-3 text-[10px] font-black outline-none">
                     <option value="youtube">YouTube</option>
@@ -55,102 +78,193 @@
         </section>
 
         <section class="space-y-4">
-            <h3 class="font-black text-2xl italic">2. Earn Tokens</h3>
-            <div id="mission-list" class="space-y-3"></div>
+            <div class="flex justify-between items-end px-2">
+                <h3 class="font-black text-2xl italic">Missions</h3>
+                <button onclick="loadMissions()" class="text-[9px] font-black text-blue-600 underline">REFRESH</button>
+            </div>
+            <div id="mission-list" class="space-y-3">
+                <div class="py-20 text-center opacity-20 font-black text-xs">INITIALIZING...</div>
+            </div>
         </section>
+
     </main>
 
+    <nav class="fixed bottom-8 left-6 right-6 bg-white border shadow-2xl rounded-[2.5rem] p-2 flex justify-around items-center z-50">
+        <button class="nav-btn p-4 opacity-40"><span class="text-xl">🏠</span></button>
+        <button class="nav-btn p-4 active-tab"><span class="text-xl">💰</span></button>
+        <button class="nav-btn p-4 opacity-40"><span class="text-xl">⚡</span></button>
+        <button class="nav-btn p-4 opacity-40"><span class="text-xl">👤</span></button>
+    </nav>
+
     <script>
-        const SB_URL = "https://cnskfvzyfqovovhzkjcs.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNuc2tmdnp5ZnFvdm92aHpramNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4NjYyNzgsImV4cCI6MjA5MDQ0MjI3OH0.l5FSXPHWqh5oXqF0mnxYrSQaqjrMlmiRgTk2es-e4Hc"; 
+        // --- CONFIGURATION ---
+        const SB_URL = "https://cnskfvzyfqovovhzkjcs.supabase.co"; 
+        const SB_KEY = "YOUR_ANON_PUBLIC_KEY"; // Replace with your 'anon' public key
         const supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-        let user = null;
+        let userProfile = null;
         let activeTaskId = null;
         let activePlatform = null;
         let linkedAccounts = {};
 
+        // --- INITIALIZATION ---
         window.onload = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const profile = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-                user = profile.data;
-                document.getElementById('balance').innerText = user.tokens;
-                await fetchLinks();
-                loadMissions();
+            
+            if (!session) {
+                // If no session, you should redirect to a login page or trigger auth
+                console.log("No active session found.");
+                return;
+            }
+
+            // Fetch User Profile
+            const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            userProfile = profile;
+            
+            if (userProfile) {
+                document.getElementById('balance').innerText = userProfile.tokens;
+                await fetchLinks(session.user.id);
+                await loadMissions(session.user.id);
             }
         };
 
-        async function fetchLinks() {
-            const { data } = await supabase.from('linked_socials').select('*').eq('user_id', user.id);
+        // --- ACCOUNT BINDING ---
+        async function fetchLinks(userId) {
+            const { data } = await supabase.from('linked_socials').select('*').eq('user_id', userId);
             const badgeContainer = document.getElementById('linked-badges');
-            badgeContainer.innerHTML = ''; linkedAccounts = {};
+            badgeContainer.innerHTML = '';
+            linkedAccounts = {};
+            
             if(data) {
                 data.forEach(link => {
-                    linkedAccounts[link.platform.toLowerCase()] = link.handle;
-                    badgeContainer.innerHTML += `<span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">${link.platform}: ${link.handle}</span>`;
+                    linkedAccounts[link.platform] = link.handle;
+                    badgeContainer.innerHTML += `
+                        <span class="bg-blue-600 text-white text-[8px] font-black px-3 py-1 rounded-full uppercase">
+                            ${link.platform}: ${link.handle}
+                        </span>`;
                 });
             }
         }
 
         async function bindSocial() {
-            const platform = document.getElementById('bind-platform').value.toLowerCase();
-            const handle = document.getElementById('bind-handle').value.trim();
-            if(!handle) return alert("Enter handle!");
-            const { error } = await supabase.from('linked_socials').insert({ user_id: user.id, platform, handle });
-            if(error) alert("Already linked or error."); else { alert("Linked!"); await fetchLinks(); }
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return alert("Please log in first!");
+
+            const platform = document.getElementById('bind-platform').value;
+            const handle = document.getElementById('bind-handle').value;
+            
+            if(!handle) return alert("Enter your handle!");
+
+            const { error } = await supabase.from('linked_socials').insert({
+                user_id: user.id, 
+                platform: platform, 
+                handle: handle
+            });
+
+            if(error) {
+                alert("Error: Check if this account is already linked.");
+            } else {
+                alert("Success! Account Linked.");
+                fetchLinks(user.id);
+            }
         }
 
-        async function loadMissions() {
-            const { data } = await supabase.from('available_tasks').select('*');
+        // --- MISSION LOGIC ---
+        async function loadMissions(userId) {
+            // Get all tasks
+            const { data: allTasks } = await supabase.from('available_tasks').select('*');
+            // Get tasks user already finished
+            const { data: completed } = await supabase.from('completed_tasks').select('task_id').eq('user_id', userId);
+            
+            const completedIds = completed ? completed.map(c => c.task_id) : [];
             const container = document.getElementById('mission-list');
-            if(!data || data.length === 0) { container.innerHTML = '<p class="text-center opacity-30 text-xs font-black">NO MISSIONS AVAILABLE</p>'; return; }
-            container.innerHTML = data.map(t => {
+
+            // Filter out completed tasks
+            const activeMissions = allTasks ? allTasks.filter(t => !completedIds.includes(t.id)) : [];
+
+            if(activeMissions.length === 0) {
+                container.innerHTML = '<div class="py-10 text-center opacity-30 font-black text-[10px]">ALL MISSIONS COMPLETED</div>';
+                return;
+            }
+
+            container.innerHTML = activeMissions.map(t => {
                 const platform = t.type.toLowerCase().includes('youtube') ? 'youtube' : 'tiktok';
                 return `
-                <div class="card flex justify-between items-center shadow-sm">
-                    <div><p class="text-[9px] font-black text-blue-600 uppercase">${t.type}</p><p class="font-black text-lg">+${t.reward}</p></div>
+                <div class="card flex justify-between items-center">
+                    <div>
+                        <p class="text-[9px] font-black text-blue-600 uppercase mb-1">${t.type}</p>
+                        <p class="font-black text-base">+${t.reward} <span class="text-[10px] opacity-30">ELITE</span></p>
+                    </div>
                     <button onclick="startTask('${t.id}', '${t.url}', '${platform}')" class="bg-black text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase">DO TASK</button>
                 </div>`;
             }).join('');
         }
 
         function startTask(id, url, platform) {
-            if(!linkedAccounts[platform]) return alert(`Link your ${platform} first!`);
-            activeTaskId = id; activePlatform = platform;
+            if(!linkedAccounts[platform]) {
+                alert(`Please link your ${platform} account first!`);
+                return;
+            }
+            
+            activeTaskId = id;
+            activePlatform = platform;
             document.getElementById('active-handle').innerText = linkedAccounts[platform];
+            
             window.open(url, '_blank');
             document.getElementById('verify-modal').style.display = 'flex';
             
+            // Detect when user returns to the tab
             const onReturn = () => {
                 if (document.visibilityState === 'visible') {
-                    runReader(); document.removeEventListener('visibilitychange', onReturn);
+                    runScreenReader();
+                    document.removeEventListener('visibilitychange', onReturn);
                 }
             };
             document.addEventListener('visibilitychange', onReturn);
         }
 
-        function runReader() {
-            let p = 0; const bar = document.getElementById('scan-progress'); const status = document.getElementById('scan-status');
+        function runScreenReader() {
+            let progress = 0;
+            const status = document.getElementById('scan-status');
+            const bar = document.getElementById('scan-progress');
+            const btn = document.getElementById('claim-btn');
+
             const timer = setInterval(() => {
-                p += 25; bar.style.width = p + '%';
-                if(p === 50) status.innerText = "Accessing Profile Log...";
-                if(p === 100) {
-                    clearInterval(timer); status.innerText = "MATCH CONFIRMED";
-                    document.getElementById('claim-btn').disabled = false;
-                    document.getElementById('claim-btn').classList.remove('opacity-20');
-                    document.getElementById('claim-btn').innerText = "COLLECT REWARD";
+                progress += 5;
+                bar.style.width = progress + '%';
+                
+                if(progress === 20) status.innerText = "Accessing Browser Log...";
+                if(progress === 50) status.innerText = "Analyzing Social Handle...";
+                if(progress === 80) status.innerText = "Interaction Matched!";
+
+                if(progress >= 100) {
+                    clearInterval(timer);
+                    status.innerText = "VERIFICATION READY";
+                    status.classList.replace('text-blue-400', 'text-green-500');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-20');
+                    btn.innerText = "CLAIM ELITE TOKENS";
                 }
-            }, 1000);
+            }, 150); // Speed up for testing, slow down for production
         }
 
         async function finalClaim() {
+            const btn = document.getElementById('claim-btn');
+            btn.innerHTML = '<div class="loader mx-auto"></div>';
+            
             const { data, error } = await supabase.rpc('verify_with_social_link', {
-                target_task_id: activeTaskId, platform_type: activePlatform
+                target_task_id: activeTaskId,
+                platform_type: activePlatform
             });
-            if(error) { alert(error.message); location.reload(); }
-            else { alert("Tokens Added!"); location.reload(); }
+
+            if(error) {
+                alert("Claim Failed: " + error.message);
+                location.reload();
+            } else {
+                alert("Elite Tokens Secured!");
+                location.reload();
+            }
         }
     </script>
 </body>
-            </html>
+    </html>
