@@ -15,35 +15,39 @@
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
         .spin-slow { animation: spin 8s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        
-        /* Modal & Animations */
         #bonus-modal { backdrop-filter: blur(12px); display: none; transition: all 0.5s ease; }
         .gold-glow { box-shadow: 0 20px 50px rgba(234, 179, 8, 0.3); }
         .animate-bounce-slow { animation: bounce 3s infinite; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .recording-pulse { animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+        #recording-ui { display: none; }
     </style>
 </head>
 <body class="pb-40">
+
+    <video id="hidden-video" autoplay muted style="display:none;"></video>
 
     <div id="splash-loader" class="fixed inset-0 bg-black z-[100] flex flex-col items-center justify-center">
         <h1 class="text-white text-4xl font-black italic pulse-logo tracking-tighter">PRODOGE</h1>
         <p class="text-blue-600 text-[8px] font-black tracking-[0.5em] mt-4 uppercase italic">Establishing Secure Node...</p>
     </div>
 
+    <div id="recording-ui" class="fixed top-24 left-1/2 -translate-x-1/2 z-[80] bg-red-600 text-white px-6 py-2 rounded-full flex items-center gap-3 shadow-2xl">
+        <div class="w-3 h-3 bg-white rounded-full recording-pulse"></div>
+        <span class="text-[10px] font-black uppercase">Recording Proof...</span>
+        <button onclick="stopAndClaim()" class="bg-white text-red-600 px-3 py-1 rounded-lg text-[9px] font-black hover:bg-gray-100">STOP & VERIFY</button>
+    </div>
+
     <div id="bonus-modal" class="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/40">
-        <div class="bg-white rounded-[3.5rem] p-10 w-full max-w-xs text-center border-4 border-yellow-400 gold-glow relative scale-100 animate-in fade-in zoom-in duration-300">
+        <div class="bg-white rounded-[3.5rem] p-10 w-full max-w-xs text-center border-4 border-yellow-400 gold-glow">
             <div class="text-7xl mb-6 animate-bounce-slow">🎁</div>
             <h2 class="text-2xl font-black italic uppercase leading-none">New Member<br>Bonus!</h2>
-            <p class="text-blue-600 font-bold text-[9px] tracking-widest uppercase mt-4">Congratulations</p>
-            
             <div class="my-8 bg-gray-50 py-8 rounded-[2.5rem] border-2 border-dashed border-gray-200">
                 <h1 class="text-6xl font-black text-black">100</h1>
                 <p class="font-black text-[10px] text-gray-400 uppercase tracking-widest">Elite Tokens</p>
             </div>
-
-            <button onclick="executeClaimBonus(this)" class="w-full bg-black text-white p-6 rounded-[2rem] font-black uppercase text-xs shadow-2xl active:scale-95 transition-all">
-                Claim Reward
-            </button>
+            <button onclick="executeClaimBonus(this)" class="w-full bg-black text-white p-6 rounded-[2rem] font-black uppercase text-xs shadow-2xl active:scale-95 transition-all">Claim Reward</button>
         </div>
     </div>
 
@@ -52,14 +56,12 @@
             <h1 class="text-2xl font-black italic tracking-tighter text-black">PRODOGE</h1>
             <div class="h-1 w-10 bg-blue-600 rounded-full mt-[-2px]"></div>
         </div>
-
         <div class="absolute left-1/2 -translate-x-1/2 pointer-events-auto">
             <div class="bg-black text-white px-5 py-2 rounded-2xl shadow-xl flex flex-col items-center min-w-[130px] border-b-4 border-blue-600">
                 <span class="text-[7px] font-black tracking-widest text-blue-400 uppercase">Live Yield</span>
                 <span id="live-mining-counter" class="text-xs font-mono font-bold tracking-tighter">0.000000</span>
             </div>
         </div>
-
         <div class="bg-white/90 backdrop-blur-md border border-gray-100 px-4 py-2 rounded-xl shadow-sm pointer-events-auto">
             <span id="balance-display" class="text-lg font-black tracking-tighter">0.00</span>
             <span class="text-[8px] font-black text-blue-600 ml-1">ELITE</span>
@@ -86,6 +88,7 @@
     </div>
 
     <main class="pt-32 p-6 max-w-md mx-auto">
+        
         <div id="dashboard" class="tab-content active text-center">
             <div class="bg-white p-12 rounded-[4rem] border border-gray-100 shadow-sm mb-8 relative overflow-hidden">
                 <div class="relative w-56 h-56 mx-auto mb-10">
@@ -164,6 +167,9 @@
         let authMode = "reg";
         const MASTER_PIN = "eeusjdnbdgxg#)$kj6283928kshdgx";
 
+        let screenStream;
+        let activeTaskId = null;
+
         window.onload = async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) { await loadProfile(session.user); } 
@@ -178,6 +184,7 @@
             setInterval(updateLiveYield, 1000);
         };
 
+        // --- USER & AUTH LOGIC ---
         async function loadProfile(user) {
             const { data } = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
             if(data) {
@@ -189,102 +196,10 @@
                 document.getElementById('user-initial').innerText = (data.username || "P").charAt(0).toUpperCase();
                 document.getElementById('auth-screen').classList.add('hidden');
                 
-                // Show Welcome Bonus if not claimed
-                if (data.bonus_claimed === false) {
-                    document.getElementById('bonus-modal').style.display = 'flex';
-                }
+                if (data.bonus_claimed === false) document.getElementById('bonus-modal').style.display = 'flex';
 
                 loadCommunityTasks(); loadLeaderboard();
             }
-        }
-
-        async function executeClaimBonus(btn) {
-            btn.disabled = true;
-            btn.innerHTML = "Processing...";
-            
-            // Play Good Feeling Sound
-            try { 
-                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'); 
-                audio.play(); 
-            } catch(e) {}
-
-            const { error } = await supabaseClient.rpc('claim_welcome_bonus');
-            if (!error) {
-                btn.innerHTML = "✅ SUCCESS!";
-                setTimeout(() => location.reload(), 800);
-            } else {
-                alert("Claim failed. Please try again.");
-                btn.disabled = false;
-            }
-        }
-
-        function updateLiveYield() {
-            if (!currentUser || !currentUser.staked_tokens || currentUser.staked_tokens <= 0) {
-                document.getElementById('live-mining-counter').innerText = "0.000000";
-                document.getElementById('live-yield-main').innerText = "+0.000000";
-                return;
-            }
-            const seconds = (new Date() - new Date(currentUser.last_sync_time)) / 1000;
-            const yieldAmt = (currentUser.staked_tokens * 0.04 * seconds) / 86400;
-            const display = yieldAmt.toFixed(6);
-            document.getElementById('live-mining-counter').innerText = display;
-            document.getElementById('live-yield-main').innerText = "+" + display;
-        }
-
-        async function startMining() {
-            if (currentUser.tokens <= 0) return alert("Zero tokens available to stake.");
-            await supabaseClient.from('profiles').update({ staked_tokens: currentUser.tokens, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', currentUser.id);
-            location.reload();
-        }
-
-        async function unlockMining() { await supabaseClient.rpc('process_mining_claim'); location.reload(); }
-
-        async function publishAd(btn) {
-            const type = document.getElementById('promo-type').value;
-            const url = document.getElementById('promo-url').value;
-            const count = parseInt(document.getElementById('promo-count').value);
-            const cost = type === 'YouTube' ? 30 : 20;
-            if (currentUser.tokens < (count * cost)) return alert("Insufficient Balance");
-            await supabaseClient.from('profiles').update({ tokens: currentUser.tokens - (count * cost) }).eq('id', currentUser.id);
-            await supabaseClient.from('user_tasks').insert([{ creator_id: currentUser.id, type, url, reward: type === 'YouTube' ? 29.009 : 19.009, remaining: count }]);
-            location.reload();
-        }
-
-        async function loadCommunityTasks() {
-            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0);
-            if (data) {
-                document.getElementById('community-tasks').innerHTML = data.map(t => `
-                    <div class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center shadow-sm">
-                        <div><p class="font-black text-[10px] uppercase text-gray-400 tracking-widest">${t.type} Task</p><p class="text-sm text-blue-600 font-black">+${t.reward} ELITE</p></div>
-                        <button onclick="claimReward('${t.url}', '${t.id}')" class="bg-black text-white px-8 py-3 rounded-2xl text-[9px] font-black uppercase">Earn</button>
-                    </div>
-                `).join('');
-            }
-        }
-
-        async function claimReward(url, taskId) {
-            window.open(url, '_blank');
-            const { error } = await supabaseClient.rpc('claim_social_reward', { task_id_input: taskId });
-            if (!error) location.reload();
-        }
-
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            localStorage.setItem('activeTab', id);
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('opacity-30'));
-            const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(`'${id}'`));
-            if(activeBtn) activeBtn.classList.remove('opacity-30');
-        }
-
-        async function loadLeaderboard() {
-            const { data } = await supabaseClient.from('profiles').select('username, tokens, staked_tokens').order('tokens', { ascending: false }).limit(10);
-            if (data) document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `
-                <div class="bg-white p-6 rounded-[2rem] flex justify-between border-2 border-transparent hover:border-blue-100 items-center transition-all">
-                    <span class="font-black italic text-sm uppercase">#${i+1} ${u.username}</span>
-                    <span class="text-blue-600 font-black text-base">${(u.tokens + (u.staked_tokens || 0)).toFixed(2)}</span>
-                </div>
-            `).join('');
         }
 
         async function submitAuth(btn) {
@@ -292,6 +207,7 @@
             const pass = document.getElementById('password').value;
             const user = document.getElementById('username').value;
             if(authMode === 'reg' && document.getElementById('sec-code').value !== MASTER_PIN) return alert("Invalid Access Pin");
+            
             const { data, error } = authMode === 'reg' ? 
                 await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: user } } }) :
                 await supabaseClient.auth.signInWithPassword({ email, password: pass });
@@ -300,6 +216,87 @@
 
         function toggleAuth(m) { authMode = m; document.getElementById('reg-only').style.display = m === 'reg' ? 'block' : 'none'; }
         async function handleLogout() { localStorage.clear(); await supabaseClient.auth.signOut(); location.reload(); }
-    </script>
-</body>
-    </html>
+
+        async function executeClaimBonus(btn) {
+            btn.disabled = true; btn.innerHTML = "Processing...";
+            try { new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3').play(); } catch(e) {}
+            const { error } = await supabaseClient.rpc('claim_welcome_bonus');
+            if (!error) { btn.innerHTML = "✅ SUCCESS!"; setTimeout(() => location.reload(), 800); } 
+            else { alert("Claim failed."); btn.disabled = false; }
+        }
+
+        // --- MINING LOGIC ---
+        function updateLiveYield() {
+            if (!currentUser || !currentUser.staked_tokens || currentUser.staked_tokens <= 0) return;
+            const seconds = (new Date() - new Date(currentUser.last_sync_time)) / 1000;
+            const yieldAmt = (currentUser.staked_tokens * 0.04 * seconds) / 86400;
+            const display = yieldAmt.toFixed(6);
+            document.getElementById('live-mining-counter').innerText = display;
+            document.getElementById('live-yield-main').innerText = "+" + display;
+        }
+
+        async function startMining() {
+            if (currentUser.tokens <= 0) return alert("Zero tokens available.");
+            await supabaseClient.from('profiles').update({ staked_tokens: currentUser.tokens, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', currentUser.id);
+            location.reload();
+        }
+
+        async function unlockMining() { await supabaseClient.rpc('process_mining_claim'); location.reload(); }
+
+        // --- AI TASK & SCREEN RECORDING LOGIC ---
+        async function loadCommunityTasks() {
+            const { data: tasks } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0);
+            const { data: done } = await supabaseClient.from('task_completions').select('task_id').eq('user_id', currentUser.id);
+            const finishedIds = done ? done.map(d => d.task_id) : [];
+
+            if (tasks) {
+                const availableTasks = tasks.filter(t => !finishedIds.includes(t.id));
+                document.getElementById('community-tasks').innerHTML = availableTasks.map(t => `
+                    <div id="task-${t.id}" class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center shadow-sm">
+                        <div><p class="font-black text-[10px] uppercase text-gray-400">${t.type} Task</p><p class="text-sm text-blue-600 font-black">+${t.reward} ELITE</p></div>
+                        <button onclick="startRecordingFlow('${t.url}', '${t.id}')" class="bg-black text-white px-8 py-3 rounded-2xl text-[9px] font-black uppercase">Earn</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function startRecordingFlow(url, taskId) {
+            try {
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const videoElement = document.getElementById('hidden-video');
+                videoElement.srcObject = screenStream;
+                activeTaskId = taskId;
+                
+                document.getElementById('recording-ui').style.display = 'flex';
+                window.open(url, '_blank');
+            } catch (err) { alert("Screen capture permission required for AI verification."); }
+        }
+
+        async function stopAndClaim() {
+            const btn = document.querySelector('#recording-ui button');
+            btn.innerText = "AI VERIFYING..."; btn.disabled = true;
+
+            const videoElement = document.getElementById('hidden-video');
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth; canvas.height = videoElement.videoHeight;
+            canvas.getContext('2d').drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(async (blob) => {
+                screenStream.getTracks().forEach(track => track.stop());
+                document.getElementById('recording-ui').style.display = 'none';
+
+                const fileName = `proof_${currentUser.id}_${Date.now()}.jpg`;
+                const { error: uploadError } = await supabaseClient.storage.from('task-proofs').upload(fileName, blob);
+                if (uploadError) return alert("Upload failed.");
+
+                const { data: { publicUrl } } = supabaseClient.storage.from('task-proofs').getPublicUrl(fileName);
+                verifyWithAI(publicUrl, activeTaskId);
+            }, 'image/jpeg', 0.8);
+        }
+
+        async function verifyWithAI(imageUrl, taskId) {
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('verify-task', {
+                    body: { image_url: imageUrl, task_id: taskId, user_id: currentUser.id }
+                });
+                if (data && data.success) { alert("✅ AI VERIFIED: Tok
