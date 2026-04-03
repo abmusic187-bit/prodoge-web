@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #F8F8F7; font-family: sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        body { background-color: #F8F8F7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
         .tab-content { display: none; }
         .active { display: block; }
         
@@ -28,96 +28,101 @@
         .recording-pulse { animation: blink 1s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } }
         
-        #auth-screen { transition: all 0.5s ease; }
-        .btn-press:active { transform: scale(0.95); }
+        .btn-press:active { transform: scale(0.95); transition: 0.1s; }
+        input, select { -webkit-appearance: none; border-radius: 1rem; }
     </style>
 </head>
 <body>
 
-    <video id="hidden-video" autoplay muted style="display:none;"></video>
+    <video id="hidden-video" autoplay playsinline muted style="display:none;"></video>
 
     <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-[200] p-8 flex flex-col justify-center">
         <div class="text-center mb-10">
             <h1 class="text-5xl font-black italic tracking-tighter">PRODOGE</h1>
-            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-2">AI Node Registration</p>
+            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-2">Secure AI Node Access</p>
         </div>
         <div class="space-y-4 max-w-sm mx-auto w-full">
-            <input type="text" id="reg-user" placeholder="Username" class="w-full p-5 rounded-2xl border bg-white font-bold text-sm outline-none">
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-5 rounded-2xl border bg-white font-bold text-sm outline-none">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-5 rounded-2xl border bg-white font-bold text-sm outline-none">
-            <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-2xl font-black uppercase text-xs btn-press">Initialize Node</button>
-            <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-center text-[10px] font-black text-gray-400 mt-4 uppercase cursor-pointer">Login to existing node</p>
+            <input type="text" id="reg-user" placeholder="Username" class="w-full p-5 border bg-white font-bold text-sm outline-none">
+            <input type="email" id="auth-email" placeholder="Email" class="w-full p-5 border bg-white font-bold text-sm outline-none">
+            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-5 border bg-white font-bold text-sm outline-none">
+            <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-2xl font-black uppercase text-xs btn-press shadow-lg">Initialize Node</button>
+            <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-center text-[10px] font-black text-gray-400 mt-4 uppercase cursor-pointer">Already registered? Login</p>
         </div>
     </div>
 
     <header>
-        <div class="bg-black text-white px-4 py-2 rounded-xl shadow-lg">
+        <div class="bg-black text-white px-4 py-2 rounded-xl shadow-md">
             <h1 class="text-[10px] font-black italic">PRODOGE</h1>
         </div>
-        <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl shadow-xl flex flex-col items-center min-w-[110px]">
-            <span class="text-[6px] font-black uppercase opacity-70 tracking-widest">Mining Core</span>
+        <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl shadow-lg flex flex-col items-center min-w-[120px]">
+            <span class="text-[6px] font-black uppercase opacity-70 tracking-widest">Mining Engine</span>
             <span id="hash-counter" class="text-[10px] font-mono font-bold">0.000000</span>
         </div>
-        <div class="bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm">
+        <div class="bg-white border border-gray-200 px-4 py-2 rounded-2xl">
             <span id="bal-display" class="text-sm font-black tracking-tighter">0.00</span>
             <span class="text-[8px] font-black text-blue-600 ml-1">ELITE</span>
         </div>
     </header>
 
-    <div id="rec-ui" class="fixed top-28 left-1/2 -translate-x-1/2 z-[110] bg-black text-white px-8 py-4 rounded-[2.5rem] hidden flex-col items-center gap-2 shadow-2xl border border-blue-500/30 backdrop-blur-md w-[80%] max-w-[300px]">
+    <div id="rec-ui" class="fixed top-28 left-1/2 -translate-x-1/2 z-[110] bg-black text-white px-8 py-5 rounded-[2.5rem] hidden flex-col items-center gap-2 shadow-2xl border border-blue-500/40 backdrop-blur-lg w-[85%] max-w-[320px]">
         <div class="flex items-center gap-3">
             <div class="w-3 h-3 bg-red-600 rounded-full recording-pulse"></div>
-            <span id="rec-status" class="text-[9px] font-black uppercase tracking-widest">AI SCANNING IN... <span id="timer-num" class="text-blue-500">10</span>s</span>
+            <span id="rec-status" class="text-[9px] font-black uppercase tracking-widest text-center">
+                AI ANALYZING IN... <span id="timer-num" class="text-blue-400">10</span>s
+            </span>
         </div>
-        <div class="w-full h-1 bg-gray-800 rounded-full mt-2 overflow-hidden">
+        <div class="w-full h-1.5 bg-gray-800 rounded-full mt-2 overflow-hidden">
             <div id="timer-bar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 100%"></div>
         </div>
+        <p class="text-[7px] text-gray-400 font-bold uppercase mt-2">Do not close the mission tab!</p>
     </div>
 
     <main class="px-6 max-w-md mx-auto">
 
         <div id="tab-home" class="tab-content active text-center">
             <div class="bg-white p-12 rounded-[4rem] border shadow-sm mb-8">
-                <div class="w-24 h-24 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6 border text-4xl">💎</div>
-                <h2 id="yield-main" class="text-4xl font-black italic">+0.000000</h2>
-                <p id="staked-info" class="text-[10px] font-black text-blue-600 uppercase mt-4">0 ELITE MINING</p>
+                <div class="w-24 h-24 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6 border text-4xl shadow-inner">💎</div>
+                <h2 id="yield-main" class="text-4xl font-black italic tracking-tighter text-gray-900">+0.000000</h2>
+                <p id="staked-info" class="text-[10px] font-black text-blue-600 uppercase mt-4 tracking-widest">0.00 ELITE STAKED</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="startMining()" class="bg-black text-white p-6 rounded-[2.2rem] font-black uppercase text-[10px] btn-press">Stake All</button>
-                <button onclick="harvest()" class="bg-white border p-6 rounded-[2.2rem] font-black uppercase text-[10px] btn-press">Harvest</button>
+                <button onclick="startMining()" class="bg-black text-white p-6 rounded-[2.2rem] font-black uppercase text-[10px] btn-press shadow-xl">Stake All</button>
+                <button onclick="harvest()" class="bg-white border border-gray-200 p-6 rounded-[2.2rem] font-black uppercase text-[10px] btn-press shadow-sm">Harvest</button>
             </div>
         </div>
 
         <div id="tab-tasks" class="tab-content space-y-6">
-            <h3 class="font-black text-2xl italic uppercase px-2">Active Missions</h3>
-            <div id="task-list" class="space-y-4">
-                </div>
+            <div class="px-2">
+                <h3 class="font-black text-2xl italic uppercase">Missions</h3>
+                <p class="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Allow screen sharing to verify</p>
+            </div>
+            <div id="task-list" class="space-y-4"></div>
         </div>
 
         <div id="tab-ads" class="tab-content">
-            <div class="bg-white p-10 rounded-[3.5rem] border">
-                <h3 class="font-black text-2xl italic uppercase mb-8">Boost Socials</h3>
+            <div class="bg-white p-10 rounded-[3.5rem] border shadow-sm">
+                <h3 class="font-black text-2xl italic uppercase mb-8 text-center">Boost Network</h3>
                 <div class="space-y-4">
-                    <select id="ad-platform" class="w-full p-5 rounded-2xl border bg-gray-50 font-black text-xs">
-                        <option value="YouTube">YouTube (+30 ELITE)</option>
-                        <option value="TikTok">TikTok (+30 ELITE)</option>
-                        <option value="Instagram">Instagram (+30 ELITE)</option>
+                    <select id="ad-platform" class="w-full p-5 border bg-gray-50 font-black text-xs outline-none">
+                        <option value="YouTube">YouTube Subscriptions</option>
+                        <option value="TikTok">TikTok Followers</option>
+                        <option value="Instagram">Instagram Followers</option>
                     </select>
-                    <input type="url" id="ad-url" placeholder="Channel/Profile URL" class="w-full p-5 rounded-2xl border bg-gray-50 font-black text-xs">
-                    <input type="number" id="ad-count" placeholder="Target Quantity" class="w-full p-5 rounded-2xl border bg-gray-50 font-black text-xs">
-                    <p class="text-[9px] font-bold text-gray-400 text-center uppercase tracking-tighter">Cost: 50 ELITE per follower</p>
-                    <button onclick="createAd()" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-[11px] btn-press">Deploy Ad</button>
+                    <input type="url" id="ad-url" placeholder="Paste Profile/Link Here" class="w-full p-5 border bg-gray-50 font-black text-xs outline-none">
+                    <input type="number" id="ad-count" placeholder="Target Quantity (e.g. 100)" class="w-full p-5 border bg-gray-50 font-black text-xs outline-none">
+                    <p class="text-[9px] font-bold text-gray-500 text-center uppercase tracking-tighter">Cost: 50 ELITE per unit</p>
+                    <button onclick="createAd()" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-[11px] btn-press shadow-xl">Deploy Boost</button>
                 </div>
             </div>
         </div>
 
         <div id="tab-ref" class="tab-content">
-            <div class="bg-white p-10 rounded-[3.5rem] border text-center">
-                <h3 class="font-black text-2xl uppercase italic mb-2">Grow Node</h3>
-                <p class="text-[10px] text-gray-400 font-bold mb-8 italic">Share your code for 50 ELITE rewards.</p>
-                <div class="bg-gray-50 p-8 rounded-[2.5rem] border-2 border-dashed mb-8">
-                    <h2 id="ref-code" class="text-3xl font-black tracking-widest text-blue-600 mb-4 italic">...</h2>
-                    <button onclick="copyRef()" class="bg-black text-white px-6 py-2 rounded-xl text-[9px] font-black uppercase">Copy Link</button>
+            <div class="bg-white p-10 rounded-[3.5rem] border text-center shadow-sm">
+                <h3 class="font-black text-2xl uppercase italic mb-2">Invite</h3>
+                <p class="text-[10px] text-gray-400 font-bold mb-8 italic uppercase tracking-tighter">Earn 50 ELITE per node activation</p>
+                <div class="bg-gray-50 p-8 rounded-[2.5rem] border-2 border-dashed border-gray-200 mb-8">
+                    <h2 id="ref-code" class="text-3xl font-black tracking-widest text-blue-600 mb-4 italic">ALPHA</h2>
+                    <button onclick="copyRef()" class="bg-black text-white px-6 py-2 rounded-xl text-[9px] font-black uppercase btn-press">Copy Link</button>
                 </div>
             </div>
         </div>
@@ -125,14 +130,14 @@
     </main>
 
     <nav>
-        <button onclick="showTab('home')" class="flex flex-col items-center gap-1 opacity-100" id="nav-home">🏠<span class="text-[7px] font-black uppercase">Core</span></button>
-        <button onclick="showTab('tasks')" class="flex flex-col items-center gap-1 opacity-40" id="nav-tasks">🛰️<span class="text-[7px] font-black uppercase">Mission</span></button>
+        <button onclick="showTab('home')" class="flex flex-col items-center gap-1" id="nav-home">🏠<span class="text-[7px] font-black uppercase">Core</span></button>
+        <button onclick="showTab('tasks')" class="flex flex-col items-center gap-1 opacity-40" id="nav-tasks">🛰️<span class="text-[7px] font-black uppercase">Missions</span></button>
         <button onclick="showTab('ads')" class="flex flex-col items-center gap-1 opacity-40" id="nav-ads">⚡<span class="text-[7px] font-black uppercase">Boost</span></button>
-        <button onclick="showTab('ref')" class="flex flex-col items-center gap-1 opacity-40" id="nav-ref">🤝<span class="text-[7px] font-black uppercase">Ref</span></button>
+        <button onclick="showTab('ref')" class="flex flex-col items-center gap-1 opacity-40" id="nav-ref">🤝<span class="text-[7px] font-black uppercase">Invite</span></button>
     </nav>
 
     <script>
-        // --- 1. CONFIGURATION (REPLACE THESE) ---
+        // --- 1. SETTINGS (PASTE YOUR KEYS HERE) ---
         const SB_URL = "https://glhxnftqcferpbmujkzt.supabase.co";
         const SB_KEY = "sb_publishable_EfIAblDqoiaMM9lQMCTobg_QXlA3UN9"; 
         const GEMINI_KEY = "AIzaSyDtwccWCloOrNS6IkVmwq1uhTQSr5s1X_k"; 
@@ -151,39 +156,43 @@
             const pass = document.getElementById('auth-pass').value.trim();
             const userN = document.getElementById('reg-user').value.trim();
 
-            if (!email || !pass) return alert("Fill all fields.");
+            if (!email || !pass) return alert("Please fill all details.");
 
             const { data, error } = authMode === 'reg' ? 
                 await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: userN } } }) :
                 await supabaseClient.auth.signInWithPassword({ email, password: pass });
 
-            if (error) alert(error.message); else location.reload();
+            if (error) {
+                if (error.message.includes("rate limit")) alert("Please wait a few minutes before trying again.");
+                else alert(error.message);
+            } else {
+                location.reload();
+            }
         }
 
         function toggleAuthMode() {
             authMode = authMode === 'reg' ? 'log' : 'reg';
             document.getElementById('reg-user').style.display = authMode === 'reg' ? 'block' : 'none';
-            document.getElementById('auth-toggle-text').innerText = authMode === 'reg' ? 'Login to existing node' : 'New User? Register';
+            document.getElementById('auth-toggle-text').innerText = authMode === 'reg' ? 'Already have a node? Login' : 'Need a node? Register';
         }
 
-        // --- 3. INITIALIZATION ---
+        // --- 3. DASHBOARD INIT ---
         window.onload = async () => {
             const { data } = await supabaseClient.auth.getSession();
             if (data.session) {
                 await loadProfile(data.session.user);
                 document.getElementById('auth-screen').style.display = 'none';
+                setInterval(updateUI, 1000);
             }
-            setInterval(updateMiningTick, 1000);
-            showTab('home');
         };
 
         async function loadProfile(u) {
-            const { data } = await supabaseClient.from('profiles').select('*').eq('id', u.id).single();
+            const { data, error } = await supabaseClient.from('profiles').select('*').eq('id', u.id).maybeSingle();
             if (data) {
                 user = data;
                 document.getElementById('bal-display').innerText = data.tokens.toFixed(2);
-                document.getElementById('staked-info').innerText = (data.staked_tokens || 0).toFixed(0) + " ELITE MINING";
-                document.getElementById('ref-code').innerText = data.referral_code || "ALPHA-01";
+                document.getElementById('staked-info').innerText = (data.staked_tokens || 0).toFixed(2) + " ELITE STAKED";
+                document.getElementById('ref-code').innerText = data.referral_code || "ALPHA-NODE";
                 loadTasks();
             }
         }
@@ -195,19 +204,20 @@
             document.getElementById('nav-'+id).style.opacity = '1';
         }
 
-        // --- 4. MINING LOGIC ---
-        function updateMiningTick() {
+        function updateUI() {
             if (!user || !user.staked_tokens) return;
-            const diff = (new Date() - new Date(user.last_sync_time)) / 1000;
-            const val = (user.staked_tokens * 0.04 * diff) / 86400; // 4% APR
-            document.getElementById('hash-counter').innerText = val.toFixed(6);
-            document.getElementById('yield-main').innerText = "+" + val.toFixed(6);
+            const now = new Date();
+            const last = new Date(user.last_sync_time);
+            const seconds = (now - last) / 1000;
+            const earned = (user.staked_tokens * 0.04 * seconds) / 86400; // 4% Daily Yield
+            document.getElementById('hash-counter').innerText = earned.toFixed(6);
+            document.getElementById('yield-main').innerText = "+" + earned.toFixed(6);
         }
 
         async function startMining() {
-            const total = user.tokens + (user.staked_tokens || 0);
+            const newStaked = user.tokens + (user.staked_tokens || 0);
             await supabaseClient.from('profiles').update({ 
-                staked_tokens: total, 
+                staked_tokens: newStaked, 
                 tokens: 0, 
                 last_sync_time: new Date().toISOString() 
             }).eq('id', user.id);
@@ -219,14 +229,15 @@
             location.reload(); 
         }
 
-        // --- 5. AI MISSIONS (AUTOMATED SCAN) ---
+        // --- 4. AI SCANNER SYSTEM ---
         async function loadTasks() {
-            const { data } = await supabaseClient.from('user_tasks')
-                .select('*')
-                .gt('remaining', 0)
-                .neq('creator_id', user.id);
-            
-            document.getElementById('task-list').innerHTML = (data || []).map(t => `
+            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0).neq('creator_id', user.id);
+            const list = document.getElementById('task-list');
+            if (!data || data.length === 0) {
+                list.innerHTML = `<p class="text-center text-gray-400 font-bold py-10 uppercase text-[9px]">No missions available</p>`;
+                return;
+            }
+            list.innerHTML = data.map(t => `
                 <div class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center shadow-sm">
                     <div>
                         <p class="text-[9px] font-black text-blue-600 uppercase tracking-tighter">${t.platform}</p>
@@ -240,9 +251,12 @@
         async function startAITask(url, id) {
             if (isScanning) return;
             try {
-                // Request screen stream if not active
+                // Compatibility-focused Media Capture
                 if (!screenStream || !screenStream.active) {
-                    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+                        video: { displaySurface: "browser" }, 
+                        audio: false 
+                    });
                     document.getElementById('hidden-video').srcObject = screenStream;
                 }
                 
@@ -250,98 +264,84 @@
                 isScanning = true;
                 window.open(url, '_blank');
                 
-                // Show AI UI
                 const ui = document.getElementById('rec-ui');
                 ui.style.display = 'flex';
-                let timeLeft = 10;
+                let time = 10;
                 
                 const timer = setInterval(async () => {
-                    timeLeft--;
-                    document.getElementById('timer-num').innerText = timeLeft;
-                    document.getElementById('timer-bar').style.width = (timeLeft * 10) + "%";
+                    time--;
+                    document.getElementById('timer-num').innerText = time;
+                    document.getElementById('timer-bar').style.width = (time * 10) + "%";
                     
-                    if (timeLeft <= 0) {
+                    if (time <= 0) {
                         clearInterval(timer);
-                        await captureAndVerify();
+                        await runVerification();
                     }
                 }, 1000);
-            } catch (e) {
-                alert("AI Error: Screen sharing permission required.");
+            } catch (err) {
+                alert("Permission Denied: AI scanning requires screen sharing to verify the mission.");
                 isScanning = false;
             }
         }
 
-        async function captureAndVerify() {
-            document.getElementById('rec-status').innerText = "🤖 AI ANALYZING...";
-            
+        async function runVerification() {
+            document.getElementById('rec-status').innerText = "🤖 AI ANALYZING PROOF...";
             const video = document.getElementById('hidden-video');
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth; 
+            canvas.height = video.videoHeight;
             canvas.getContext('2d').drawImage(video, 0, 0);
             
             const base64 = canvas.toDataURL('image/jpeg', 0.5).split(',')[1];
-            
-            // Check for image reuse (Anti-Cheat Fingerprint)
-            const fingerprint = btoa(base64.substring(0, 50));
-            const { data: duplicate } = await supabaseClient.from('task_verifications').select('id').eq('image_hash', fingerprint).maybeSingle();
-            
-            if (duplicate) {
-                alert("CHEATER DETECTED: Image already used.");
-                location.reload();
-                return;
-            }
 
-            // Call Gemini
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-                method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ contents: [{ parts: [
-                    { text: "Reply only TRUE or FALSE. Does this show a successful Follow or Subscribe?" },
-                    { inlineData: { mimeType: "image/jpeg", data: base64 } }
-                ] }] })
-            });
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [
+                        { text: "Verify if this image shows a profile page with 'Subscribed' or 'Following' status visible. Reply ONLY 'TRUE' or 'FALSE'." },
+                        { inlineData: { mimeType: "image/jpeg", data: base64 } }
+                    ] }] })
+                });
 
-            const d = await res.json();
-            const result = d.candidates[0].content.parts[0].text.trim().toUpperCase();
+                const json = await res.json();
+                const result = json.candidates[0].content.parts[0].text.trim().toUpperCase();
 
-            if (result.includes("TRUE")) {
-                await supabaseClient.rpc('claim_social_reward', { task_id_input: activeTaskId });
-                // Log hash
-                await supabaseClient.from('task_verifications').insert([{ user_id: user.id, image_hash: fingerprint, task_id: activeTaskId }]);
-                alert("Verified! Reward Added.");
-                location.reload();
-            } else {
-                alert("AI Rejected Proof. Did you click Subscribe?");
+                if (result.includes("TRUE")) {
+                    await supabaseClient.rpc('claim_social_reward', { task_id_input: activeTaskId });
+                    alert("✅ Mission Verified! Tokens Added.");
+                    location.reload();
+                } else {
+                    alert("❌ AI Rejected: Verification failed. Did you subscribe?");
+                }
+            } catch (e) {
+                alert("AI Engine Timeout. Please try again.");
+            } finally {
                 document.getElementById('rec-ui').style.display = 'none';
                 isScanning = false;
             }
         }
 
-        // --- 6. BOOST SYSTEM ---
+        // --- 5. BOOST & UTILS ---
         async function createAd() {
-            const platform = document.getElementById('ad-platform').value;
             const url = document.getElementById('ad-url').value;
             const qty = parseInt(document.getElementById('ad-count').value);
             const cost = qty * 50;
-
-            if (user.tokens < cost) return alert("Not enough ELITE tokens.");
-
+            if (user.tokens < cost) return alert("Insufficient ELITE balance.");
+            
             const { error } = await supabaseClient.rpc('deploy_social_boost', {
                 target_url: url,
-                platform_name: platform,
+                platform_name: document.getElementById('ad-platform').value,
                 target_qty: qty,
                 total_cost: cost
             });
-
-            if (!error) {
-                alert("Ad Deployed to Network!");
-                location.reload();
-            } else alert(error.message);
+            if (!error) { alert("Mission Deployed Successfully!"); location.reload(); }
         }
 
         function copyRef() {
-            navigator.clipboard.writeText(user.referral_code);
-            alert("Code Copied!");
+            navigator.clipboard.writeText(window.location.origin + "?ref=" + user.referral_code);
+            alert("Referral Link Copied!");
         }
     </script>
 </body>
-                                                                                                                                                                 </html>
+            </html>
