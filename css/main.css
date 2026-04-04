@@ -1,0 +1,4 @@
+body { overflow-x: hidden; margin: 0; }
+main { padding-top: 115px; padding-bottom: 140px; }
+.tab-content { display: none; }
+.active { display: block; }
