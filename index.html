@@ -10,12 +10,30 @@
         body { background-color: #F8F8F7; font-family: sans-serif; -webkit-tap-highlight-color: transparent; overflow-x: hidden; margin: 0; }
         .tab-content { display: none; }
         .active { display: block; }
-        header { position: fixed; top: 0; left: 0; right: 0; height: 90px; z-index: 100; background: rgba(248, 248, 247, 0.98); backdrop-filter: blur(15px); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        nav { position: fixed; bottom: 20px; left: 20px; right: 20px; height: 85px; z-index: 100; background: white; border-radius: 35px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05); }
-        main { padding-top: 110px; padding-bottom: 140px; }
+        
+        header { 
+            position: fixed; top: 0; left: 0; right: 0; height: 95px; z-index: 100; 
+            background: rgba(248, 248, 247, 0.98); backdrop-filter: blur(15px); 
+            display: flex; justify-content: space-between; align-items: center; padding: 0 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        nav { 
+            position: fixed; bottom: 20px; left: 20px; right: 20px; height: 85px; 
+            z-index: 100; background: white; border-radius: 35px; 
+            display: flex; justify-content: space-around; align-items: center; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        main { padding-top: 115px; padding-bottom: 140px; }
         .btn-press:active { transform: scale(0.96); transition: 0.1s; }
-        .recording-pulse { animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } }
+        
+        .pulse-red { animation: pulse-bg 1.5s infinite; }
+        @keyframes pulse-bg { 0% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .glass-ui { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(59, 130, 246, 0.3); }
+        input, select { border-radius: 1.2rem; outline: none; transition: 0.2s; }
+        input:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
     </style>
 </head>
 <body>
@@ -24,213 +42,290 @@
 
     <div id="auth-screen" class="fixed inset-0 bg-[#F8F8F7] z-[200] p-8 flex flex-col justify-center">
         <div class="text-center mb-10">
+            <div class="w-16 h-16 bg-black rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-2xl">
+                <span class="text-white font-black italic text-2xl">P</span>
+            </div>
             <h1 class="text-5xl font-black italic tracking-tighter uppercase">PRODOGE</h1>
-            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-2">AI NODE TERMINAL</p>
+            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-2">AI DISTRIBUTED NODE</p>
         </div>
-        <div class="space-y-4 max-w-sm mx-auto w-full">
-            <input type="text" id="reg-user" placeholder="Username" class="w-full p-5 border bg-white font-bold text-sm rounded-2xl outline-none">
-            <input type="email" id="auth-email" placeholder="Email" class="w-full p-5 border bg-white font-bold text-sm rounded-2xl outline-none">
-            <input type="password" id="auth-pass" placeholder="Password" class="w-full p-5 border bg-white font-bold text-sm rounded-2xl outline-none">
-            <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-2xl font-black uppercase text-xs btn-press shadow-lg">Initialize Node</button>
-            <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-center text-[10px] font-black text-gray-400 mt-4 uppercase cursor-pointer underline">Switch to Login</p>
+        <div class="space-y-3 max-w-sm mx-auto w-full">
+            <input type="text" id="reg-user" placeholder="Username" class="w-full p-5 border bg-white font-bold text-sm">
+            <input type="email" id="auth-email" placeholder="Email Address" class="w-full p-5 border bg-white font-bold text-sm">
+            <input type="password" id="auth-pass" placeholder="Security Key" class="w-full p-5 border bg-white font-bold text-sm">
+            <button onclick="handleAuth()" class="w-full bg-black text-white p-5 rounded-[1.5rem] font-black uppercase text-xs btn-press shadow-xl mt-4">Initialize Connection</button>
+            <p onclick="toggleAuthMode()" id="auth-toggle-text" class="text-center text-[10px] font-black text-gray-400 mt-6 uppercase cursor-pointer hover:text-black">Already registered? Login</p>
         </div>
     </div>
 
     <header>
-        <div class="bg-black text-white px-4 py-2 rounded-xl">
-            <h1 class="text-[10px] font-black italic">PRODOGE</h1>
+        <div class="bg-black text-white px-4 py-2 rounded-xl shadow-lg">
+            <h1 class="text-[10px] font-black italic uppercase">PRODOGE</h1>
         </div>
-        <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl shadow-lg flex flex-col items-center min-w-[120px]">
-            <span class="text-[6px] font-black uppercase opacity-70 tracking-widest">Mining Core</span>
-            <span id="hash-counter" class="text-[10px] font-mono font-bold">0.000000</span>
+        <div class="bg-blue-600 text-white px-5 py-2 rounded-2xl shadow-lg flex flex-col items-center min-w-[130px] border-b-4 border-blue-800">
+            <span class="text-[6px] font-black uppercase opacity-80 tracking-widest">Mining Core</span>
+            <span id="hash-counter" class="text-[11px] font-mono font-bold tracking-tight">0.000000</span>
         </div>
-        <div class="bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm">
-            <span id="bal-display" class="text-sm font-black tracking-tighter">0.00</span>
-            <span class="text-[8px] font-black text-blue-600 ml-1">ELITE</span>
+        <div class="bg-white border border-gray-200 px-4 py-2 rounded-2xl shadow-sm flex items-center">
+            <span id="bal-display" class="text-sm font-black tracking-tighter text-gray-900">0.00</span>
+            <span class="text-[7px] font-black text-blue-600 ml-1 uppercase">ELITE</span>
         </div>
     </header>
 
-    <div id="rec-ui" class="fixed top-28 left-1/2 -translate-x-1/2 z-[110] bg-black text-white px-8 py-6 rounded-[2.5rem] hidden flex-col items-center gap-4 shadow-2xl border border-blue-500/40 backdrop-blur-lg w-[90%] max-w-[340px]">
-        <div class="flex items-center gap-2">
-            <div class="w-2 h-2 bg-red-600 rounded-full recording-pulse"></div>
-            <span class="text-[10px] font-black uppercase tracking-widest">AI Capture Engaged</span>
+    <div id="rec-ui" class="fixed top-28 left-1/2 -translate-x-1/2 z-[110] glass-ui text-white px-8 py-7 rounded-[3rem] hidden flex-col items-center gap-5 shadow-2xl w-[90%] max-w-[340px]">
+        <div class="flex items-center gap-3">
+            <div class="w-2.5 h-2.5 bg-red-600 rounded-full pulse-red"></div>
+            <span class="text-[10px] font-black uppercase tracking-widest text-blue-400">AI Verification Active</span>
         </div>
-        <div id="verify-controls" class="w-full text-center">
-            <p class="text-[11px] font-bold text-gray-400 mb-4 uppercase">Complete the follow, then verify</p>
-            <button onclick="captureAndVerify()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase btn-press shadow-xl">Confirm Completion</button>
+        <div id="verify-body" class="text-center">
+            <p class="text-xs font-bold text-gray-300 leading-relaxed mb-6">Complete the task on the other tab, then click verify below.</p>
+            <button onclick="captureAndVerify()" class="w-full bg-blue-600 hover:bg-blue-500 text-white py-5 rounded-3xl font-black text-xs uppercase btn-press shadow-2xl transition-all">
+                I'm Done (Verify Now)
+            </button>
         </div>
-        <div id="ai-loading" class="hidden flex-col items-center">
-            <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-            <p class="text-[10px] font-black text-blue-400 uppercase">🤖 Analyzing Screen...</p>
+        <div id="ai-status" class="hidden flex flex-col items-center gap-2">
+            <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest">🤖 Scanning Metadata...</p>
         </div>
     </div>
 
     <main class="px-6 max-w-md mx-auto">
+        
         <div id="tab-home" class="tab-content active text-center">
-            <div class="bg-white p-12 rounded-[4rem] border shadow-sm mb-8">
-                <div class="w-24 h-24 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6 border text-4xl">💎</div>
+            <div class="bg-white p-12 rounded-[4.5rem] border border-gray-100 shadow-sm mb-8 relative overflow-hidden">
+                <div class="absolute top-4 right-8 bg-green-100 text-green-700 px-3 py-1 rounded-full text-[8px] font-black uppercase">Live Node</div>
+                <div class="w-20 h-20 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6 border text-4xl shadow-inner">💎</div>
                 <h2 id="yield-main" class="text-4xl font-black italic tracking-tighter text-gray-900">+0.000000</h2>
-                <p id="staked-info" class="text-[10px] font-black text-blue-600 uppercase mt-4 tracking-widest">0.00 ELITE STAKED</p>
+                <p id="staked-info" class="text-[10px] font-black text-blue-600 uppercase mt-4 tracking-widest opacity-70">0.00 ELITE STAKED</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="startMining()" class="bg-black text-white p-6 rounded-[2.2rem] font-black uppercase text-[10px] btn-press shadow-xl">Stake All</button>
-                <button onclick="harvest()" class="bg-white border border-gray-200 p-6 rounded-[2.2rem] font-black uppercase text-[10px] btn-press">Harvest</button>
+                <button onclick="startMining()" class="bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-[10px] btn-press shadow-xl border-b-4 border-gray-800">Stake All</button>
+                <button onclick="harvest()" class="bg-white border border-gray-200 p-6 rounded-[2.5rem] font-black uppercase text-[10px] btn-press shadow-sm">Harvest</button>
             </div>
         </div>
 
-        <div id="tab-tasks" class="tab-content space-y-4">
-            <h3 class="font-black text-2xl italic uppercase px-2">Missions</h3>
+        <div id="tab-tasks" class="tab-content space-y-6">
+            <div class="px-2">
+                <h3 class="font-black text-2xl italic uppercase tracking-tighter">AI Missions</h3>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Verify follows to earn ELITE</p>
+            </div>
             <div id="task-list" class="space-y-4"></div>
         </div>
 
         <div id="tab-ads" class="tab-content">
-            <div class="bg-white p-8 rounded-[3.5rem] border shadow-sm">
-                <h3 class="font-black text-2xl italic uppercase mb-6 text-center">Deploy Boost</h3>
+            <div class="bg-white p-10 rounded-[4rem] border shadow-sm">
+                <h3 class="font-black text-2xl italic uppercase mb-8 text-center tracking-tighter text-blue-600">Deploy Boost</h3>
                 <div class="space-y-4">
-                    <select id="ad-platform" class="w-full p-4 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
-                        <option value="YouTube">YouTube</option>
-                        <option value="TikTok">TikTok</option>
+                    <select id="ad-platform" class="w-full p-5 border bg-gray-50 font-black text-xs uppercase">
+                        <option value="YouTube">YouTube Sub</option>
+                        <option value="TikTok">TikTok Follow</option>
+                        <option value="Instagram">Instagram Follow</option>
                     </select>
-                    <input type="url" id="ad-url" placeholder="Link (URL)" class="w-full p-4 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
-                    <input type="number" id="ad-count" placeholder="Quantity" class="w-full p-4 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
-                    <button onclick="createAd()" class="w-full bg-black text-white p-5 rounded-[2rem] font-black uppercase text-[11px] btn-press shadow-xl">Launch Mission</button>
+                    <input type="url" id="ad-url" placeholder="Paste Social Link" class="w-full p-5 border bg-gray-50 font-black text-xs">
+                    <input type="number" id="ad-count" placeholder="Target Quantity" class="w-full p-5 border bg-gray-50 font-black text-xs">
+                    <button onclick="createAd()" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-[11px] btn-press shadow-xl border-b-4 border-gray-900 mt-4">Broadcast Mission</button>
                 </div>
             </div>
         </div>
 
         <div id="tab-ref" class="tab-content">
-            <div class="bg-white p-10 rounded-[3.5rem] border text-center shadow-sm">
-                <h3 class="font-black text-2xl uppercase italic">Invite</h3>
-                <div class="bg-gray-50 p-8 rounded-[2.5rem] border-2 border-dashed border-gray-200 my-6">
-                    <h2 id="ref-code" class="text-3xl font-black tracking-widest text-blue-600 mb-4 italic">ALPHA</h2>
-                    <button onclick="copyRef()" class="bg-black text-white px-6 py-2 rounded-xl text-[9px] font-black uppercase btn-press">Copy Link</button>
+            <div class="bg-white p-12 rounded-[4rem] border text-center shadow-sm">
+                <h3 class="font-black text-2xl uppercase italic tracking-tighter">Node Network</h3>
+                <div class="bg-gray-50 p-10 rounded-[3rem] border-2 border-dashed border-gray-200 my-8">
+                    <p class="text-[8px] font-black text-gray-400 uppercase mb-4 tracking-widest">Your Referral ID</p>
+                    <h2 id="ref-code" class="text-4xl font-black tracking-[0.2em] text-blue-600 mb-6 italic">...</h2>
+                    <button onclick="copyRef()" class="bg-black text-white px-8 py-3 rounded-2xl text-[9px] font-black uppercase btn-press shadow-lg">Copy Invite Link</button>
                 </div>
             </div>
         </div>
+
     </main>
 
     <nav>
-        <button onclick="showTab('home')" class="flex flex-col items-center gap-1" id="nav-home">🏠<span class="text-[7px] font-black uppercase tracking-tighter">Core</span></button>
-        <button onclick="showTab('tasks')" class="flex flex-col items-center gap-1 opacity-40" id="nav-tasks">🛰️<span class="text-[7px] font-black uppercase tracking-tighter">Missions</span></button>
-        <button onclick="showTab('ads')" class="flex flex-col items-center gap-1 opacity-40" id="nav-ads">⚡<span class="text-[7px] font-black uppercase tracking-tighter">Boost</span></button>
-        <button onclick="showTab('ref')" class="flex flex-col items-center gap-1 opacity-40" id="nav-ref">🤝<span class="text-[7px] font-black uppercase tracking-tighter">Invite</span></button>
+        <button onclick="showTab('home')" class="flex flex-col items-center gap-1.5" id="nav-home">
+            <span class="text-lg">🏠</span><span class="text-[7px] font-black uppercase tracking-tighter">Core</span>
+        </button>
+        <button onclick="showTab('tasks')" class="flex flex-col items-center gap-1.5 opacity-40" id="nav-tasks">
+            <span class="text-lg">🛰️</span><span class="text-[7px] font-black uppercase tracking-tighter">Missions</span>
+        </button>
+        <button onclick="showTab('ads')" class="flex flex-col items-center gap-1.5 opacity-40" id="nav-ads">
+            <span class="text-lg">⚡</span><span class="text-[7px] font-black uppercase tracking-tighter">Boost</span>
+        </button>
+        <button onclick="showTab('ref')" class="flex flex-col items-center gap-1.5 opacity-40" id="nav-ref">
+            <span class="text-lg">🤝</span><span class="text-[7px] font-black uppercase tracking-tighter">Network</span>
+        </button>
     </nav>
 
     <script>
-        /**
-         * IMPORTANT: In Vercel, replace these strings with actual 
-         * strings in your code OR use a build-time inject.
-         */
-        const SB_URL = "https://xfvdjsupzluzlhahbcqz.supabase.co"; 
-        const SB_KEY = "sb_publishable_cF29RStYnVFX2lBUa7w2UQ_ymPu13bs"; 
+        // --- 1. CONFIGURATION ---
+        const SB_URL = "https://xfvdjsupzluzlhahbcqz.supabase.co"; // REPLACE WITH YOURS
+        const SB_KEY = "sb_publishable_cF29RStYnVFX2lBUa7w2UQ_ymPu13bs"; // REPLACE WITH YOURS
         
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
         let user = null, activeTaskId = null, authMode = 'reg', globalStream = null;
 
-        // AUTHENTICATION
+        // --- 2. AUTHENTICATION & BONUS ---
         async function handleAuth() {
-            const email = document.getElementById('auth-email').value, 
-                  pass = document.getElementById('auth-pass').value, 
-                  userN = document.getElementById('reg-user').value;
-            const { error } = authMode === 'reg' ? 
+            const email = document.getElementById('auth-email').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            const userN = document.getElementById('reg-user').value.trim();
+
+            const { data, error } = authMode === 'reg' ? 
                 await supabaseClient.auth.signUp({ email, password: pass, options: { data: { username: userN } } }) :
                 await supabaseClient.auth.signInWithPassword({ email, password: pass });
+
             if (error) alert(error.message); else location.reload();
         }
 
-        function toggleAuthMode() {
-            authMode = authMode === 'reg' ? 'log' : 'reg';
-            document.getElementById('reg-user').style.display = authMode === 'reg' ? 'block' : 'none';
-            document.getElementById('auth-toggle-text').innerText = authMode === 'reg' ? 'Login' : 'Register';
-        }
-
-        // LOAD DATA
         window.onload = async () => {
             const { data } = await supabaseClient.auth.getSession();
             if (data.session) {
                 const { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', data.session.user.id).maybeSingle();
                 user = profile;
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('bal-display').innerText = user.tokens.toFixed(2);
-                document.getElementById('staked-info').innerText = (user.staked_tokens || 0).toFixed(2) + " ELITE STAKED";
-                document.getElementById('ref-code').innerText = user.referral_code;
-                loadTasks();
-                setInterval(updateMiningUI, 1000);
+
+                if (user) {
+                    // Bonus Notification
+                    if (user.tokens === 100 && !localStorage.getItem('bonus_claimed')) {
+                        alert("🎁 WELCOME BONUS: 100 ELITE tokens have been added to your balance!");
+                        localStorage.setItem('bonus_claimed', 'true');
+                    }
+
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('bal-display').innerText = user.tokens.toFixed(2);
+                    document.getElementById('staked-info').innerText = (user.staked_tokens || 0).toFixed(2) + " ELITE STAKED";
+                    document.getElementById('ref-code').innerText = user.referral_code;
+                    loadTasks();
+                    setInterval(updateMiningUI, 1000);
+                }
             }
         };
 
+        function toggleAuthMode() {
+            authMode = authMode === 'reg' ? 'log' : 'reg';
+            document.getElementById('reg-user').style.display = authMode === 'reg' ? 'block' : 'none';
+            document.getElementById('auth-toggle-text').innerText = authMode === 'reg' ? 'Already registered? Login' : 'New Node? Register';
+        }
+
+        // --- 3. MINING LOGIC ---
         function updateMiningUI() {
             if (!user?.staked_tokens) return;
             const diff = (new Date() - new Date(user.last_sync_time)) / 1000;
-            const val = (user.staked_tokens * 0.04 * diff) / 86400;
+            const val = (user.staked_tokens * 0.04 * diff) / 86400; 
             document.getElementById('hash-counter').innerText = val.toFixed(6);
             document.getElementById('yield-main').innerText = "+" + val.toFixed(6);
         }
 
-        async function loadTasks() {
-            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0).neq('creator_id', user.id);
-            const list = document.getElementById('task-list');
-            list.innerHTML = data?.length ? data.map(t => `
-                <div class="bg-white p-6 rounded-[2.5rem] border flex justify-between items-center shadow-sm">
-                    <div><p class="text-[9px] font-black text-blue-600 uppercase">${t.platform}</p><p class="text-sm font-black">+${t.reward} ELITE</p></div>
-                    <button onclick="startAITask('${t.url}', '${t.id}')" class="bg-black text-white px-6 py-2 rounded-xl text-[9px] font-black uppercase btn-press">Execute</button>
-                </div>
-            `).join('') : '<p class="text-center text-gray-400 py-10 text-[9px]">NO MISSIONS AVAILABLE</p>';
-        }
-
-        // AI TASK LOGIC
-        async function startAITask(url, id) {
-            try {
-                globalStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                document.getElementById('hidden-video').srcObject = globalStream;
-                activeTaskId = id;
-                window.open(url, '_blank');
-                document.getElementById('rec-ui').style.display = 'flex';
-            } catch (e) { alert("AI Capture Permission Required."); }
-        }
-
-        async function captureAndVerify() {
-            document.getElementById('verify-controls').style.display = 'none';
-            document.getElementById('ai-loading').classList.remove('hidden');
-            
-            const video = document.getElementById('hidden-video');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
-            const base64 = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
-
-            try {
-                // Call your Vercel Backend Function
-                const res = await fetch('/api/verify', {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ image: base64 })
-                });
-                const result = await res.json();
-
-                if (result.success) {
-                    await supabaseClient.rpc('claim_social_reward', { task_id_input: activeTaskId });
-                    alert("✅ TASK VERIFIED! REWARD ADDED."); 
-                    location.reload();
-                } else {
-                    alert("❌ TASK NOT COMPLETE"); 
-                    location.reload();
-                }
-            } catch (e) { alert("Connection Error."); location.reload(); }
-        }
-
-        // UTILITIES
         async function harvest() { await supabaseClient.rpc('process_mining_claim'); location.reload(); }
+
         async function startMining() {
             const total = user.tokens + (user.staked_tokens || 0);
             await supabaseClient.from('profiles').update({ staked_tokens: total, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', user.id);
             location.reload();
         }
+
+        // --- 4. MISSION SYSTEM (AI CAPTURE) ---
+        async function loadTasks() {
+            const { data } = await supabaseClient.from('user_tasks').select('*').gt('remaining', 0).neq('creator_id', user.id);
+            const list = document.getElementById('task-list');
+            if (!data?.length) return list.innerHTML = `<p class="text-center text-gray-400 py-10 uppercase text-[9px] font-black">Scanning for missions...</p>`;
+            
+            list.innerHTML = data.map(t => `
+                <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${t.platform}</p>
+                        <p class="text-sm font-black text-gray-900">+${t.reward} ELITE</p>
+                    </div>
+                    <button onclick="startAITask('${t.url}', '${t.id}')" class="bg-black text-white px-7 py-3 rounded-2xl text-[9px] font-black uppercase btn-press shadow-lg border-b-4 border-gray-800">Execute</button>
+                </div>
+            `).join('');
+        }
+
+        async function startAITask(url, id) {
+            try {
+                // Initialize screen capture
+                globalStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                document.getElementById('hidden-video').srcObject = globalStream;
+                activeTaskId = id;
+
+                // Open mission link
+                window.open(url, '_blank');
+                
+                // Show Verification UI
+                document.getElementById('rec-ui').style.display = 'flex';
+                document.getElementById('verify-body').style.display = 'block';
+                document.getElementById('ai-status').classList.add('hidden');
+            } catch (err) {
+                alert("AI SCAN REJECTED: You must allow screen sharing to verify the mission.");
+            }
+        }
+
+        async function captureAndVerify() {
+            const verifyBody = document.getElementById('verify-body');
+            const aiStatus = document.getElementById('ai-status');
+            
+            verifyBody.style.display = 'none';
+            aiStatus.classList.remove('hidden');
+
+            const video = document.getElementById('hidden-video');
+            const canvas = document.createElement('canvas');
+            
+            // Wait for video stream to stabilize
+            await new Promise(r => setTimeout(r, 1000));
+            
+            canvas.width = video.videoWidth; 
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            const base64 = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
+
+            try {
+                // CALL VERCEL API PROXY
+                const res = await fetch('/api/verify', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ image: base64 })
+                });
+                
+                const result = await res.json();
+
+                if (result.success) {
+                    await supabaseClient.rpc('claim_social_reward', { task_id_input: activeTaskId });
+                    alert("✅ MISSION VERIFIED! ELITE tokens credited.");
+                    location.reload();
+                } else {
+                    alert("❌ TASK NOT COMPLETE: AI could not find the 'Followed/Subscribed' status.");
+                    location.reload();
+                }
+            } catch (e) {
+                alert("AI Engine Connection Failed. Retrying...");
+                location.reload();
+            } finally {
+                if (globalStream) globalStream.getTracks().forEach(t => t.stop());
+            }
+        }
+
+        // --- 5. UTILITIES ---
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.style.opacity = '0.4');
             document.getElementById('tab-'+id).classList.add('active');
             document.getElementById('nav-'+id).style.opacity = '1';
+        }
+
+        async function createAd() {
+            const url = document.getElementById('ad-url').value, 
+                  qty = parseInt(document.getElementById('ad-count').value),
+                  cost = qty * 50;
+            if (user.tokens < cost) return alert("Insufficient ELITE balance.");
+            
+            const { error } = await supabaseClient.rpc('deploy_social_boost', {
+                target_url: url, platform_name: document.getElementById('ad-platform').value,
+                target_qty: qty, total_cost: cost
+            });
+            if (!error) { alert("Mission Broadcasted!"); location.reload(); }
+        }
+
+        function copyRef() {
+            navigator.clipboard.writeText(window.location.origin + "?ref=" + user.referral_code);
+            alert("Referral Link Copied!");
         }
     </script>
 </body>
