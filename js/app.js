@@ -1,0 +1,3 @@
+import { supabase } from './supabase.js';
+import * as Auth from './auth.js';
+// ... initialization logic ...
