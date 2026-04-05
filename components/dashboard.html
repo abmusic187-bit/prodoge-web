@@ -27,7 +27,22 @@
         <h3 class="font-black text-2xl italic uppercase tracking-tighter mb-6">AI Missions</h3>
         <div id="task-list" class="space-y-4"></div>
     </div>
-
+    
+<div id="tab-ads" class="tab-content">
+    <div class="bg-white p-10 rounded-[4rem] border shadow-sm">
+        <h3 class="font-black text-2xl italic uppercase mb-8 text-center text-blue-600">Deploy Boost</h3>
+        <div class="space-y-4">
+            <select id="ad-platform" class="w-full p-5 border bg-gray-50 font-black text-xs uppercase rounded-2xl outline-none">
+                <option value="YouTube">YouTube Sub</option>
+                <option value="TikTok">TikTok Follow</option>
+                <option value="Instagram">Instagram Follow</option>
+            </select>
+            <input type="url" id="ad-url" placeholder="Paste Social Link" class="w-full p-5 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
+            <input type="number" id="ad-count" placeholder="Target Quantity" class="w-full p-5 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
+            <button id="btn-deploy-boost" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-[11px] btn-press shadow-xl border-b-4 border-gray-900 mt-4">Broadcast Mission</button>
+        </div>
+    </div>
+</div>
     <div id="tab-ref" class="tab-content">
         <div class="bg-white p-12 rounded-[4rem] border text-center shadow-sm">
             <h3 class="font-black text-2xl uppercase italic">Node Network</h3>
@@ -42,5 +57,9 @@
 <nav class="flex justify-around items-center bg-white border border-black/5 shadow-2xl">
     <button onclick="window.showTab('home')" class="flex flex-col items-center" id="nav-home">🏠<span class="text-[7px] font-black uppercase">Core</span></button>
     <button onclick="window.showTab('tasks')" class="flex flex-col items-center opacity-40" id="nav-tasks">🛰️<span class="text-[7px] font-black uppercase">Missions</span></button>
+    <button onclick="window.showTab('ads')" class="flex flex-col items-center opacity-40" id="nav-ads">
+    <span class="text-lg">⚡</span>
+    <span class="text-[7px] font-black uppercase">Boost</span>
+    </button>
     <button onclick="window.showTab('ref')" class="flex flex-col items-center opacity-40" id="nav-ref">🤝<span class="text-[7px] font-black uppercase">Invite</span></button>
   </nav>
