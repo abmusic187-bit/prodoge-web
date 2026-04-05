@@ -33,6 +33,33 @@ async function loadPage(name) {
 
 async function setupDashboard(authUser) {
     const { data: user } = await supabase.from('profiles').select('*').eq('id', authUser.id).maybeSingle();
+    // ... inside setupDashboard(authUser) ...
+
+const deployBtn = document.getElementById('btn-deploy-boost');
+if (deployBtn) {
+    deployBtn.onclick = async () => {
+        const url = document.getElementById('ad-url').value;
+        const qty = parseInt(document.getElementById('ad-count').value);
+        const platform = document.getElementById('ad-platform').value;
+        const cost = qty * 50;
+
+        if (user.tokens < cost) return alert("Insufficient ELITE balance.");
+
+        const { error } = await supabase.rpc('deploy_social_boost', {
+            target_url: url,
+            platform_name: platform,
+            target_qty: qty,
+            total_cost: cost
+        });
+
+        if (!error) {
+            alert("Mission Broadcasted!");
+            location.reload();
+        } else {
+            alert("Error: " + error.message);
+        }
+    };
+    }
     
     if (user) {
         document.getElementById('bal-display').innerText = user.tokens.toFixed(2);
