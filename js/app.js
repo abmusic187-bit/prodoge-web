@@ -31,7 +31,23 @@ async function loadPage(name) {
     }
 }
 
-async function setupDashboard(authUser) {
+async function setupDashboard(authUser) import * as Missions from './missions.js'; // Ensure this is imported at the top
+
+// ... existing code ...
+
+const dailyBtn = document.getElementById('btn-daily-claim');
+if (dailyBtn) {
+    dailyBtn.onclick = async () => {
+        const result = await Missions.claimDaily(authUser.id);
+        if (result.success) {
+            alert("✅ " + result.message);
+            location.reload(); // Refresh to show new balance
+        } else {
+            alert("⏳ " + result.message);
+        }
+    };
+}
+{
     const { data: user } = await supabase.from('profiles').select('*').eq('id', authUser.id).maybeSingle();
     // ... inside setupDashboard(authUser) ...
 
