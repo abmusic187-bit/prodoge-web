@@ -12,7 +12,7 @@
 
 <main class="px-6">
     <div id="tab-home" class="tab-content active text-center">
-        <div class="bg-white p-12 rounded-[4.5rem] border border-gray-100 shadow-sm mb-8">
+        <div class="bg-white p-12 rounded-[4.5rem] border border-gray-100 shadow-sm mb-8 relative">
             <div class="w-20 h-20 bg-gray-50 rounded-full mx-auto flex items-center justify-center mb-6 text-4xl shadow-inner">💎</div>
             <h2 id="yield-main" class="text-4xl font-black italic tracking-tighter text-gray-900">+0.000000</h2>
             <p id="staked-info" class="text-[10px] font-black text-blue-600 uppercase mt-4 tracking-widest opacity-70">0.00 ELITE STAKED</p>
@@ -25,33 +25,33 @@
 
     <div id="tab-tasks" class="tab-content">
         <div class="bg-blue-600 p-6 rounded-[2.5rem] mb-6 shadow-xl border-b-4 border-blue-800 flex justify-between items-center text-white">
-    <div>
-        <p class="text-[8px] font-black uppercase tracking-[0.2em] opacity-80">Network Loyalty</p>
-        <h4 class="text-lg font-black italic uppercase tracking-tighter">Daily 50 ELITE</h4>
-    </div>
-    <button id="btn-daily-claim" class="bg-white text-blue-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase btn-press shadow-lg">
-        Claim
-    </button>
+            <div>
+                <p class="text-[8px] font-black uppercase tracking-[0.2em] opacity-80">Network Loyalty</p>
+                <h4 class="text-lg font-black italic uppercase tracking-tighter">Daily 50 ELITE</h4>
+            </div>
+            <button id="btn-daily-claim" class="bg-white text-blue-600 px-6 py-3 rounded-2xl text-[10px] font-black uppercase btn-press shadow-lg">Claim</button>
         </div>
+        
         <h3 class="font-black text-2xl italic uppercase tracking-tighter mb-6">AI Missions</h3>
         <div id="task-list" class="space-y-4"></div>
     </div>
     
-<div id="tab-ads" class="tab-content">
-    <div class="bg-white p-10 rounded-[4rem] border shadow-sm">
-        <h3 class="font-black text-2xl italic uppercase mb-8 text-center text-blue-600">Deploy Boost</h3>
-        <div class="space-y-4">
-            <select id="ad-platform" class="w-full p-5 border bg-gray-50 font-black text-xs uppercase rounded-2xl outline-none">
-                <option value="YouTube">YouTube Sub</option>
-                <option value="TikTok">TikTok Follow</option>
-                <option value="Instagram">Instagram Follow</option>
-            </select>
-            <input type="url" id="ad-url" placeholder="Paste Social Link" class="w-full p-5 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
-            <input type="number" id="ad-count" placeholder="Target Quantity" class="w-full p-5 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
-            <button id="btn-deploy-boost" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-[11px] btn-press shadow-xl border-b-4 border-gray-900 mt-4">Broadcast Mission</button>
+    <div id="tab-ads" class="tab-content">
+        <div class="bg-white p-10 rounded-[4rem] border shadow-sm">
+            <h3 class="font-black text-2xl italic uppercase mb-8 text-center text-blue-600">Deploy Boost</h3>
+            <div class="space-y-4">
+                <select id="ad-platform" class="w-full p-5 border bg-gray-50 font-black text-xs uppercase rounded-2xl outline-none">
+                    <option value="YouTube">YouTube Sub</option>
+                    <option value="TikTok">TikTok Follow</option>
+                    <option value="Instagram">Instagram Follow</option>
+                </select>
+                <input type="url" id="ad-url" placeholder="Paste Social Link" class="w-full p-5 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
+                <input type="number" id="ad-count" placeholder="Target Quantity" class="w-full p-5 border bg-gray-50 font-black text-xs rounded-2xl outline-none">
+                <button id="btn-deploy-boost" class="w-full bg-black text-white p-6 rounded-[2.5rem] font-black uppercase text-[11px] btn-press shadow-xl border-b-4 border-gray-900 mt-4">Broadcast Mission</button>
+            </div>
         </div>
     </div>
-</div>
+
     <div id="tab-ref" class="tab-content">
         <div class="bg-white p-12 rounded-[4rem] border text-center shadow-sm">
             <h3 class="font-black text-2xl uppercase italic">Node Network</h3>
@@ -64,11 +64,17 @@
 </main>
 
 <nav class="flex justify-around items-center bg-white border border-black/5 shadow-2xl">
-    <button onclick="window.showTab('home')" class="flex flex-col items-center" id="nav-home">🏠<span class="text-[7px] font-black uppercase">Core</span></button>
-    <button onclick="window.showTab('tasks')" class="flex flex-col items-center opacity-40" id="nav-tasks">🛰️<span class="text-[7px] font-black uppercase">Missions</span></button>
-    <button onclick="window.showTab('ads')" class="flex flex-col items-center opacity-40" id="nav-ads">
-    <span class="text-lg">⚡</span>
-    <span class="text-[7px] font-black uppercase">Boost</span>
+    <button onclick="window.showTab('home')" class="flex flex-col items-center" id="nav-home">
+        🏠<span class="text-[7px] font-black uppercase">Core</span>
     </button>
-    <button onclick="window.showTab('ref')" class="flex flex-col items-center opacity-40" id="nav-ref">🤝<span class="text-[7px] font-black uppercase">Invite</span></button>
-  </nav>
+    <button onclick="window.showTab('tasks')" class="flex flex-col items-center opacity-40" id="nav-tasks">
+        🛰️<span class="text-[7px] font-black uppercase">Missions</span>
+    </button>
+    <button onclick="window.showTab('ads')" class="flex flex-col items-center opacity-40" id="nav-ads">
+        <span class="text-lg">⚡</span>
+        <span class="text-[7px] font-black uppercase">Boost</span>
+    </button>
+    <button onclick="window.showTab('ref')" class="flex flex-col items-center opacity-40" id="nav-ref">
+        🤝<span class="text-[7px] font-black uppercase">Invite</span>
+    </button>
+                </nav>
