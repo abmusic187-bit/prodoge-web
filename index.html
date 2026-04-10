@@ -3,135 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRODOGE AI v2</title>
+    <title>PRODOGE AI v3 - Hologram</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #050505; color: white; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .neon-text { text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        /* BASE STYLE: Pure Obsidian with Wireframe */
+        body { 
+            background: #000; 
+            color: white; 
+            font-family: 'Chakra Petch', sans-serif; 
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.95)),
+                url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBzdHJva2U9IiM5QjIzRkYiIHN0cm9rZS13aWR0aD0iMC4xNSIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTAgMGgxMDB2MTAwSDB6Ii8+PHBhdGggZD0iTTAgMGwxMDAgMTAwTTAgMTAwaDEwME0wIDBsNTAgNTBMIDEwMCAwIi8+PC9nPjwvc3ZnPg==');
+            background-size: cover, 150px 150px;
+        }
+
+        /* HOLOGRAPHIC PAGE STYLE (from image) */
+        .hologram-page {
+            position: relative;
+            background: rgba(10, 10, 10, 0.95);
+            border-style: solid;
+            border-color: #9B23FF; /* Neon Purple from image */
+            border-width: 0;
+            border-top-width: 4px;
+            border-bottom-width: 4px;
+            padding: 2rem;
+            border-radius: 4px; /* Slightly sharp corners */
+            box-shadow: 0 0 25px rgba(155, 35, 255, 0.5), inset 0 0 10px rgba(155, 35, 255, 0.2);
+            backdrop-filter: blur(5px);
+            margin-bottom: 2rem;
+            transform: perspective(1000px) rotateX(1deg); /* Slight angle like the image */
+        }
+
+        /* Subtle wireframe overlay inside hologram panels */
+        .hologram-page::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHBhdGggZD0iTTUgNWg5MHY5MEg1eiBNMzAgMzBoNDB2NDBIMzB6IE01MCAwVjEwME0wIDUwaDEwMCIgc3Ryb2tlPSIjOUIyM0ZGLzEuMSIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIwLjA1Ii8+PC9zdmc+');
+            background-size: 50px 50px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        /* Holographic Notifications */
+        .hologram-notification {
+            @apply hologram-page;
+            @apply border border-[#9B23FF] rounded-lg;
+            transform: perspective(1000px) rotateX(2deg);
+        }
+
+        /* Color Scheme */
+        .neon-text-teal { color: #00F9FF; text-shadow: 0 0 10px rgba(0, 249, 255, 0.7); } /* Teal for main numbers */
+        .neon-text-purple { color: #9B23FF; text-shadow: 0 0 10px rgba(155, 35, 255, 0.7); }
+        .neon-text-white { color: white; text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
+
+        /* General UI Elements */
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .btn-glow:active { transform: scale(0.95); box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px) rotateX(1deg); } to { opacity: 1; transform: translateY(0) rotateX(1deg); } }
+        .btn-press:active { transform: scale(0.96) perspective(1000px) rotateX(1deg); transition: 0.1s; }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-28">
 
-    <div id="auth-screen" class="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-6">
-        <div class="w-24 h-24 bg-blue-600 rounded-[2.5rem] mb-8 flex items-center justify-center shadow-[0_0_50px_rgba(37,99,235,0.3)]">
-            <span class="text-white text-4xl font-black italic">P</span>
+    <div id="auth-screen" class="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-6 bg-gradient-to-b from-black via-[#000000] to-[#0A001F]">
+        <div class="hologram-notification w-full max-w-sm text-center">
+            <div class="flex items-center justify-center gap-3 border border-[#9B23FF] bg-[#0A001F]/70 px-6 py-2 rounded-md mb-8">
+                <div class="w-6 h-6 border-2 border-[#9B23FF] rounded-full flex items-center justify-center text-[#9B23FF] font-black text-xs">!</div>
+                <span class="font-bold text-xs uppercase tracking-[0.4em] neon-text-purple">SYSTEM_LINK</span>
+            </div>
+            
+            <h1 class="text-3xl font-black tracking-tighter mb-10 neon-text-white uppercase italic">PRODOGE_AI</h1>
+            
+            <button onclick="login()" class="w-full flex items-center justify-center gap-4 bg-transparent border-2 border-[#9B23FF] hover:bg-[#9B23FF]/10 text-white p-5 rounded-md font-bold text-sm uppercase tracking-widest btn-press shadow-[0_0_15px_rgba(155,35,255,0.4)] transition-all">
+                <img src="https://www.google.com/favicon.ico" class="w-5 h-5 filter grayscale brightness-150">
+                Initialize Node
+            </button>
+            
+            <p class="text-[9px] font-bold neon-text-purple mt-8 uppercase tracking-[0.3em]">Holographic_Interface_v3.2</p>
         </div>
-        <h1 class="text-4xl font-black tracking-tighter mb-2 italic">PRODOGE <span class="text-blue-500">AI</span></h1>
-        <p class="text-gray-500 text-[10px] tracking-[0.5em] uppercase mb-12">Neural Network Terminal</p>
-        <button onclick="login()" class="w-full max-w-xs glass p-5 rounded-3xl flex items-center justify-center gap-4 border border-white/10 hover:bg-white/5 transition-all">
-            <img src="https://www.google.com/favicon.ico" class="w-5 h-5">
-            <span class="font-bold text-sm uppercase tracking-widest text-white">Initialize Node</span>
-        </button>
     </div>
 
-    <header class="p-6 flex justify-between items-center sticky top-0 z-50 bg-black/50 backdrop-blur-lg">
+    <header class="p-6 fixed top-0 left-0 right-0 z-50 flex justify-between items-center bg-black/60 backdrop-blur-xl border-b border-[#9B23FF]/20">
         <div>
-            <p id="user-name" class="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Loading...</p>
-            <h2 class="text-xl font-black italic">CORE</h2>
+            <p id="user-name" class="text-[10px] font-bold text-[#00F9FF] uppercase tracking-widest neon-text-purple">Node_Linking...</p>
+            <h2 class="text-xl font-black italic neon-text-white uppercase tracking-tighter">CORE</h2>
         </div>
-        <div class="glass px-4 py-2 rounded-2xl flex flex-col items-end">
-            <span class="text-[8px] text-gray-500 font-bold uppercase">Balance</span>
-            <div class="flex items-center gap-2">
-                <span id="bal" class="text-lg font-mono font-bold">0.00</span>
-                <span class="text-blue-500 text-[10px] font-black">ELITE</span>
+        <div class="border border-[#9B23FF]/40 bg-black px-4 py-2 rounded-lg text-right shadow-[inset_0_0_5px_rgba(155,35,255,0.2)]">
+            <span class="text-[7px] text-[#9B23FF] font-bold uppercase tracking-widest">Available_Fuel</span>
+            <div class="flex items-center gap-1">
+                <span id="bal" class="text-lg font-mono font-bold neon-text-teal">0.00</span>
+                <span class="text-[#00F9FF] text-[10px] font-black">ELITE</span>
             </div>
         </div>
     </header>
 
-    <main class="p-6 max-w-md mx-auto">
+    <main class="pt-28 p-6 max-w-md mx-auto">
+        
         <div id="tab-home" class="tab-content active">
-            <div class="glass rounded-[3rem] p-10 text-center mb-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Real-time Yield</p>
-                <h3 id="yield" class="text-5xl font-mono font-bold neon-text mb-4 text-white">0.000000</h3>
-                <p id="staked" class="text-[11px] font-bold text-blue-400 bg-blue-500/10 py-2 px-4 rounded-full inline-block uppercase">0.00 STAKED</p>
+            <div class="hologram-page text-center relative">
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.4em] mb-4">Neural_Yield</p>
+                <h3 id="yield" class="text-5xl font-mono font-bold neon-text-teal mb-5 text-white tracking-tighter">0.000000</h3>
+                <p id="staked" class="text-[11px] font-bold neon-text-purple bg-[#0A001F] py-2 px-5 rounded-md inline-block uppercase tracking-widest">0.00 Fuel_Staked</p>
             </div>
             
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="stake()" class="bg-blue-600 p-6 rounded-[2rem] font-black uppercase text-xs btn-glow text-white">Stake All</button>
-                <button onclick="harvest()" class="glass p-6 rounded-[2rem] font-black uppercase text-xs btn-glow text-white">Harvest</button>
+                <button onclick="stake()" class="bg-[#9B23FF] hover:bg-[#A93DFF] p-6 rounded-md font-black uppercase text-xs btn-press text-white shadow-[0_0_15px_rgba(155,35,255,0.5)]">Stake_All</button>
+                <button onclick="harvest()" class="bg-transparent border-2 border-[#9B23FF] hover:bg-[#9B23FF]/10 p-6 rounded-md font-black uppercase text-xs btn-press text-white shadow-[0_0_10px_rgba(155,35,255,0.3)]">Harvest_Fuel</button>
             </div>
         </div>
 
         <div id="tab-tasks" class="tab-content">
-            <h2 class="text-2xl font-black italic mb-6">MISSIONS</h2>
-            <div id="task-list" class="space-y-4 text-center text-gray-500 text-xs uppercase tracking-widest py-10">
-                No active missions in your sector...
+            <h2 class="text-2xl font-black italic mb-6 neon-text-white uppercase tracking-tighter">MISSIONS_QUEUE</h2>
+            <div id="task-list" class="space-y-4 text-center text-white/40 text-[11px] uppercase tracking-widest py-10 hologram-page">
+                Awaiting mission directive...
             </div>
         </div>
     </main>
 
-    <nav class="fixed bottom-6 left-6 right-6 h-20 glass rounded-[2.5rem] flex justify-around items-center border-white/10 shadow-2xl">
-        <button onclick="showTab('home')" class="text-2xl opacity-100 transition-all hover:scale-110">🏠</button>
-        <button onclick="showTab('tasks')" class="text-2xl opacity-40 transition-all hover:scale-110">🛰️</button>
-        <button onclick="location.reload()" class="text-2xl opacity-40 transition-all hover:scale-110">🔄</button>
+    <nav class="fixed bottom-0 left-0 right-0 h-24 bg-black/80 backdrop-blur-xl border-t-2 border-[#9B23FF]/30 flex justify-center items-center gap-12 p-4 shadow-[0_-5px_20px_rgba(155,35,255,0.3)]">
+        <button onclick="showTab('home')" class="nav-btn text-2xl filter brightness-200 grayscale-0 transition-all hover:scale-110">🏠</button>
+        <button onclick="showTab('tasks')" class="nav-btn text-2xl filter brightness-50 grayscale transition-all hover:scale-110">🛰️</button>
+        <button onclick="location.reload()" class="nav-btn text-2xl filter brightness-50 grayscale transition-all hover:scale-110">🔄</button>
     </nav>
 
     <script>
-        // YOUR CUSTOM CREDENTIALS INTEGRATED
+        // --- SUPABASE INTEGRATION ---
         const SB_URL = "https://htngfzwclkqsffozxfuo.supabase.co";
         const SB_KEY = "sb_publishable_2LJdcMlfhcEyNl_EMUx-2w_Ms5ZtJ5g";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         let profile = null;
 
+        // Simplified Google Login
         async function login() {
-            const { error } = await sb.auth.signInWithOAuth({ 
+            await sb.auth.signInWithOAuth({ 
                 provider: 'google',
-                options: { 
-                    redirectTo: window.location.origin 
-                }
+                options: { redirectTo: window.location.origin }
             });
-            if (error) console.error("Login Error:", error.message);
         }
 
+        // Initialize App: Fetch session and profile
         async function init() {
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
                 document.getElementById('auth-screen').style.display = 'none';
                 
-                // Fetch user profile
+                // Fetch user profile (ensure your profiles table has id, tokens, staked_tokens, last_sync_time)
                 const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
                 
                 if (data) {
                     profile = data;
                     render();
-                    setInterval(updateMining, 1000);
+                    setInterval(updateMining, 1000); // Start the yield counter
                 } else {
-                    console.log("Profile not found. If this is a new user, wait for the SQL Trigger to finish.");
-                    // Optional: Add a small delay and retry once
-                    setTimeout(init, 2000);
+                    console.error("Profile not found. Re-linking...");
+                    setTimeout(init, 3000); // Retry if profile trigger is slow
                 }
             }
         }
 
+        // Update basic static UI elements
         function render() {
             document.getElementById('user-name').innerText = profile.username || "Anonymous Node";
             document.getElementById('bal').innerText = Number(profile.tokens).toFixed(2);
-            document.getElementById('staked').innerText = Number(profile.staked_tokens).toFixed(2) + " STAKED";
+            document.getElementById('staked').innerText = Number(profile.staked_tokens).toFixed(2) + " Fuel_Staked";
         }
 
+        // Real-time Mining yield calculation (4% daily)
         function updateMining() {
             if (!profile || !profile.staked_tokens) return;
             const now = new Date();
             const last = new Date(profile.last_sync_time);
-            const diff = (now - last) / 1000;
-            const earned = (profile.staked_tokens * 0.04 * diff) / 86400;
+            const diff = (now - last) / 1000; // time since last sync in seconds
+            const earned = (profile.staked_tokens * 0.04 * diff) / 86400; // staked * 4% / (seconds in a day)
             document.getElementById('yield').innerText = earned.toFixed(6);
         }
 
+        // Claim yield (must implement SB RPC for "process_mining_claim")
         async function harvest() {
             const { error } = await sb.rpc('process_mining_claim');
-            if (error) alert("Harvest failed: " + error.message);
+            if (error) alert("Harvest protocol failed: " + error.message);
             else location.reload();
         }
 
+        // Stake all tokens
         async function stake() {
             const total = Number(profile.tokens) + Number(profile.staked_tokens);
             const { error } = await sb.from('profiles')
@@ -142,16 +203,22 @@
                 })
                 .eq('id', profile.id);
             
-            if (error) alert("Staking failed: " + error.message);
+            if (error) alert("Staking sequence failed: " + error.message);
             else location.reload();
         }
 
+        // UI: Tab and Nav management
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
-            // Basic opacity toggle for nav
-            event.currentTarget.parentElement.querySelectorAll('button').forEach(b => b.classList.add('opacity-40'));
-            event.currentTarget.classList.remove('opacity-40');
+            
+            // Brighten active nav icon
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('brightness-200', 'grayscale-0');
+                b.classList.add('brightness-50', 'grayscale');
+            });
+            event.currentTarget.classList.remove('brightness-50', 'grayscale');
+            event.currentTarget.classList.add('brightness-200', 'grayscale-0');
         }
 
         window.onload = init;
