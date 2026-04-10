@@ -10,84 +10,89 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* BASE STYLE: Ocean Teal from your photo */
         body { 
             background: #003B4F; 
             color: white; 
             font-family: 'Chakra Petch', sans-serif; 
             overflow-x: hidden;
-            /* Radial gradient creates the depth look from your image */
             background-image: 
                 radial-gradient(circle at center, rgba(0, 85, 115, 0.3) 0%, rgba(0, 30, 40, 1) 100%),
                 url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48ZyBzdHJva2U9IiMwMEZBRkYiIHN0cm9rZS13aWR0aD0iMC4wNSIgZmlsbD0ibm9uZSI+PHBhdGggZD0iTTAgMGgxMDB2MTAwSDB6Ii8+PC9nPjwvc3ZnPg==');
             background-size: cover, 60px 60px;
         }
 
-        /* HOLOGRAPHIC PAGE STYLE (Enhanced Glassmorphism) */
         .hologram-page {
             position: relative;
             background: rgba(0, 20, 30, 0.8);
             border: 1px solid rgba(0, 249, 255, 0.2);
             border-top: 3px solid #00F9FF;
             border-bottom: 3px solid #00F9FF;
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0, 249, 255, 0.15), inset 0 0 15px rgba(0, 249, 255, 0.05);
+            box-shadow: 0 0 30px rgba(0, 249, 255, 0.15);
             backdrop-filter: blur(12px);
-            margin-bottom: 2rem;
-            transform: perspective(1000px) rotateX(1deg);
+            margin-bottom: 1.5rem;
         }
 
-        /* Holographic Notifications */
-        .hologram-notification {
-            @apply hologram-page;
-            border: 2px solid #00F9FF;
-            transform: perspective(1000px) rotateX(2deg);
-        }
-
-        /* Updated Neon Color Scheme */
         .neon-text-teal { color: #00F9FF; text-shadow: 0 0 15px rgba(0, 249, 255, 0.8); } 
-        .neon-text-cyan { color: #00F9FF; text-shadow: 0 0 10px rgba(0, 249, 255, 0.5); }
         .neon-text-white { color: white; text-shadow: 0 0 10px rgba(255, 255, 255, 0.7); }
 
-        /* General UI Elements */
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .btn-press:active { transform: scale(0.96); transition: 0.1s; }
         
         header { background: rgba(0, 20, 30, 0.7) !important; border-bottom: 1px solid rgba(0, 249, 255, 0.2) !important; }
         nav { background: rgba(0, 20, 30, 0.9) !important; border-top: 1px solid rgba(0, 249, 255, 0.2) !important; }
+
+        #scan-overlay {
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+        }
+        
+        .scanner-line {
+            width: 100%;
+            height: 2px;
+            background: #00F9FF;
+            box-shadow: 0 0 15px #00F9FF;
+            position: absolute;
+            animation: scanMove 2s infinite ease-in-out;
+        }
+        @keyframes scanMove { 0% { top: 0% } 100% { top: 100% } }
     </style>
 </head>
 <body class="pb-28">
 
     <div id="auth-screen" class="fixed inset-0 z-[200] bg-[#001E28] flex flex-col items-center justify-center p-6">
-        <div class="hologram-notification w-full max-w-sm text-center">
-            <div class="flex items-center justify-center gap-3 border border-[#00F9FF] bg-[#002D3C]/70 px-6 py-2 rounded-md mb-8">
-                <div class="w-6 h-6 border-2 border-[#00F9FF] rounded-full flex items-center justify-center text-[#00F9FF] font-black text-xs">!</div>
-                <span class="font-bold text-xs uppercase tracking-[0.4em] neon-text-cyan">SYSTEM_INITIALIZE</span>
-            </div>
-            
-            <h1 class="text-3xl font-black tracking-tighter mb-10 neon-text-white uppercase italic">PRODOGE_AI</h1>
-            
-            <button onclick="login()" class="w-full flex items-center justify-center gap-4 bg-transparent border-2 border-[#00F9FF] hover:bg-[#00F9FF]/10 text-white p-5 rounded-md font-bold text-sm uppercase tracking-widest btn-press shadow-[0_0_15px_rgba(0,249,255,0.3)] transition-all">
-                <img src="https://www.google.com/favicon.ico" class="w-5 h-5 filter brightness-150">
+        <div class="hologram-page w-full max-w-sm text-center border-2 border-[#00F9FF]">
+            <h1 class="text-3xl font-black mb-10 neon-text-white italic uppercase">PRODOGE_AI</h1>
+            <button onclick="login()" class="w-full bg-transparent border-2 border-[#00F9FF] text-white p-5 rounded-md font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(0,249,255,0.3)]">
                 Sync Google Node
             </button>
         </div>
     </div>
 
+    <div id="scan-overlay">
+        <div class="scanner-line"></div>
+        <h2 class="neon-text-teal text-xl font-bold animate-pulse">AI_SCANNING_TIKTOK...</h2>
+        <p class="text-[10px] text-white/50 mt-4 uppercase">Verifying Follower Status</p>
+    </div>
+
     <header class="p-6 fixed top-0 left-0 right-0 z-50 flex justify-between items-center backdrop-blur-xl">
         <div>
-            <p id="user-name" class="text-[10px] font-bold text-[#00F9FF] uppercase tracking-widest">Linking...</p>
-            <h2 class="text-xl font-black italic neon-text-white uppercase tracking-tighter">CORE_UNIT</h2>
+            <p id="user-name" class="text-[10px] font-bold text-[#00F9FF] uppercase">Linking...</p>
+            <h2 class="text-xl font-black italic neon-text-white uppercase">CORE_UNIT</h2>
         </div>
         <div class="border border-[#00F9FF]/40 bg-black/40 px-4 py-2 rounded-lg text-right">
-            <span class="text-[7px] text-[#00F9FF] font-bold uppercase tracking-widest">Available_Fuel</span>
+            <span class="text-[7px] text-[#00F9FF] font-bold uppercase">Available_Fuel</span>
             <div class="flex items-center gap-1">
                 <span id="bal" class="text-lg font-mono font-bold neon-text-teal">0.00</span>
-                <span class="text-[#00F9FF] text-[10px] font-black italic">ELITE</span>
+                <span class="text-[#00F9FF] text-[10px] font-black">ELITE</span>
             </div>
         </div>
     </header>
@@ -95,44 +100,60 @@
     <main class="pt-28 p-6 max-w-md mx-auto">
         
         <div id="tab-home" class="tab-content active">
+            <div class="hologram-page" id="tiktok-link-box">
+                <p class="text-[10px] font-bold text-[#00F9FF] uppercase mb-3">TikTok_Identity</p>
+                <div id="tk-input-area" class="flex gap-2">
+                    <input type="text" id="tk-username" placeholder="@username" class="bg-black/40 border border-[#00F9FF]/30 p-3 rounded-lg text-sm w-full outline-none">
+                    <button onclick="linkTikTok()" class="bg-[#00F9FF] text-black px-4 rounded-lg font-bold text-xs">LINK</button>
+                </div>
+                <div id="tk-profile" class="hidden flex items-center gap-4">
+                    <img id="tk-avatar" src="" class="w-12 h-12 rounded-full border-2 border-[#00F9FF]">
+                    <div>
+                        <p id="tk-name-display" class="font-bold text-sm"></p>
+                        <p class="text-[9px] text-green-400">STATUS: NODE_CONNECTED</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="hologram-page text-center">
-                <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.4em] mb-4">Neural_Mining_Yield</p>
-                <h3 id="yield" class="text-5xl font-mono font-bold neon-text-teal mb-5 tracking-tighter">0.000000</h3>
-                <p id="staked" class="text-[11px] font-bold text-[#00F9FF] bg-black/40 py-2 px-5 rounded-md inline-block uppercase tracking-widest border border-[#00F9FF]/20">0.00 Fuel_Staked</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase mb-4">Neural_Mining_Yield</p>
+                <h3 id="yield" class="text-5xl font-mono font-bold neon-text-teal mb-5">0.000000</h3>
+                <p id="staked" class="text-[11px] font-bold text-[#00F9FF] border border-[#00F9FF]/20 py-2 px-5 rounded-md inline-block">0.00 Fuel_Staked</p>
             </div>
             
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="stake()" class="bg-[#00F9FF] hover:bg-[#57FDFF] p-6 rounded-md font-black uppercase text-xs btn-press text-[#001E28] shadow-[0_0_20px_rgba(0,249,255,0.4)]">Stake_All</button>
-                <button onclick="harvest()" class="bg-transparent border-2 border-[#00F9FF] hover:bg-[#00F9FF]/10 p-6 rounded-md font-black uppercase text-xs btn-press text-white shadow-[0_0_10px_rgba(0,249,255,0.2)]">Harvest</button>
+                <button onclick="stake()" class="bg-[#00F9FF] p-6 rounded-md font-black uppercase text-xs text-[#001E28]">Stake_All</button>
+                <button onclick="harvest()" class="border-2 border-[#00F9FF] p-6 rounded-md font-black uppercase text-xs text-white">Harvest</button>
             </div>
         </div>
 
         <div id="tab-tasks" class="tab-content">
-            <h2 class="text-2xl font-black italic mb-6 neon-text-white uppercase">MISSIONS</h2>
-            <div id="task-list" class="space-y-4 text-center text-white/40 text-[11px] uppercase tracking-widest py-10 hologram-page">
-                Searching for mission frequency...
+            <h2 class="text-2xl font-black italic mb-6 neon-text-white uppercase">MISSION_HUB</h2>
+            <div id="task-list" class="space-y-4">
+                <div class="hologram-page text-center text-white/40 text-xs">
+                    Establishing mission link...
+                </div>
             </div>
         </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 h-24 backdrop-blur-xl flex justify-center items-center gap-16 p-4 shadow-[0_-5px_25px_rgba(0,0,0,0.5)]">
-        <button onclick="showTab('home')" class="nav-btn text-2xl filter brightness-200 transition-all hover:scale-110">🏠</button>
-        <button onclick="showTab('tasks')" class="nav-btn text-2xl filter brightness-50 grayscale transition-all hover:scale-110">🛰️</button>
-        <button onclick="location.reload()" class="nav-btn text-2xl filter brightness-50 grayscale transition-all hover:scale-110">🔄</button>
+    <nav class="fixed bottom-0 left-0 right-0 h-24 backdrop-blur-xl flex justify-center items-center gap-16 p-4">
+        <button onclick="showTab('home')" class="nav-btn text-2xl filter brightness-200">🏠</button>
+        <button onclick="showTab('tasks')" class="nav-btn text-2xl filter brightness-50 grayscale">🛰️</button>
+        <button onclick="location.reload()" class="nav-btn text-2xl filter brightness-50 grayscale">🔄</button>
     </nav>
 
     <script>
         const SB_URL = "https://htngfzwclkqsffozxfuo.supabase.co";
         const SB_KEY = "sb_publishable_2LJdcMlfhcEyNl_EMUx-2w_Ms5ZtJ5g";
+        const GEMINI_KEY = "AIzaSyBO2ixjcEP2Du--LhzEfKrTy2y2RAw88o8";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         let profile = null;
+        let captureStream = null;
 
         async function login() {
-            await sb.auth.signInWithOAuth({ 
-                provider: 'google',
-                options: { redirectTo: window.location.origin }
-            });
+            await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
         }
 
         async function init() {
@@ -143,9 +164,9 @@
                 if (data) {
                     profile = data;
                     render();
+                    updateTikTokUI();
+                    loadTasks();
                     setInterval(updateMining, 1000);
-                } else {
-                    setTimeout(init, 2000);
                 }
             }
         }
@@ -156,42 +177,121 @@
             document.getElementById('staked').innerText = Number(profile.staked_tokens).toFixed(2) + " Fuel_Staked";
         }
 
+        // TIKTOK LINKING
+        async function linkTikTok() {
+            const username = document.getElementById('tk-username').value.replace('@', '');
+            if(!username) return;
+            const avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${username}`;
+            const { error } = await sb.from('profiles').update({ tiktok_username: username, tiktok_avatar: avatar }).eq('id', profile.id);
+            if(!error) { profile.tiktok_username = username; profile.tiktok_avatar = avatar; updateTikTokUI(); }
+        }
+
+        function updateTikTokUI() {
+            if(profile.tiktok_username) {
+                document.getElementById('tk-input-area').classList.add('hidden');
+                document.getElementById('tk-profile').classList.remove('hidden');
+                document.getElementById('tk-avatar').src = profile.tiktok_avatar;
+                document.getElementById('tk-name-display').innerText = '@' + profile.tiktok_username;
+            }
+        }
+
+        // AI MISSION LOGIC
+        async function loadTasks() {
+            // Static example tasks - you can fetch these from your 'tiktok_tasks' table
+            const tasks = [{ id: 1, handle: 'prodoge_ai', reward: 18 }]; 
+            const list = document.getElementById('task-list');
+            list.innerHTML = tasks.map(t => `
+                <div class="hologram-page !p-4 flex justify-between items-center border-[#00F9FF]/20">
+                    <div>
+                        <p class="text-xs font-bold">FOLLOW @${t.handle}</p>
+                        <p class="text-[9px] text-[#00F9FF]">REWARD: ${t.reward} ELITE</p>
+                    </div>
+                    <button onclick="executeTask('${t.handle}')" class="bg-[#00F9FF] text-black px-4 py-2 rounded-md text-[10px] font-bold">EXECUTE</button>
+                </div>
+            `).join('');
+        }
+
+        async function executeTask(handle) {
+            alert("Step 1: Allow Screen Access\nStep 2: Follow the account on TikTok\nStep 3: Return here to verify.");
+            try {
+                captureStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                window.open(`https://www.tiktok.com/@${handle}`, '_blank');
+                
+                // Add a temporary "VERIFY NOW" button
+                const list = document.getElementById('task-list');
+                list.innerHTML = `
+                    <button onclick="verifyFollowAI()" class="w-full bg-white text-black p-8 rounded-lg font-black text-xl shadow-[0_0_30px_#fff]">
+                        CLICK TO VERIFY NOW
+                    </button>
+                `;
+            } catch (err) { alert("Permission required to verify task."); }
+        }
+
+        async function verifyFollowAI() {
+            document.getElementById('scan-overlay').style.display = 'flex';
+            
+            // Capture Frame
+            const video = document.createElement('video');
+            video.srcObject = captureStream;
+            video.play();
+            
+            await new Promise(r => setTimeout(r, 1000));
+            const canvas = document.createElement('canvas');
+            canvas.width = 720; canvas.height = 1280;
+            canvas.getContext('2d').drawImage(video, 0, 0, 720, 1280);
+            const base64 = canvas.toDataURL('image/jpeg').split(',')[1];
+            
+            captureStream.getTracks().forEach(t => t.stop());
+
+            // Send to Gemini
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        contents: [{ parts: [
+                            { text: "Is the user currently following this TikTok account in this screenshot? Respond only with YES or NO." },
+                            { inline_data: { mime_type: "image/jpeg", data: base64 } }
+                        ]}]
+                    })
+                });
+                const data = await res.json();
+                const text = data.candidates[0].content.parts[0].text.toUpperCase();
+
+                if (text.includes("YES")) {
+                    const { error } = await sb.from('profiles').update({ tokens: profile.tokens + 18 }).eq('id', profile.id);
+                    alert("MISSION SUCCESS: +18 ELITE added!");
+                    location.reload();
+                } else {
+                    alert("AI SCAN: Follow not detected. Ensure TikTok is visible.");
+                    location.reload();
+                }
+            } catch (e) { alert("AI Sync Error."); location.reload(); }
+        }
+
+        // UTILS
         function updateMining() {
             if (!profile || !profile.staked_tokens) return;
-            const now = new Date();
-            const last = new Date(profile.last_sync_time);
-            const diff = (now - last) / 1000;
+            const diff = (new Date() - new Date(profile.last_sync_time)) / 1000;
             const earned = (profile.staked_tokens * 0.04 * diff) / 86400;
             document.getElementById('yield').innerText = earned.toFixed(6);
         }
 
-        async function harvest() {
-            const { error } = await sb.rpc('process_mining_claim');
-            if (error) alert("Sync Error: " + error.message);
-            else location.reload();
-        }
-
-        async function stake() {
+        async function harvest() { await sb.rpc('process_mining_claim'); location.reload(); }
+        async function stake() { 
             const total = Number(profile.tokens) + Number(profile.staked_tokens);
-            const { error } = await sb.from('profiles')
-                .update({ staked_tokens: total, tokens: 0, last_sync_time: new Date().toISOString() })
-                .eq('id', profile.id);
-            if (error) alert("Staking Error: " + error.message);
-            else location.reload();
+            await sb.from('profiles').update({ staked_tokens: total, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', profile.id);
+            location.reload();
         }
 
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.add('brightness-50', 'grayscale');
-                b.classList.remove('brightness-200');
-            });
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('brightness-50', 'grayscale'));
             event.currentTarget.classList.remove('brightness-50', 'grayscale');
-            event.currentTarget.classList.add('brightness-200');
         }
 
         window.onload = init;
     </script>
 </body>
-</html>
+            </html>
