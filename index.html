@@ -26,7 +26,7 @@
         <p class="text-gray-500 text-[10px] tracking-[0.5em] uppercase mb-12">Neural Network Terminal</p>
         <button onclick="login()" class="w-full max-w-xs glass p-5 rounded-3xl flex items-center justify-center gap-4 border border-white/10 hover:bg-white/5 transition-all">
             <img src="https://www.google.com/favicon.ico" class="w-5 h-5">
-            <span class="font-bold text-sm uppercase tracking-widest">Initialize Node</span>
+            <span class="font-bold text-sm uppercase tracking-widest text-white">Initialize Node</span>
         </button>
     </div>
 
@@ -50,18 +50,20 @@
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-50"></div>
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Real-time Yield</p>
                 <h3 id="yield" class="text-5xl font-mono font-bold neon-text mb-4 text-white">0.000000</h3>
-                <p id="staked" class="text-[11px] font-bold text-blue-400 bg-blue-500/10 py-2 px-4 rounded-full inline-block">0.00 STAKED</p>
+                <p id="staked" class="text-[11px] font-bold text-blue-400 bg-blue-500/10 py-2 px-4 rounded-full inline-block uppercase">0.00 STAKED</p>
             </div>
             
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="stake()" class="bg-blue-600 p-6 rounded-[2rem] font-black uppercase text-xs btn-glow">Stake All</button>
-                <button onclick="harvest()" class="glass p-6 rounded-[2rem] font-black uppercase text-xs btn-glow">Harvest</button>
+                <button onclick="stake()" class="bg-blue-600 p-6 rounded-[2rem] font-black uppercase text-xs btn-glow text-white">Stake All</button>
+                <button onclick="harvest()" class="glass p-6 rounded-[2rem] font-black uppercase text-xs btn-glow text-white">Harvest</button>
             </div>
         </div>
 
         <div id="tab-tasks" class="tab-content">
             <h2 class="text-2xl font-black italic mb-6">MISSIONS</h2>
-            <div id="task-list" class="space-y-4"></div>
+            <div id="task-list" class="space-y-4 text-center text-gray-500 text-xs uppercase tracking-widest py-10">
+                No active missions in your sector...
+            </div>
         </div>
     </main>
 
@@ -72,38 +74,51 @@
     </nav>
 
     <script>
-        const SB_URL = "YOUR_SUPABASE_URL";
-        const SB_KEY = "YOUR_ANON_KEY";
+        // YOUR CUSTOM CREDENTIALS INTEGRATED
+        const SB_URL = "https://htngfzwclkqsffozxfuo.supabase.co";
+        const SB_KEY = "sb_publishable_2LJdcMlfhcEyNl_EMUx-2w_Ms5ZtJ5g";
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
         let profile = null;
 
         async function login() {
-            await sb.auth.signInWithOAuth({ 
+            const { error } = await sb.auth.signInWithOAuth({ 
                 provider: 'google',
-                options: { redirectTo: window.location.origin }
+                options: { 
+                    redirectTo: window.location.origin 
+                }
             });
+            if (error) console.error("Login Error:", error.message);
         }
 
         async function init() {
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
                 document.getElementById('auth-screen').style.display = 'none';
-                const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-                profile = data;
-                render();
-                setInterval(updateMining, 1000);
+                
+                // Fetch user profile
+                const { data, error } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+                
+                if (data) {
+                    profile = data;
+                    render();
+                    setInterval(updateMining, 1000);
+                } else {
+                    console.log("Profile not found. If this is a new user, wait for the SQL Trigger to finish.");
+                    // Optional: Add a small delay and retry once
+                    setTimeout(init, 2000);
+                }
             }
         }
 
         function render() {
-            document.getElementById('user-name').innerText = profile.username;
-            document.getElementById('bal').innerText = profile.tokens.toFixed(2);
-            document.getElementById('staked').innerText = profile.staked_tokens.toFixed(2) + " STAKED";
+            document.getElementById('user-name').innerText = profile.username || "Anonymous Node";
+            document.getElementById('bal').innerText = Number(profile.tokens).toFixed(2);
+            document.getElementById('staked').innerText = Number(profile.staked_tokens).toFixed(2) + " STAKED";
         }
 
         function updateMining() {
-            if (!profile.staked_tokens) return;
+            if (!profile || !profile.staked_tokens) return;
             const now = new Date();
             const last = new Date(profile.last_sync_time);
             const diff = (now - last) / 1000;
@@ -112,22 +127,34 @@
         }
 
         async function harvest() {
-            await sb.rpc('process_mining_claim');
-            location.reload();
+            const { error } = await sb.rpc('process_mining_claim');
+            if (error) alert("Harvest failed: " + error.message);
+            else location.reload();
         }
 
         async function stake() {
-            const total = profile.tokens + profile.staked_tokens;
-            await sb.from('profiles').update({ staked_tokens: total, tokens: 0, last_sync_time: new Date() }).eq('id', profile.id);
-            location.reload();
+            const total = Number(profile.tokens) + Number(profile.staked_tokens);
+            const { error } = await sb.from('profiles')
+                .update({ 
+                    staked_tokens: total, 
+                    tokens: 0, 
+                    last_sync_time: new Date().toISOString() 
+                })
+                .eq('id', profile.id);
+            
+            if (error) alert("Staking failed: " + error.message);
+            else location.reload();
         }
 
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
+            // Basic opacity toggle for nav
+            event.currentTarget.parentElement.querySelectorAll('button').forEach(b => b.classList.add('opacity-40'));
+            event.currentTarget.classList.remove('opacity-40');
         }
 
         window.onload = init;
     </script>
 </body>
-</html>
+    </html>
