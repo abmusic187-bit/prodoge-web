@@ -153,7 +153,14 @@
         let captureStream = null;
 
         async function login() {
-            await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+    // This forces the login to open in the system browser
+    await sb.auth.signInWithOAuth({ 
+        provider: 'google',
+        options: { 
+            redirectTo: window.location.origin,
+            skipBrowserRedirect: false // Ensure it uses the external flow
+        }
+    });
         }
 
         async function init() {
