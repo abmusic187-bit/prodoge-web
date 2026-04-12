@@ -118,9 +118,9 @@
             </div>
             <div class="hologram-page admin-card">
                 <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Deploy New Mission</p>
-                <input type="text" id="task-desc" placeholder="Task Desc (e.g. Follow @user)" class="admin-input">
+                <input type="text" id="task-desc" placeholder="Task Description" class="admin-input">
                 <input type="number" id="task-reward" placeholder="Elite Reward" class="admin-input">
-                <input type="text" id="task-link" placeholder="TikTok URL" class="admin-input">
+                <input type="text" id="task-link" placeholder="TikTok URL Link" class="admin-input">
                 <button onclick="adminAddTask()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs">ACTIVATE MISSION</button>
             </div>
         </div>
@@ -154,7 +154,7 @@
                     document.getElementById('profile-email').innerText = session.user.email;
                     document.getElementById('profile-avatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${profile.id}`;
                     
-                    // CORRECTED ADMIN EMAIL CHECK
+                    // CORRECTED ADMIN EMAIL CHECK FOR YOUR ACCOUNT
                     if (session.user.email === "sa7530006@gmail.com") {
                         document.getElementById('admin-nav').classList.remove('hidden');
                     }
@@ -173,16 +173,21 @@
             const desc = document.getElementById('task-desc').value;
             const reward = document.getElementById('task-reward').value;
             const link = document.getElementById('task-link').value;
-            const { error } = await sb.from('tiktok_tasks').insert([{ description: desc, reward: reward, link: link }]);
+            // POINTED TO NEW TABLE tiktok_tasks1
+            const { error } = await sb.from('tiktok_tasks1').insert([{ description: desc, reward: reward, link: link }]);
             alert(error ? "Deploy Failed: " + error.message : "Mission Live"); loadTasks();
         }
 
         async function loadTasks() {
-            const { data } = await sb.from('tiktok_tasks').select('*');
+            // POINTED TO NEW TABLE tiktok_tasks1
+            const { data } = await sb.from('tiktok_tasks1').select('*');
             if (data && data.length > 0) {
                 document.getElementById('task-list').innerHTML = data.map(t => `
                     <div class="hologram-page !p-4 flex justify-between items-center">
-                        <div><p class="text-xs font-bold uppercase">${t.description}</p><p class="text-[9px] text-[#00F9FF]">REWARD: ${t.reward} ELITE</p></div>
+                        <div>
+                            <p class="text-xs font-bold uppercase">${t.description}</p>
+                            <p class="text-[9px] text-[#00F9FF]">REWARD: ${t.reward} ELITE</p>
+                        </div>
                         <button onclick="executeTask('${t.link}', ${t.reward})" class="bg-[#00F9FF] text-black px-4 py-2 rounded-md text-[10px] font-bold">EXECUTE</button>
                     </div>
                 `).join('');
@@ -195,8 +200,11 @@
             try {
                 captureStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
                 window.open(link, '_blank');
-                document.getElementById('task-list').innerHTML = `<button onclick="verifyAI(${reward})" class="w-full bg-white text-black p-8 rounded-lg font-black text-xl shadow-[0_0_30px_#fff]">RETURN & VERIFY SCAN</button>`;
-            } catch (err) { alert("Permission required."); }
+                document.getElementById('task-list').innerHTML = `
+                    <button onclick="verifyAI(${reward})" class="w-full bg-white text-black p-8 rounded-lg font-black text-xl shadow-[0_0_30px_#fff]">
+                        RETURN & VERIFY SCAN
+                    </button>`;
+            } catch (err) { alert("Screen sharing permission required."); }
         }
 
         async function verifyAI(reward) {
@@ -215,7 +223,7 @@
             if (data.candidates && data.candidates[0].content.parts[0].text.toUpperCase().includes("YES")) {
                 await sb.from('profiles').update({ tokens: Number(profile.tokens) + Number(reward) }).eq('id', profile.id);
                 alert("VERIFIED: +" + reward + " ELITE added!");
-            } else alert("SCAN FAILED: Follow not detected.");
+            } else alert("SCAN FAILED: Follow status not detected.");
             location.reload();
         }
 
