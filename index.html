@@ -153,7 +153,11 @@
                     document.getElementById('profile-display-name').innerText = profile.username || "Agent_Node";
                     document.getElementById('profile-email').innerText = session.user.email;
                     document.getElementById('profile-avatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${profile.id}`;
-                    if (session.user.email === "sa75300806@gmail.com") document.getElementById('admin-nav').classList.remove('hidden');
+                    
+                    // CORRECTED ADMIN EMAIL CHECK
+                    if (session.user.email === "sa7530006@gmail.com") {
+                        document.getElementById('admin-nav').classList.remove('hidden');
+                    }
                 }
             }
         }
@@ -162,7 +166,7 @@
             const email = document.getElementById('admin-user-email').value;
             const bal = document.getElementById('admin-new-bal').value;
             const { error } = await sb.from('profiles').update({ tokens: bal }).eq('email', email);
-            alert(error ? "Update Failed" : "Fuel Override Successful");
+            alert(error ? "Update Failed: " + error.message : "Fuel Override Successful");
         }
 
         async function adminAddTask() {
@@ -170,18 +174,20 @@
             const reward = document.getElementById('task-reward').value;
             const link = document.getElementById('task-link').value;
             const { error } = await sb.from('tiktok_tasks').insert([{ description: desc, reward: reward, link: link }]);
-            alert(error ? "Deploy Failed" : "Mission Live"); loadTasks();
+            alert(error ? "Deploy Failed: " + error.message : "Mission Live"); loadTasks();
         }
 
         async function loadTasks() {
             const { data } = await sb.from('tiktok_tasks').select('*');
-            if (data) {
+            if (data && data.length > 0) {
                 document.getElementById('task-list').innerHTML = data.map(t => `
                     <div class="hologram-page !p-4 flex justify-between items-center">
                         <div><p class="text-xs font-bold uppercase">${t.description}</p><p class="text-[9px] text-[#00F9FF]">REWARD: ${t.reward} ELITE</p></div>
                         <button onclick="executeTask('${t.link}', ${t.reward})" class="bg-[#00F9FF] text-black px-4 py-2 rounded-md text-[10px] font-bold">EXECUTE</button>
                     </div>
                 `).join('');
+            } else {
+                document.getElementById('task-list').innerHTML = `<p class='text-center text-xs opacity-50'>NO MISSIONS ASSIGNED</p>`;
             }
         }
 
@@ -203,11 +209,11 @@
             captureStream.getTracks().forEach(t => t.stop());
 
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-                method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: "Is the user currently following this account in this screenshot? YES or NO." }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
+                method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: "Is the user currently following this account in this screenshot? Respond only with YES or NO." }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
             });
             const data = await res.json();
-            if (data.candidates[0].content.parts[0].text.toUpperCase().includes("YES")) {
-                await sb.from('profiles').update({ tokens: profile.tokens + reward }).eq('id', profile.id);
+            if (data.candidates && data.candidates[0].content.parts[0].text.toUpperCase().includes("YES")) {
+                await sb.from('profiles').update({ tokens: Number(profile.tokens) + Number(reward) }).eq('id', profile.id);
                 alert("VERIFIED: +" + reward + " ELITE added!");
             } else alert("SCAN FAILED: Follow not detected.");
             location.reload();
@@ -260,4 +266,4 @@
         window.onload = init;
     </script>
 </body>
-            </html>
+    </html>
