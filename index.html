@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRODOGE AI v3 - Ocean Hologram Elite</title>
+    <title>PRODOGE AI v3 - Universal Node</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { 
@@ -22,115 +20,100 @@
             padding: 1.5rem; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 249, 255, 0.15);
             backdrop-filter: blur(12px); margin-bottom: 1.5rem;
         }
-        .admin-card { border-top: 3px solid #7000FF; border-bottom: 3px solid #7000FF; box-shadow: 0 0 30px rgba(112, 0, 255, 0.2); }
-        .neon-text-teal { color: #00F9FF; text-shadow: 0 0 15px rgba(0, 249, 255, 0.8); } 
+        .admin-card { border-top: 3px solid #7000FF; border-bottom: 3px solid #7000FF; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #scan-overlay { background: rgba(0, 0, 0, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; position: fixed; inset: 0; z-index: 500; }
-        .scanner-line { width: 100%; height: 2px; background: #00F9FF; box-shadow: 0 0 15px #00F9FF; position: absolute; animation: scanMove 2s infinite ease-in-out; }
+        .scanner-line { width: 100%; height: 2px; background: #00F9FF; position: absolute; animation: scanMove 2s infinite ease-in-out; }
         @keyframes scanMove { 0% { top: 0% } 100% { top: 100% } }
-        .admin-input { background: rgba(0,0,0,0.5); border: 1px solid #7000FF; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 14px; outline: none; margin-bottom: 10px; }
+        .admin-input { background: rgba(0,0,0,0.5); border: 1px solid #7000FF; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 14px; margin-bottom: 10px; }
     </style>
 </head>
 <body class="pb-28">
 
-    <div id="auth-screen" class="fixed inset-0 z-[200] bg-[#001E28] flex flex-col items-center justify-center p-6">
-        <div class="hologram-page w-full max-w-sm text-center">
-            <h1 class="text-3xl font-black mb-10 text-white italic uppercase">PRODOGE_AI</h1>
-            <button onclick="login()" class="w-full border-2 border-[#00F9FF] text-white p-5 rounded-md font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(0,249,255,0.3)]">Sync Google Node</button>
+    <div id="auth-screen" class="fixed inset-0 z-[200] bg-[#001E28] flex flex-col items-center justify-center p-6 text-center">
+        <div class="hologram-page w-full max-w-sm">
+            <h1 class="text-3xl font-black mb-10 italic uppercase">PRODOGE_AI</h1>
+            <button onclick="login()" class="w-full border-2 border-[#00F9FF] p-5 rounded-md font-bold uppercase">Sync Google Node</button>
         </div>
     </div>
 
     <div id="scan-overlay">
         <div class="scanner-line"></div>
-        <h2 class="neon-text-teal text-xl font-bold animate-pulse uppercase tracking-widest">AI_SCANNING_SYSTEM...</h2>
+        <h2 class="text-[#00F9FF] text-xl font-bold animate-pulse uppercase">AI_VERIFYING_ACTIVITY...</h2>
     </div>
 
     <header class="p-6 fixed top-0 left-0 right-0 z-50 flex justify-between items-center bg-black/40 backdrop-blur-xl border-b border-[#00F9FF]/20">
         <div>
-            <p id="user-name" class="text-[10px] font-bold text-[#00F9FF] uppercase tracking-tighter">Linking...</p>
-            <h2 class="text-xl font-black italic text-white uppercase">CORE_UNIT</h2>
+            <p id="user-name" class="text-[10px] font-bold text-[#00F9FF] uppercase">Connecting...</p>
+            <h2 class="text-xl font-black italic uppercase">CORE_UNIT</h2>
         </div>
         <div class="border border-[#00F9FF]/40 bg-black/40 px-4 py-2 rounded-lg text-right">
             <span class="text-[7px] text-[#00F9FF] font-bold uppercase">Fuel_Balance</span>
             <div class="flex items-center gap-1">
-                <span id="bal" class="text-lg font-mono font-bold neon-text-teal">0.00</span>
+                <span id="bal" class="text-lg font-mono font-bold text-[#00F9FF]">0.00</span>
                 <span class="text-[#00F9FF] text-[10px] font-black">ELITE</span>
             </div>
         </div>
     </header>
 
     <main class="pt-28 p-6 max-w-md mx-auto">
-        
         <div id="tab-home" class="tab-content active">
             <div class="hologram-page text-center">
-                <p class="text-[10px] font-bold text-white/50 uppercase mb-4 tracking-widest">Neural_Mining_Yield</p>
-                <h3 id="yield" class="text-5xl font-mono font-bold neon-text-teal mb-5">0.000000</h3>
-                <p id="staked" class="text-[11px] font-bold text-[#00F9FF] border border-[#00F9FF]/20 py-2 px-5 rounded-md inline-block">0.00 Fuel_Staked</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase mb-4">Mining_Yield</p>
+                <h3 id="yield" class="text-5xl font-mono font-bold text-[#00F9FF] mb-5">0.000000</h3>
+                <p id="staked" class="text-[11px] font-bold text-[#00F9FF] border border-[#00F9FF]/20 py-2 px-5 rounded-md inline-block">0.00 Staked</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <button onclick="stake()" class="bg-[#00F9FF] p-6 rounded-md font-black uppercase text-xs text-[#001E28]">Stake_All</button>
-                <button onclick="harvest()" class="border-2 border-[#00F9FF] p-6 rounded-md font-black uppercase text-xs text-white">Harvest</button>
+                <button onclick="harvest()" class="border-2 border-[#00F9FF] p-6 rounded-md font-black uppercase text-xs">Harvest</button>
             </div>
         </div>
 
         <div id="tab-tasks" class="tab-content">
-            <h2 class="text-2xl font-black italic mb-6 text-white uppercase">MISSION_HUB</h2>
+            <h2 class="text-2xl font-black italic mb-6 uppercase">MISSION_HUB</h2>
             <div id="task-list" class="space-y-4"></div>
         </div>
 
         <div id="tab-profile" class="tab-content">
-            <h2 class="text-2xl font-black italic mb-6 text-white uppercase">USER_PROFILE</h2>
+            <h2 class="text-2xl font-black italic mb-6 uppercase">IDENTITY_NODE</h2>
             <div class="hologram-page">
-                <div class="flex items-center gap-4 mb-6">
-                    <img id="profile-avatar" src="" class="w-16 h-16 rounded-full border-2 border-[#00F9FF] bg-black/40">
-                    <div>
-                        <p id="profile-display-name" class="font-bold text-lg text-white">Guest_Node</p>
-                        <p id="profile-email" class="text-[10px] text-[#00F9FF]"></p>
-                    </div>
+                <p class="text-[10px] font-bold text-[#00F9FF] mb-4 uppercase">Social Link</p>
+                <div id="tk-input-area" class="flex gap-2">
+                    <input type="text" id="tk-username" placeholder="@username" class="bg-black/40 border border-[#00F9FF]/30 p-3 rounded-lg text-sm w-full outline-none">
+                    <button onclick="linkTikTok()" class="bg-[#00F9FF] text-black px-4 rounded-lg font-bold text-xs">LINK</button>
                 </div>
-                <div class="border-t border-[#00F9FF]/20 pt-4">
-                    <p class="text-[9px] font-bold text-[#00F9FF] mb-3 uppercase tracking-widest">TikTok_Identity</p>
-                    <div id="tk-input-area" class="flex gap-2">
-                        <input type="text" id="tk-username" placeholder="@username" class="bg-black/40 border border-[#00F9FF]/30 p-3 rounded-lg text-sm w-full outline-none">
-                        <button onclick="linkTikTok()" class="bg-[#00F9FF] text-black px-4 rounded-lg font-bold text-xs">LINK</button>
-                    </div>
-                    <div id="tk-profile" class="hidden flex items-center justify-between bg-black/20 p-3 rounded-lg border border-[#00F9FF]/20">
-                        <div class="flex items-center gap-3">
-                            <img id="tk-avatar" src="" class="w-8 h-8 rounded-full border border-[#00F9FF]">
-                            <p id="tk-name-display" class="font-bold text-xs"></p>
-                        </div>
-                        <span class="text-[8px] text-green-400 font-bold uppercase">Active</span>
-                    </div>
+                <div id="tk-profile" class="hidden flex items-center justify-between bg-black/20 p-3 rounded-lg border border-[#00F9FF]/20">
+                    <p id="tk-name-display" class="font-bold text-xs"></p>
+                    <span class="text-green-400 text-[10px]">CONNECTED</span>
                 </div>
             </div>
-            <button onclick="sb.auth.signOut().then(() => location.reload())" class="w-full border border-red-500/50 text-red-400 p-3 rounded-lg text-xs font-bold uppercase tracking-widest">Terminate_Session</button>
         </div>
 
         <div id="tab-admin" class="tab-content">
             <h2 class="text-2xl font-black italic mb-6 text-[#7000FF] uppercase">ROOT_ADMIN</h2>
             <div class="hologram-page admin-card">
-                <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Modify User Fuel</p>
-                <input type="text" id="admin-user-email" placeholder="User Email" class="admin-input">
+                <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Override Balance</p>
+                <input type="text" id="admin-user-tk" placeholder="TikTok Username (No @)" class="admin-input">
                 <input type="number" id="admin-new-bal" placeholder="New Elite Amount" class="admin-input">
-                <button onclick="adminUpdateBalance()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs">OVERRIDE BALANCE</button>
+                <button onclick="adminUpdateBalance()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs">OVERRIDE</button>
             </div>
             <div class="hologram-page admin-card">
-                <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Deploy New Mission</p>
-                <input type="text" id="task-desc" placeholder="Task Description" class="admin-input">
-                <input type="number" id="task-reward" placeholder="Elite Reward" class="admin-input">
-                <input type="text" id="task-link" placeholder="TikTok URL Link" class="admin-input">
+                <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Deploy Global Mission</p>
+                <input type="text" id="task-desc" placeholder="Instruction (e.g. Subscribe to YouTube)" class="admin-input">
+                <input type="number" id="task-reward" placeholder="Reward Amount" class="admin-input">
+                <input type="text" id="task-link" placeholder="URL (TikTok, YT, Web)" class="admin-input">
                 <button onclick="adminAddTask()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs">ACTIVATE MISSION</button>
             </div>
         </div>
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 h-24 backdrop-blur-xl flex justify-center items-center gap-12 p-4 border-t border-[#00F9FF]/10">
-        <button onclick="showTab('home')" class="nav-btn text-2xl filter brightness-200">🏠</button>
-        <button onclick="showTab('tasks')" class="nav-btn text-2xl filter brightness-50 grayscale">🛰️</button>
-        <button onclick="showTab('profile')" class="nav-btn text-2xl filter brightness-50 grayscale">👤</button>
-        <button id="admin-nav" onclick="showTab('admin')" class="nav-btn text-2xl filter brightness-50 grayscale hidden">⚙️</button>
+        <button onclick="showTab('home')" class="nav-btn text-2xl">🏠</button>
+        <button onclick="showTab('tasks')" class="nav-btn text-2xl opacity-50">🛰️</button>
+        <button onclick="showTab('profile')" class="nav-btn text-2xl opacity-50">👤</button>
+        <button id="admin-nav" onclick="showTab('admin')" class="nav-btn text-2xl opacity-50 hidden">⚙️</button>
     </nav>
 
     <script>
@@ -150,61 +133,45 @@
                 if (data) {
                     profile = data; render(); updateTikTokUI(); loadTasks();
                     setInterval(updateMining, 1000);
-                    document.getElementById('profile-display-name').innerText = profile.username || "Agent_Node";
-                    document.getElementById('profile-email').innerText = session.user.email;
-                    document.getElementById('profile-avatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${profile.id}`;
-                    
-                    // CORRECTED ADMIN EMAIL CHECK FOR YOUR ACCOUNT
-                    if (session.user.email === "sa7530006@gmail.com") {
-                        document.getElementById('admin-nav').classList.remove('hidden');
-                    }
+                    if (session.user.email === "sa7530006@gmail.com") document.getElementById('admin-nav').classList.remove('hidden');
                 }
             }
         }
 
         async function adminUpdateBalance() {
-            const email = document.getElementById('admin-user-email').value;
+            const tk = document.getElementById('admin-user-tk').value.trim();
             const bal = document.getElementById('admin-new-bal').value;
-            const { error } = await sb.from('profiles').update({ tokens: bal }).eq('email', email);
-            alert(error ? "Update Failed: " + error.message : "Fuel Override Successful");
+            const { error } = await sb.from('profiles').update({ tokens: bal }).eq('tiktok_username', tk);
+            alert(error ? "Failed: " + error.message : "Success: Fuel Updated");
         }
 
         async function adminAddTask() {
             const desc = document.getElementById('task-desc').value;
             const reward = document.getElementById('task-reward').value;
             const link = document.getElementById('task-link').value;
-            // POINTED TO NEW TABLE tiktok_tasks1
             const { error } = await sb.from('tiktok_tasks1').insert([{ description: desc, reward: reward, link: link }]);
-            alert(error ? "Deploy Failed: " + error.message : "Mission Live"); loadTasks();
+            alert(error ? "Deploy Failed: " + error.message : "Mission Active"); loadTasks();
         }
 
         async function loadTasks() {
-            // POINTED TO NEW TABLE tiktok_tasks1
             const { data } = await sb.from('tiktok_tasks1').select('*');
+            const list = document.getElementById('task-list');
             if (data && data.length > 0) {
-                document.getElementById('task-list').innerHTML = data.map(t => `
-                    <div class="hologram-page !p-4 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-bold uppercase">${t.description}</p>
-                            <p class="text-[9px] text-[#00F9FF]">REWARD: ${t.reward} ELITE</p>
-                        </div>
+                list.innerHTML = data.map(t => `
+                    <div class="hologram-page flex justify-between items-center !p-4">
+                        <div><p class="text-xs font-bold uppercase">${t.description}</p><p class="text-[9px] text-[#00F9FF]">REWARD: ${t.reward} ELITE</p></div>
                         <button onclick="executeTask('${t.link}', ${t.reward})" class="bg-[#00F9FF] text-black px-4 py-2 rounded-md text-[10px] font-bold">EXECUTE</button>
                     </div>
                 `).join('');
-            } else {
-                document.getElementById('task-list').innerHTML = `<p class='text-center text-xs opacity-50'>NO MISSIONS ASSIGNED</p>`;
-            }
+            } else { list.innerHTML = "<p class='text-center opacity-50 text-xs'>NO MISSIONS</p>"; }
         }
 
         async function executeTask(link, reward) {
             try {
                 captureStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
                 window.open(link, '_blank');
-                document.getElementById('task-list').innerHTML = `
-                    <button onclick="verifyAI(${reward})" class="w-full bg-white text-black p-8 rounded-lg font-black text-xl shadow-[0_0_30px_#fff]">
-                        RETURN & VERIFY SCAN
-                    </button>`;
-            } catch (err) { alert("Screen sharing permission required."); }
+                document.getElementById('task-list').innerHTML = `<button onclick="verifyAI(${reward})" class="w-full bg-white text-black p-8 rounded-lg font-black text-xl">RETURN & VERIFY SCAN</button>`;
+            } catch (err) { alert("Permission required to scan activity."); }
         }
 
         async function verifyAI(reward) {
@@ -217,26 +184,25 @@
             captureStream.getTracks().forEach(t => t.stop());
 
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
-                method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: "Is the user currently following this account in this screenshot? Respond only with YES or NO." }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
+                method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: "Did the user complete the required action (Follow/Subscribe/Like) in this screenshot? Respond YES or NO." }, { inline_data: { mime_type: "image/jpeg", data: base64 } }] }] })
             });
             const data = await res.json();
-            if (data.candidates && data.candidates[0].content.parts[0].text.toUpperCase().includes("YES")) {
+            if (data.candidates?.[0].content.parts[0].text.toUpperCase().includes("YES")) {
                 await sb.from('profiles').update({ tokens: Number(profile.tokens) + Number(reward) }).eq('id', profile.id);
-                alert("VERIFIED: +" + reward + " ELITE added!");
-            } else alert("SCAN FAILED: Follow status not detected.");
+                alert("AI VERIFIED: +" + reward + " ELITE");
+            } else alert("AI SCAN: Verification failed.");
             location.reload();
         }
 
         function render() {
-            document.getElementById('user-name').innerText = profile.username || "NODE_ACTIVE";
+            document.getElementById('user-name').innerText = profile.username || "AGENT_NODE";
             document.getElementById('bal').innerText = Number(profile.tokens).toFixed(2);
-            document.getElementById('staked').innerText = Number(profile.staked_tokens).toFixed(2) + " Fuel_Staked";
+            document.getElementById('staked').innerText = Number(profile.staked_tokens).toFixed(2) + " Staked";
         }
 
         async function linkTikTok() {
             const user = document.getElementById('tk-username').value.replace('@', '');
-            const av = `https://api.dicebear.com/7.x/bottts/svg?seed=${user}`;
-            await sb.from('profiles').update({ tiktok_username: user, tiktok_avatar: av }).eq('id', profile.id);
+            await sb.from('profiles').update({ tiktok_username: user }).eq('id', profile.id);
             location.reload();
         }
 
@@ -244,7 +210,6 @@
             if(profile.tiktok_username) {
                 document.getElementById('tk-input-area').classList.add('hidden');
                 document.getElementById('tk-profile').classList.remove('hidden');
-                document.getElementById('tk-avatar').src = profile.tiktok_avatar;
                 document.getElementById('tk-name-display').innerText = '@' + profile.tiktok_username;
             }
         }
@@ -266,9 +231,8 @@
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('brightness-50', 'grayscale'));
-            event.currentTarget.classList.remove('brightness-50', 'grayscale');
-            event.currentTarget.classList.add('brightness-200');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('opacity-50'));
+            event.currentTarget.classList.remove('opacity-50');
         }
 
         window.onload = init;
