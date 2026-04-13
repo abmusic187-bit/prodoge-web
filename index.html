@@ -3,160 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRODOGE AI - PD TERMINAL</title>
+    <title>PD_NODE - PRODOGE AI TERMINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00F9FF; --admin: #7000FF; }
+        :root { --neon: #00F9FF; --admin: #7000FF; --glass: rgba(255, 255, 255, 0.03); }
         body { 
-            background: #001219; color: white; font-family: 'Chakra Petch', sans-serif; overflow-x: hidden;
-            background-image: radial-gradient(circle at center, rgba(0, 85, 115, 0.2) 0%, rgba(0, 18, 25, 1) 100%);
+            background: #000D12; color: #E0F2F1; font-family: 'Chakra Petch', sans-serif; overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 50%, rgba(0, 249, 255, 0.07) 0%, transparent 80%);
         }
 
-        /* Professional Glass Cards */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0, 249, 255, 0.1);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        /* Pure CSS PD Logo Look-alike */
+        .pd-logo-pro {
+            width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;
+            background: rgba(0, 0, 0, 0.6); border: 2px solid var(--neon); border-radius: 12px;
+            font-weight: 900; font-size: 32px; color: var(--neon);
+            text-shadow: 0 0 10px var(--neon); box-shadow: 0 0 20px rgba(0, 249, 255, 0.2);
         }
 
-        /* PD Hologram Styling */
-        .pd-logo { 
-            filter: drop-shadow(0 0 10px var(--neon)); 
-            border: 1px solid rgba(0, 249, 255, 0.3);
-            border-radius: 12px;
+        /* Glassmorphism Design */
+        .glass-panel {
+            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 249, 255, 0.1); border-radius: 20px;
         }
 
-        /* Splash Animation */
+        /* Animations */
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .mining-orbit { 
+            position: relative; width: 220px; height: 220px; margin: 0 auto;
+            border: 1px dashed rgba(0, 249, 255, 0.2); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            animation: rotate 10s linear infinite;
+        }
+        .node-pulse { width: 12px; height: 12px; background: var(--neon); border-radius: 50%; position: absolute; top: -6px; box-shadow: 0 0 15px var(--neon); }
+        
         #splash-screen {
             position: fixed; inset: 0; background: #000; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.8s ease, visibility 0.8s;
         }
         #splash-screen.loaded { opacity: 0; visibility: hidden; }
-
-        /* Mining Orbit */
-        .mining-container {
-            position: relative; width: 200px; height: 200px; margin: 0 auto;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .orbit {
-            position: absolute; width: 100%; height: 100%;
-            border: 1px dashed rgba(0, 249, 255, 0.2); border-radius: 50%;
-            animation: rotate 8s linear infinite;
-        }
-        .node-dot {
-            position: absolute; top: -6px; left: 50%; width: 12px; height: 12px;
-            background: var(--neon); border-radius: 50%; box-shadow: 0 0 15px var(--neon);
-        }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .admin-input { background: rgba(0,0,0,0.5); border: 1px solid var(--admin); color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 14px; margin-bottom: 10px; outline: none; }
+        /* Custom Inputs */
+        .pro-input { background: rgba(0,0,0,0.4); border: 1px solid rgba(0,249,255,0.2); padding: 14px; border-radius: 12px; width: 100%; font-size: 13px; outline: none; transition: 0.3s; }
+        .pro-input:focus { border-color: var(--neon); box-shadow: 0 0 10px rgba(0,249,255,0.1); }
     </style>
 </head>
-<body class="pb-28">
+<body class="pb-32">
 
     <div id="splash-screen">
-        <img src="IMG_20260413_154818_021.jpg" class="pd-logo w-24 mb-6 animate-pulse">
-        <h1 class="text-2xl font-black tracking-[0.4em] text-[#00F9FF]">PD_NODE</h1>
-        <div class="mt-4 flex gap-1">
-            <div class="w-2 h-2 bg-[#00F9FF] animate-bounce"></div>
-            <div class="w-2 h-2 bg-[#00F9FF] animate-bounce [animation-delay:0.2s]"></div>
-            <div class="w-2 h-2 bg-[#00F9FF] animate-bounce [animation-delay:0.4s]"></div>
+        <div class="pd-logo-pro mb-8">PD</div>
+        <h1 class="text-2xl font-bold tracking-[0.5em] text-[#00F9FF] animate-pulse">PD_NODE</h1>
+        <div class="w-48 h-1 bg-white/10 mt-6 rounded-full overflow-hidden">
+            <div class="h-full bg-[#00F9FF] w-1/2 animate-[loading_2s_infinite]"></div>
         </div>
     </div>
 
-    <div id="auth-screen" class="fixed inset-0 z-[1000] bg-[#001219] flex flex-col items-center justify-center p-8 hidden">
-        <img src="IMG_20260413_154818_021.jpg" class="pd-logo w-32 mb-8">
-        <h1 class="text-3xl font-black italic mb-2 tracking-widest">PRODOGE_AI</h1>
-        <p class="text-[10px] opacity-40 mb-10 tracking-[0.5em] uppercase text-center">Elite Mining Protocol v3</p>
-        <button onclick="login()" class="w-full max-w-xs glass-card p-5 flex items-center justify-center gap-4 hover:bg-white/5 border-[#00F9FF]/30 active:scale-95 transition-all">
+    <div id="auth-screen" class="fixed inset-0 z-[1000] bg-[#000D12] flex flex-col items-center justify-center p-8 hidden">
+        <div class="pd-logo-pro mb-8 scale-150">PD</div>
+        <h2 class="text-3xl font-black italic mb-2 tracking-widest uppercase">PRODOGE_AI</h2>
+        <p class="text-[10px] opacity-40 mb-12 tracking-[0.3em] uppercase">Enterprise-Grade Mining System</p>
+        <button onclick="login()" class="w-full max-w-xs glass-panel p-5 flex items-center justify-center gap-4 hover:bg-white/5 transition-all">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-6">
-            <span class="font-bold uppercase tracking-widest text-sm">Sync Neural Node</span>
+            <span class="font-bold uppercase tracking-[0.1em] text-sm">Initialize via Google</span>
         </button>
     </div>
 
-    <header class="p-4 fixed top-0 left-0 right-0 z-50 flex justify-between items-center bg-black/60 backdrop-blur-xl border-b border-[#00F9FF]/10">
+    <header class="p-4 fixed top-0 inset-x-0 z-50 flex justify-between items-center bg-black/60 backdrop-blur-2xl border-b border-white/5">
         <div class="flex items-center gap-3">
-            <img src="IMG_20260413_154818_021.jpg" class="w-10 rounded-lg border border-[#00F9FF]/20">
+            <div class="pd-logo-pro !w-10 !h-10 !text-xs !border">PD</div>
             <div>
-                <p id="user-display-id" class="text-[10px] font-bold text-[#00F9FF] uppercase tracking-tighter">Linking...</p>
-                <h2 class="text-sm font-black italic uppercase">CORE_UNIT</h2>
+                <p id="user-display-id" class="text-[11px] font-bold text-[#00F9FF] uppercase tracking-wider">AGENT_LINKING...</p>
+                <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span><span class="text-[8px] opacity-40 uppercase">Secure_Link</span></div>
             </div>
         </div>
-        <div class="glass-card px-4 py-2 text-right border-[#00F9FF]/20">
-            <span class="text-[7px] text-[#00F9FF] font-bold uppercase tracking-widest">Fuel_Balance</span>
-            <div class="flex items-center gap-1">
-                <span id="bal" class="text-lg font-mono font-bold text-[#00F9FF]">0.00</span>
-                <span class="text-[#00F9FF] text-[8px] font-black">ELITE</span>
+        <div class="text-right">
+            <p class="text-[8px] opacity-40 font-bold uppercase tracking-widest mb-0.5">Liquid_Assets</p>
+            <div class="flex items-center gap-1 justify-end">
+                <span id="bal" class="text-xl font-mono font-bold text-[#00F9FF]">0.00</span>
+                <span class="text-[9px] font-black text-[#00F9FF]/60">ELITE</span>
             </div>
         </div>
     </header>
 
-    <main class="pt-28 p-6 max-w-md mx-auto">
+    <main class="pt-28 px-6 max-w-md mx-auto space-y-6">
+        
         <div id="tab-home" class="tab-content active">
-            <div class="glass-card text-center py-10 relative">
-                <div class="mining-container mb-8">
-                    <div class="orbit"><div class="node-dot"></div></div>
-                    <div>
-                        <p class="text-[9px] opacity-40 uppercase tracking-[0.2em] mb-1">Live_Yield</p>
-                        <h3 id="yield" class="text-4xl font-mono font-bold text-[#00F9FF] drop-shadow-[0_0_10px_rgba(0,249,255,0.4)]">0.000000</h3>
+            <div class="glass-panel p-8 text-center relative overflow-hidden">
+                <div class="mining-orbit mb-8">
+                    <div class="node-pulse"></div>
+                    <div class="rotate-[-360deg] animate-[rotate_10s_linear_infinite_reverse] flex flex-col items-center">
+                        <p class="text-[9px] opacity-40 uppercase tracking-widest mb-1">Yield_Flow</p>
+                        <h3 id="yield" class="text-4xl font-mono font-bold text-[#00F9FF] drop-shadow-[0_0_10px_rgba(0,249,255,0.3)]">0.000000</h3>
                     </div>
                 </div>
-                <div class="bg-black/40 border border-[#00F9FF]/20 py-2 px-6 rounded-full inline-block mb-8">
-                    <span id="staked" class="text-[11px] font-bold text-[#00F9FF]">0.00 Staked</span>
+                
+                <div class="bg-white/5 border border-white/10 px-6 py-2 rounded-full inline-block mb-10">
+                    <span id="staked" class="text-xs font-bold text-[#00F9FF] tracking-widest">0.00 STAKED</span>
                 </div>
-                <div class="grid grid-cols-2 gap-4 px-4">
-                    <button onclick="stake()" class="bg-[#00F9FF] p-5 rounded-xl font-black uppercase text-xs text-[#001E28]">Stake_All</button>
-                    <button onclick="harvest()" class="border-2 border-[#00F9FF] p-5 rounded-xl font-black uppercase text-xs">Harvest</button>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="stake-btn" onclick="handleStakeToggle()" class="bg-[#00F9FF] text-black h-16 rounded-2xl font-black uppercase text-xs active:scale-95 transition-all">Stake All</button>
+                    <button onclick="harvest()" class="border-2 border-[#00F9FF] text-[#00F9FF] h-16 rounded-2xl font-black uppercase text-xs active:scale-95 transition-all">Harvest</button>
                 </div>
+            </div>
+        </div>
+
+        <div id="tab-deposit" class="tab-content">
+            <h2 class="text-xl font-black italic mb-6 uppercase tracking-widest">Elite_Vault</h2>
+            <div class="glass-panel p-6 space-y-4 border-green-500/20">
+                <div class="flex justify-between items-center bg-black/40 p-5 rounded-2xl border border-white/5">
+                    <div>
+                        <h4 class="font-bold text-white uppercase text-sm">1,000 ELITE PACK</h4>
+                        <p class="text-[10px] text-green-400 font-bold tracking-widest">100 PKR [VERIFIED]</p>
+                    </div>
+                    <button onclick="alert('Contact Admin on WhatsApp to pay 100 PKR and receive 1,000 Elite.')" class="bg-green-500 text-white px-5 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg shadow-green-500/20">Deposit</button>
+                </div>
+                <p class="text-[9px] text-center opacity-40 italic">All manual deposits are processed within 12 hours of payment verification.</p>
             </div>
         </div>
 
         <div id="tab-tasks" class="tab-content">
-            <h2 class="text-xl font-black italic mb-6 uppercase tracking-widest border-l-4 border-[#00F9FF] pl-3">Mission_Hub</h2>
+            <h2 class="text-xl font-black italic mb-6 uppercase tracking-widest">Mission_Registry</h2>
             <div id="task-list" class="space-y-4"></div>
         </div>
 
         <div id="tab-profile" class="tab-content space-y-4">
-            <h2 class="text-xl font-black italic mb-2 uppercase tracking-widest border-l-4 border-[#00F9FF] pl-3">Identity_Node</h2>
-            <div class="glass-card p-6 flex items-center gap-4">
-                <img id="p-avatar" class="w-16 h-16 rounded-xl border border-[#00F9FF]/20">
+            <div class="glass-panel p-6 flex items-center gap-4">
+                <img id="p-avatar" class="w-16 h-16 rounded-2xl border border-white/10">
                 <div>
-                    <h4 id="p-username" class="text-lg font-bold text-white uppercase tracking-tighter">...</h4>
-                    <p id="p-email" class="text-[10px] text-[#00F9FF] opacity-60"></p>
+                    <h4 id="p-username" class="text-lg font-bold uppercase tracking-tight">Agent_Name</h4>
+                    <p id="p-email" class="text-[10px] text-[#00F9FF] opacity-50"></p>
                 </div>
             </div>
-            <div class="glass-card p-6">
-                <p class="text-[10px] font-bold text-[#00F9FF] mb-3 uppercase tracking-widest">Update Agent Alias</p>
-                <div class="flex gap-2">
-                    <input type="text" id="new-name-input" placeholder="New Username" class="bg-black/40 border border-white/10 rounded-lg p-3 text-xs flex-1 outline-none focus:border-[#00F9FF]">
-                    <button onclick="updateName()" class="bg-[#00F9FF] text-black px-4 rounded-lg font-bold text-[10px] uppercase">Save</button>
-                </div>
+            <div class="glass-panel p-6 space-y-4">
+                <input type="text" id="new-name-input" placeholder="Enter New Alias" class="pro-input">
+                <button onclick="updateName()" class="w-full bg-[#00F9FF] text-black py-4 rounded-xl font-black text-xs uppercase">Update Identity</button>
             </div>
-            <button onclick="sb.auth.signOut().then(() => location.reload())" class="w-full glass-card border-red-500/20 text-red-500 p-4 rounded-xl font-bold text-xs tracking-widest uppercase">Terminate Session</button>
+            <button onclick="sb.auth.signOut().then(() => location.reload())" class="w-full glass-panel border-red-500/20 text-red-500 p-4 rounded-xl font-bold text-[10px] uppercase tracking-widest">Terminate Link</button>
         </div>
 
         <div id="tab-admin" class="tab-content">
-            <h2 class="text-xl font-black italic mb-6 uppercase text-[#7000FF] border-l-4 border-[#7000FF] pl-3">Root_Control</h2>
-            <div class="glass-card p-6 border-[#7000FF]/30">
-                <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Modify Balance (By Username)</p>
-                <input type="text" id="admin-user-name" placeholder="Target Username" class="admin-input">
-                <input type="number" id="admin-new-bal" placeholder="New Elite Amount" class="admin-input">
-                <button onclick="adminUpdateBalance()" class="w-full bg-[#7000FF] p-4 rounded-xl font-black text-xs uppercase shadow-lg">Inject Balance</button>
+            <h2 class="text-xl font-black italic mb-6 text-[#7000FF] uppercase tracking-widest">Root_Access</h2>
+            <div class="glass-panel p-6 space-y-3 border-[#7000FF]/30">
+                <p class="text-[9px] font-bold text-[#7000FF] uppercase tracking-[0.2em] mb-2">Modify Database by Username</p>
+                <input type="text" id="admin-user-name" placeholder="Target Username" class="pro-input !border-[#7000FF]/40">
+                <input type="number" id="admin-new-bal" placeholder="Inject Elite Tokens" class="pro-input !border-[#7000FF]/40">
+                <button onclick="adminUpdateBalance()" class="w-full bg-[#7000FF] p-4 rounded-xl font-black text-xs uppercase shadow-xl">Inject Balance</button>
             </div>
         </div>
+
     </main>
 
-    <nav class="fixed bottom-6 left-6 right-6 h-20 glass-card flex justify-around items-center px-4 border-[#00F9FF]/20">
-        <button onclick="showTab('home', event)" class="nav-btn text-2xl nav-active opacity-100">🏠</button>
+    <nav class="fixed bottom-6 inset-x-6 h-20 glass-panel flex justify-around items-center px-4 border-white/10 shadow-2xl z-50">
+        <button onclick="showTab('home', event)" class="nav-btn text-2xl opacity-100 text-[#00F9FF]">🏠</button>
+        <button onclick="showTab('deposit', event)" class="nav-btn text-2xl opacity-40">💎</button>
         <button onclick="showTab('tasks', event)" class="nav-btn text-2xl opacity-40">🛰️</button>
         <button onclick="showTab('profile', event)" class="nav-btn text-2xl opacity-40">👤</button>
         <button id="admin-nav" onclick="showTab('admin', event)" class="nav-btn text-2xl opacity-40 hidden">⚙️</button>
@@ -179,27 +185,21 @@
         }
 
         async function init() {
-            const splash = document.getElementById('splash-screen');
             const { data: { session } } = await sb.auth.getSession();
-            
             if (session) {
                 const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
                 if (data) {
                     profile = data; 
                     render(); 
                     loadTasks();
+                    updateButtonUI();
                     setInterval(updateMining, 1000);
-                    if (session.user.email === "sa7530006@gmail.com") {
-                        document.getElementById('admin-nav').classList.remove('hidden');
-                    }
+                    if (session.user.email === "sa7530006@gmail.com") document.getElementById('admin-nav').classList.remove('hidden');
                 }
             } else {
                 document.getElementById('auth-screen').classList.remove('hidden');
             }
-
-            setTimeout(() => {
-                splash.classList.add('loaded');
-            }, 2000);
+            setTimeout(() => document.getElementById('splash-screen').classList.add('loaded'), 2500);
         }
 
         function render() {
@@ -209,44 +209,61 @@
             document.getElementById('p-email').innerText = profile.email;
             document.getElementById('p-avatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${profile.id}`;
             document.getElementById('bal').innerText = formatVal(profile.tokens);
-            document.getElementById('staked').innerText = formatVal(profile.staked_tokens) + " Staked";
+            document.getElementById('staked').innerText = formatVal(profile.staked_tokens) + " STAKED";
+        }
+
+        function updateButtonUI() {
+            const btn = document.getElementById('stake-btn');
+            if (Number(profile.staked_tokens) > 0) {
+                btn.innerText = "Unstake All";
+                btn.classList.replace('bg-[#00F9FF]', 'bg-orange-500');
+            } else {
+                btn.innerText = "Stake All";
+                btn.classList.replace('bg-orange-500', 'bg-[#00F9FF]');
+            }
+        }
+
+        async function handleStakeToggle() {
+            if (Number(profile.staked_tokens) > 0) {
+                const total = Number(profile.tokens) + Number(profile.staked_tokens);
+                await sb.from('profiles').update({ staked_tokens: 0, tokens: total }).eq('id', profile.id);
+            } else {
+                const total = Number(profile.tokens);
+                if (total <= 0) return alert("No tokens to stake!");
+                await sb.from('profiles').update({ staked_tokens: total, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', profile.id);
+            }
+            location.reload();
         }
 
         async function updateName() {
             const name = document.getElementById('new-name-input').value.trim();
             if(!name) return;
-            const { error } = await sb.from('profiles').update({ username: name }).eq('id', profile.id);
-            if(!error) location.reload();
+            await sb.from('profiles').update({ username: name }).eq('id', profile.id);
+            location.reload();
         }
 
-        // ADMIN: Update by Username
         async function adminUpdateBalance() {
             const uname = document.getElementById('admin-user-name').value.trim();
             const bal = document.getElementById('admin-new-bal').value;
             const { error } = await sb.from('profiles').update({ tokens: bal }).eq('username', uname);
             if(error) alert("Error: " + error.message);
-            else alert("Balance Overridden for: " + uname);
+            else alert("Target System Updated: " + uname);
         }
 
         async function loadTasks() {
             const { data } = await sb.from('tiktok_tasks1').select('*');
-            const list = document.getElementById('task-list');
-            if (data && data.length > 0) {
-                list.innerHTML = data.map(t => `
-                    <div class="glass-card flex justify-between items-center p-4">
-                        <div><p class="text-xs font-bold uppercase">${t.description}</p><p class="text-[9px] text-[#00F9FF]">${t.reward} ELITE</p></div>
-                        <button onclick="executeTask('${t.link}', ${t.reward})" class="bg-[#00F9FF] text-black px-5 py-2 rounded-lg text-[10px] font-black uppercase">Start</button>
+            if (data) {
+                document.getElementById('task-list').innerHTML = data.map(t => `
+                    <div class="glass-panel flex justify-between items-center p-5 bg-black/20">
+                        <div><p class="text-xs font-bold uppercase tracking-tight">${t.description}</p><p class="text-[9px] text-[#00F9FF] font-bold mt-1">+${t.reward} ELITE</p></div>
+                        <button onclick="executeTask('${t.link}', ${t.reward})" class="bg-[#00F9FF] text-black px-5 py-2 rounded-xl text-[10px] font-black uppercase">Start</button>
                     </div>`).join('');
             }
         }
 
         function executeTask(link, reward) {
             window.open(link, '_blank');
-            document.getElementById('task-list').innerHTML = `
-                <div class="glass-card p-8 text-center animate-pulse">
-                    <p class="mb-4 text-xs font-bold uppercase tracking-widest">Verifying Connection...</p>
-                    <button onclick="claimReward(${reward})" class="w-full bg-[#00F9FF] text-black p-4 rounded-xl font-black text-sm uppercase">Claim ${reward} Elite</button>
-                </div>`;
+            document.getElementById('task-list').innerHTML = `<div class="glass-panel p-10 text-center animate-pulse"><p class="mb-4 text-xs font-black uppercase tracking-widest">Establishing Connection...</p><button onclick="claimReward(${reward})" class="w-full bg-[#00F9FF] text-black p-4 rounded-xl font-black text-sm uppercase">Claim Reward</button></div>`;
         }
 
         async function claimReward(reward) {
@@ -263,20 +280,19 @@
         }
 
         async function harvest() { await sb.rpc('process_mining_claim'); location.reload(); }
-        async function stake() { 
-            const total = Number(profile.tokens) + Number(profile.staked_tokens);
-            await sb.from('profiles').update({ staked_tokens: total, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', profile.id);
-            location.reload();
-        }
 
         function showTab(id, e) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-'+id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('opacity-40'));
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.add('opacity-40');
+                b.classList.remove('text-[#00F9FF]');
+            });
             e.currentTarget.classList.remove('opacity-40');
+            e.currentTarget.classList.add('text-[#00F9FF]');
         }
 
         window.onload = init;
     </script>
 </body>
-    </html>
+                    </html>
