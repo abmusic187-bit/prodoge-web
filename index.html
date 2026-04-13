@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRODOGE AI v3 - Instant Rewards</title>
+    <title>PRODOGE AI v3 - Elite Gmail Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .admin-input { background: rgba(0,0,0,0.5); border: 1px solid #7000FF; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 14px; margin-bottom: 10px; }
+        .admin-input { background: rgba(0,0,0,0.5); border: 1px solid #7000FF; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 14px; margin-bottom: 10px; outline: none; }
     </style>
 </head>
 <body class="pb-28">
@@ -32,13 +32,13 @@
     <div id="auth-screen" class="fixed inset-0 z-[200] bg-[#001E28] flex flex-col items-center justify-center p-6 text-center">
         <div class="hologram-page w-full max-w-sm">
             <h1 class="text-3xl font-black mb-10 italic uppercase">PRODOGE_AI</h1>
-            <button onclick="login()" class="w-full border-2 border-[#00F9FF] p-5 rounded-md font-bold uppercase">Sync Google Node</button>
+            <button onclick="login()" class="w-full border-2 border-[#00F9FF] p-5 rounded-md font-bold uppercase tracking-widest">Sync Google Node</button>
         </div>
     </div>
 
     <header class="p-6 fixed top-0 left-0 right-0 z-50 flex justify-between items-center bg-black/40 backdrop-blur-xl border-b border-[#00F9FF]/20">
         <div>
-            <p id="user-name" class="text-[10px] font-bold text-[#00F9FF] uppercase">Connecting...</p>
+            <p id="user-display-email" class="text-[10px] font-bold text-[#00F9FF] uppercase tracking-tighter">Linking...</p>
             <h2 class="text-xl font-black italic uppercase">CORE_UNIT</h2>
         </div>
         <div class="border border-[#00F9FF]/40 bg-black/40 px-4 py-2 rounded-lg text-right">
@@ -52,21 +52,8 @@
 
     <main class="pt-28 p-6 max-w-md mx-auto">
         <div id="tab-home" class="tab-content active">
-            
-            <div class="hologram-page">
-                <p class="text-[10px] font-bold text-[#00F9FF] mb-4 uppercase">Social_Identity_Link</p>
-                <div id="tk-input-area" class="flex gap-2">
-                    <input type="text" id="tk-username" placeholder="@tiktok_user" class="bg-black/40 border border-[#00F9FF]/30 p-3 rounded-lg text-sm w-full outline-none">
-                    <button onclick="linkTikTok()" class="bg-[#00F9FF] text-black px-4 rounded-lg font-bold text-xs">LINK</button>
-                </div>
-                <div id="tk-profile" class="hidden flex items-center justify-between bg-black/20 p-3 rounded-lg border border-[#00F9FF]/20">
-                    <p id="tk-name-display" class="font-bold text-xs"></p>
-                    <span class="text-green-400 text-[10px]">CONNECTED</span>
-                </div>
-            </div>
-
             <div class="hologram-page text-center">
-                <p class="text-[10px] font-bold text-white/50 uppercase mb-4">Mining_Output</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase mb-4 tracking-widest">Mining_Output</p>
                 <h3 id="yield" class="text-5xl font-mono font-bold text-[#00F9FF] mb-5">0.000000</h3>
                 <div class="bg-black/40 border border-[#00F9FF]/20 py-2 px-5 rounded-full inline-block">
                     <span id="staked" class="text-[11px] font-bold text-[#00F9FF]">0.00 Staked</span>
@@ -80,32 +67,32 @@
         </div>
 
         <div id="tab-tasks" class="tab-content">
-            <h2 class="text-2xl font-black italic mb-6 uppercase">MISSION_HUB</h2>
+            <h2 class="text-2xl font-black italic mb-6 uppercase tracking-tight">MISSION_HUB</h2>
             <div id="task-list" class="space-y-4"></div>
         </div>
 
         <div id="tab-profile" class="tab-content text-center">
             <h2 class="text-2xl font-black italic mb-6 uppercase">User_Settings</h2>
             <div class="hologram-page">
-                <p id="profile-email-display" class="text-xs opacity-60 mb-4"></p>
-                <button onclick="sb.auth.signOut().then(() => location.reload())" class="w-full border border-red-500 text-red-500 p-3 rounded-lg font-bold text-xs">LOGOUT SESSION</button>
+                <p id="profile-email-full" class="text-xs opacity-60 mb-6"></p>
+                <button onclick="sb.auth.signOut().then(() => location.reload())" class="w-full border border-red-500 text-red-500 p-4 rounded-lg font-bold text-xs tracking-widest uppercase">Terminate Session</button>
             </div>
         </div>
 
         <div id="tab-admin" class="tab-content">
             <h2 class="text-2xl font-black italic mb-6 text-[#7000FF] uppercase">ROOT_ADMIN</h2>
             <div class="hologram-page admin-card">
-                <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Override Balance</p>
-                <input type="text" id="admin-user-tk" placeholder="TikTok Username (No @)" class="admin-input">
+                <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Modify User Balance</p>
+                <input type="text" id="admin-user-email" placeholder="User Gmail Address" class="admin-input">
                 <input type="number" id="admin-new-bal" placeholder="New Elite Amount" class="admin-input">
-                <button onclick="adminUpdateBalance()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs">OVERRIDE</button>
+                <button onclick="adminUpdateBalance()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs uppercase shadow-lg">Override Balance</button>
             </div>
             <div class="hologram-page admin-card">
                 <p class="text-[10px] font-bold text-[#7000FF] uppercase mb-4">Deploy Global Mission</p>
-                <input type="text" id="task-desc" placeholder="Instruction (e.g. Subscribe to YouTube)" class="admin-input">
+                <input type="text" id="task-desc" placeholder="Instruction (e.g. Subscribe to channel)" class="admin-input">
                 <input type="number" id="task-reward" placeholder="Reward Amount" class="admin-input">
-                <input type="text" id="task-link" placeholder="URL (Any Link)" class="admin-input">
-                <button onclick="adminAddTask()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs">ACTIVATE MISSION</button>
+                <input type="text" id="task-link" placeholder="Task URL" class="admin-input">
+                <button onclick="adminAddTask()" class="w-full bg-[#7000FF] p-3 rounded font-black text-xs uppercase shadow-lg">Activate Mission</button>
             </div>
         </div>
     </main>
@@ -129,21 +116,35 @@
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
                 document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('profile-email-display').innerText = session.user.email;
+                document.getElementById('user-display-email').innerText = session.user.email.split('@')[0];
+                document.getElementById('profile-email-full').innerText = session.user.email;
+                
                 const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
                 if (data) {
-                    profile = data; render(); updateTikTokUI(); loadTasks();
+                    profile = data; 
+                    render(); 
+                    loadTasks();
                     setInterval(updateMining, 1000);
-                    if (session.user.email === "sa7530006@gmail.com") document.getElementById('admin-nav').classList.remove('hidden');
+                    // Strictly check your admin email
+                    if (session.user.email === "sa7530006@gmail.com") {
+                        document.getElementById('admin-nav').classList.remove('hidden');
+                    }
                 }
             }
         }
 
+        // --- UPDATED ADMIN FUNCTION: SEARCH BY GMAIL ---
         async function adminUpdateBalance() {
-            const tk = document.getElementById('admin-user-tk').value.trim();
+            const email = document.getElementById('admin-user-email').value.trim();
             const bal = document.getElementById('admin-new-bal').value;
-            const { error } = await sb.from('profiles').update({ tokens: bal }).eq('tiktok_username', tk);
-            alert(error ? "Failed: " + error.message : "Success: Fuel Updated");
+            
+            if(!email || !bal) return alert("Fill all fields");
+
+            // Searches the profiles table where email matches the input
+            const { error } = await sb.from('profiles').update({ tokens: bal }).eq('email', email);
+            
+            if(error) alert("Error: " + error.message);
+            else alert("Success! Balance updated for: " + email);
         }
 
         async function adminAddTask() {
@@ -151,7 +152,8 @@
             const reward = document.getElementById('task-reward').value;
             const link = document.getElementById('task-link').value;
             const { error } = await sb.from('tiktok_tasks1').insert([{ description: desc, reward: reward, link: link }]);
-            alert(error ? "Deploy Failed: " + error.message : "Mission Active"); loadTasks();
+            if(error) alert("Error: " + error.message);
+            else { alert("Mission Active"); loadTasks(); }
         }
 
         async function loadTasks() {
@@ -161,20 +163,18 @@
                 list.innerHTML = data.map(t => `
                     <div class="hologram-page flex justify-between items-center !p-4">
                         <div><p class="text-xs font-bold uppercase">${t.description}</p><p class="text-[9px] text-[#00F9FF]">REWARD: ${t.reward} ELITE</p></div>
-                        <button onclick="executeTask('${t.link}', ${t.reward})" class="bg-[#00F9FF] text-black px-4 py-2 rounded-md text-[10px] font-bold uppercase">Execute</button>
+                        <button onclick="executeTask('${t.link}', ${t.reward})" class="bg-[#00F9FF] text-black px-4 py-2 rounded-md text-[10px] font-bold uppercase">Open</button>
                     </div>
                 `).join('');
             } else { list.innerHTML = "<p class='text-center opacity-50 text-xs'>NO MISSIONS AVAILABLE</p>"; }
         }
 
-        // --- UPDATED: NO SCANNING REQUIRED ---
         function executeTask(link, reward) {
             window.open(link, '_blank');
-            // Change the task list to show a "Claim" button immediately
             document.getElementById('task-list').innerHTML = `
                 <div class="hologram-page text-center">
-                    <p class="mb-4 text-sm font-bold">TASK OPENED IN NEW TAB</p>
-                    <button onclick="claimReward(${reward})" class="w-full bg-[#00F9FF] text-black p-4 rounded-lg font-black text-lg shadow-[0_0_20px_#00F9FF]">CLAIM ${reward} ELITE</button>
+                    <p class="mb-4 text-sm font-bold uppercase">Mission Link Opened</p>
+                    <button onclick="claimReward(${reward})" class="w-full bg-[#00F9FF] text-black p-4 rounded-lg font-black text-lg">CLAIM ${reward} ELITE</button>
                 </div>`;
         }
 
@@ -182,32 +182,14 @@
             const newBal = Number(profile.tokens) + Number(reward);
             const { error } = await sb.from('profiles').update({ tokens: newBal }).eq('id', profile.id);
             if (!error) {
-                alert("REWARD CLAIMED: +" + reward + " ELITE added!");
+                alert("REWARD CLAIMED!");
                 location.reload();
-            } else {
-                alert("CLAIM FAILED: " + error.message);
-            }
+            } else { alert("Error: " + error.message); }
         }
 
         function render() {
-            document.getElementById('user-name').innerText = profile.username || "AGENT_NODE";
             document.getElementById('bal').innerText = Number(profile.tokens).toFixed(2);
             document.getElementById('staked').innerText = Number(profile.staked_tokens).toFixed(2) + " Staked";
-        }
-
-        async function linkTikTok() {
-            const user = document.getElementById('tk-username').value.replace('@', '');
-            if(!user) return alert("Enter a username");
-            await sb.from('profiles').update({ tiktok_username: user }).eq('id', profile.id);
-            location.reload();
-        }
-
-        function updateTikTokUI() {
-            if(profile.tiktok_username) {
-                document.getElementById('tk-input-area').classList.add('hidden');
-                document.getElementById('tk-profile').classList.remove('hidden');
-                document.getElementById('tk-name-display').innerText = '@' + profile.tiktok_username;
-            }
         }
 
         function updateMining() {
@@ -234,4 +216,4 @@
         window.onload = init;
     </script>
 </body>
-            </html>
+    </html>
