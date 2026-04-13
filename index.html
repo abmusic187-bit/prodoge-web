@@ -20,7 +20,6 @@
             padding: 1.5rem; border-radius: 12px; box-shadow: 0 0 30px rgba(0, 249, 255, 0.15);
             backdrop-filter: blur(12px); margin-bottom: 1.5rem;
         }
-        .admin-card { border-top: 3px solid #7000FF; border-bottom: 3px solid #7000FF; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -33,9 +32,45 @@
         .input-glow { background: rgba(0,0,0,0.5); border: 1px solid #00F9FF; color: white; padding: 12px; border-radius: 8px; outline: none; transition: 0.3s; }
         .input-glow:focus { box-shadow: 0 0 10px #00F9FF; }
         .admin-input { background: rgba(0,0,0,0.5); border: 1px solid #7000FF; color: white; padding: 12px; border-radius: 8px; width: 100%; font-size: 14px; margin-bottom: 10px; outline: none; }
+
+        /* --- NEW: JD HOLOGRAM SPLASH STYLES --- */
+        #splash-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: fixed; inset: 0; background: #001E28; z-index: 1000;
+            transition: opacity 1s ease-out, visibility 1s;
+        }
+        #splash-screen.loaded { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        /* The effect for your JD logo */
+        .jd-holo-logo {
+            width: 150px; height: auto;
+            /* hologram aesthetic: skew, transparency, glow */
+            transform: skewX(-5deg); opacity: 0.8;
+            filter: drop-shadow(0 0 10px rgba(0, 249, 255, 0.6)) 
+                    drop-shadow(-5px 0 2px rgba(255, 0, 255, 0.3)) 
+                    drop-shadow(5px 0 2px rgba(0, 249, 255, 0.3));
+            animation: holoFlicker 3s linear infinite;
+        }
+
+        @keyframes holoFlicker {
+            0%, 100% { opacity: 0.8; transform: skewX(-5deg); }
+            5% { opacity: 0.5; transform: skewX(-10deg); filter: hue-rotate(90deg); }
+            7% { opacity: 0.8; transform: skewX(-5deg); filter: hue-rotate(0deg); }
+            90% { opacity: 0.8; transform: scale(1); }
+            91% { opacity: 1; transform: scale(1.02); }
+            92% { opacity: 0.8; transform: scale(1); }
+        }
     </style>
 </head>
 <body class="pb-28">
+
+    <div id="splash-screen">
+        <div class="hologram-page flex flex-col items-center p-10 border-2 border-[#00F9FF]">
+            <img src="image_6.png" alt="JD Icon" class="jd-holo-logo mb-6">
+            <h1 class="text-3xl font-black neon-text uppercase tracking-[0.5em] animate-pulse">JD_NODE</h1>
+            <p class="text-[10px] text-white/50 mt-4 uppercase tracking-widest">Establishing Neural Link...</p>
+        </div>
+    </div>
 
     <div id="auth-screen" class="fixed inset-0 z-[200] bg-[#001E28] flex flex-col items-center justify-center p-6 text-center">
         <div class="hologram-page w-full max-w-sm">
@@ -168,10 +203,19 @@
             return n.toFixed(2);
         }
 
+        // --- UPDATED INIT: Manages Splash Timing ---
         async function init() {
+            const splash = document.getElementById('splash-screen');
+            
+            // 1. Minimum show time for splash (2 seconds)
+            const minTimePromise = new Promise(resolve => setTimeout(resolve, 2000));
+
+            // 2. Main data loading logic
             const { data: { session } } = await sb.auth.getSession();
+            let authScreenOn = true;
+
             if (session) {
-                document.getElementById('auth-screen').style.display = 'none';
+                authScreenOn = false; // Google session found, auth screen stays hidden
                 const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
                 if (data) {
                     profile = data; 
@@ -183,6 +227,15 @@
                     }
                 }
             }
+
+            // 3. Wait for BOTH data to load AND min time to elapse
+            await minTimePromise;
+
+            // 4. Update UI and Hide Splash
+            if (!authScreenOn) {
+                document.getElementById('auth-screen').style.display = 'none';
+            }
+            splash.classList.add('loaded'); // Activates the fade-out CSS
         }
 
         function render() {
@@ -274,4 +327,4 @@
         window.onload = init;
     </script>
 </body>
-                </html>
+                    </html>
