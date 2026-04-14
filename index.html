@@ -3,301 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PRODOGE - ELITE TERMINAL</title>
+    <title>PRODOGE - SOCIAL ELITE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --neon: #00F9FF; --admin: #7000FF; --surface: #001A24; }
-        body { 
-            background: #000D12; color: #E0F2F1; font-family: 'Chakra Petch', sans-serif; overflow-x: hidden;
-            background-image: radial-gradient(circle at top right, rgba(0, 249, 255, 0.05) 0%, transparent 40%);
-        }
-
-        /* --- PROFESSIONAL UI COMPONENTS --- */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px;
-        }
-
-        .pd-logo-pro {
-            width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;
-            background: var(--surface); border: 2px solid var(--neon); border-radius: 16px;
-            font-weight: 900; font-size: 28px; color: var(--neon);
-            box-shadow: 0 8px 32px rgba(0, 249, 255, 0.15);
-        }
-
-        /* Rank Colors */
-        .rank-E { color: #94a3b8; border-color: #94a3b8; }
-        .rank-D { color: #4ade80; border-color: #4ade80; }
-        .rank-C { color: #60a5fa; border-color: #60a5fa; }
-        .rank-B { color: #a78bfa; border-color: #a78bfa; }
-        .rank-A { color: #fbbf24; border-color: #fbbf24; }
-        .rank-S { color: #f87171; border-color: #f87171; text-shadow: 0 0 10px rgba(248,113,113,0.5); }
-
-        /* XP Bar */
-        .xp-container { width: 100%; background: rgba(255,255,255,0.05); border-radius: 10px; height: 6px; overflow: hidden; }
-        .xp-bar { height: 100%; background: linear-gradient(90deg, #00F9FF, #7000FF); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-        /* Mining Orbit */
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .orbit-container { 
-            position: relative; width: 180px; height: 180px; margin: 0 auto;
-            border: 2px solid rgba(0, 249, 255, 0.05); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .orbit-ring {
-            position: absolute; inset: -10px; border: 1px dashed rgba(0, 249, 255, 0.2);
-            border-radius: 50%; animation: rotate 12s linear infinite;
-        }
+        :root { --primary-red: #C52127; --teal: #2DD4BF; --bg-offwhite: #F8F9FA; }
+        body { background: var(--bg-offwhite); color: #1A1A1A; font-family: 'Inter', sans-serif; }
+        
+        .social-card { background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        
+        /* Screenshot UI Elements */
+        .stat-label-box { background: #FF3B30; color: white; padding: 2px 15px; border-radius: 4px; font-weight: 900; font-size: 1.2rem; }
+        .balance-box { background: var(--teal); border-radius: 6px; padding: 8px 20px; color: var(--primary-red); font-weight: 900; font-size: 2rem; display: inline-block; min-width: 100px; text-align: center; }
+        .red-btn-text { color: var(--primary-red); font-weight: 900; font-size: 1.8rem; text-transform: uppercase; cursor: pointer; }
 
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: slideUp 0.4s ease-out; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .pro-btn { transition: all 0.2s; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .pro-btn:active { transform: scale(0.95); opacity: 0.8; }
-
-        /* Splash Transition - Forced Closure */
         #splash-screen {
-            position: fixed; inset: 0; z-index: 9999; background: #000D12;
+            position: fixed; inset: 0; z-index: 9999; background: white;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease-out; pointer-events: none;
+            transition: opacity 0.5s;
         }
-        #splash-screen.hidden { opacity: 0; visibility: hidden; }
+        #splash-screen.hidden { opacity: 0; pointer-events: none; }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-24">
 
     <div id="splash-screen">
-        <div class="pd-logo-pro mb-6">PD</div>
-        <div class="w-32 h-1 xp-container">
-            <div class="xp-bar animate-[loading_1s_infinite]" style="width: 50%"></div>
-        </div>
-        <p class="mt-4 text-[10px] opacity-40 font-black tracking-widest uppercase">Initializing Node...</p>
+        <h1 style="color:var(--primary-red); font-weight:900; font-size:3rem;">PD</h1>
+        <p class="text-[10px] uppercase tracking-widest font-bold opacity-40">Loading System...</p>
     </div>
 
-    <div id="auth-screen" class="fixed inset-0 z-[1000] bg-[#000D12] flex flex-col items-center justify-center p-8 hidden">
-        <div class="pd-logo-pro mb-10 scale-125">PD</div>
-        <h2 class="text-3xl font-black mb-12 tracking-tighter">PRODOGE_SYSTEM</h2>
-        <button onclick="login()" class="w-full max-w-xs bg-white text-black py-5 rounded-2xl font-black uppercase text-sm shadow-xl">Initialize Neural Link</button>
-    </div>
-
-    <header class="p-5 fixed top-0 inset-x-0 z-50 bg-[#000D12]/80 backdrop-blur-xl border-b border-white/5">
-        <div class="flex justify-between items-end mb-4">
-            <div class="flex items-center gap-4">
-                <div class="pd-logo-pro !w-12 !h-12 !text-sm">PD</div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <p id="user-display-id" class="font-black text-sm uppercase tracking-tight">AGENT_ID</p>
-                        <span id="header-rank" class="text-[9px] font-black border px-2 py-0.5 rounded uppercase">Rank E</span>
-                    </div>
-                    <p id="header-level" class="text-[10px] opacity-50 font-bold">LEVEL 1</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <p id="bal" class="text-2xl font-black text-[#00F9FF]">0.00</p>
-                <p class="text-[9px] font-black opacity-40 uppercase tracking-widest">Elite Credits</p>
-            </div>
-        </div>
-        <div class="xp-container"><div id="header-xp-bar" class="xp-bar" style="width: 0%"></div></div>
-    </header>
-
-    <main class="pt-36 px-6 max-w-md mx-auto space-y-6">
-
-        <div id="tab-home" class="tab-content active">
-            <div class="glass-card p-8 text-center">
-                <div class="orbit-container mb-8">
-                    <div class="orbit-ring"></div>
+    <div id="app-wrapper">
+        
+        <div id="tab-profile" class="tab-content active">
+            <div class="bg-white p-6 border-b">
+                <div class="flex items-center gap-4 mb-6">
+                    <img id="view-avatar" src="" class="w-20 h-20 rounded-full border-2 border-teal-400">
                     <div>
-                        <p class="text-[10px] opacity-40 uppercase font-black mb-1">Current Yield</p>
-                        <h3 id="yield" class="text-3xl font-black text-[#00F9FF] tracking-tight">0.000000</h3>
+                        <div class="flex items-center gap-2">
+                            <h2 id="view-username" class="font-bold text-xl uppercase italic">AGENT</h2>
+                            <span class="bg-teal-400 text-white text-[10px] px-2 py-0.5 rounded font-bold">Host</span>
+                        </div>
+                        <p id="view-id" class="text-xs text-gray-400 font-mono">ID: 000000</p>
                     </div>
                 </div>
-                <div class="mb-10">
-                    <p id="staked" class="text-xs font-black opacity-60 uppercase tracking-widest mb-4">0.00 Staked</p>
-                    <div class="grid grid-cols-2 gap-4">
-                        <button id="stake-btn" onclick="handleStakeToggle()" class="pro-btn bg-[#00F9FF] text-black h-14 rounded-2xl text-xs">Stake All</button>
-                        <button onclick="harvest()" class="pro-btn border-2 border-white/10 h-14 rounded-2xl text-xs">Harvest</button>
+
+                <div class="flex justify-around text-center mb-4">
+                    <div><span class="block font-black text-lg">2</span><span class="text-[10px] uppercase text-gray-400 font-bold">Followed</span></div>
+                    <div><span class="block font-black text-lg">16</span><span class="text-[10px] uppercase text-gray-400 font-bold">Following</span></div>
+                    <div><span class="block font-black text-lg">1</span><span class="text-[10px] uppercase text-gray-400 font-bold">Friends</span></div>
+                </div>
+
+                <div class="flex justify-center gap-10 mt-2">
+                    <div class="text-center">
+                        <div class="stat-label-box mb-1">LEVEL</div>
+                        <span id="view-level" class="font-black text-teal-500">23</span>
+                    </div>
+                    <div class="text-center">
+                        <div class="stat-label-box mb-1">RANK</div>
+                        <span id="view-rank" class="font-black text-teal-500">E</span>
                     </div>
                 </div>
+            </div>
+
+            <div id="owner-controls" class="p-8 space-y-10">
+                <div class="flex justify-around gap-4">
+                    <div class="text-center">
+                        <label class="block text-red-700 font-black text-xl mb-2">PKR</label>
+                        <div class="balance-box" id="view-pkr">0</div>
+                    </div>
+                    <div class="text-center">
+                        <label class="block text-red-700 font-black text-xl mb-2">ELITE</label>
+                        <div class="balance-box" id="view-elite">0</div>
+                    </div>
+                </div>
+
+                <div class="flex justify-around">
+                    <div class="red-btn-text">Recharge</div>
+                    <div class="red-btn-text">Withdrawal</div>
+                </div>
+
+                <button onclick="logout()" class="w-full mt-10 text-gray-300 font-black text-xs uppercase tracking-widest border-t pt-4">Terminate Link (Logout)</button>
+            </div>
+
+            <div id="visitor-controls" class="hidden p-8 text-center">
+                <button onclick="showTab('events')" class="bg-gray-200 px-8 py-3 rounded-full font-bold text-sm">Return to Leaderboard</button>
             </div>
         </div>
 
         <div id="tab-events" class="tab-content">
-            <h2 class="text-2xl font-black uppercase mb-6 italic">Mega Week</h2>
-            <div class="glass-card p-2 space-y-2" id="leaderboard-list"></div>
-        </div>
-
-        <div id="tab-tasks" class="tab-content">
-            <h2 class="text-2xl font-black uppercase mb-6 italic">Missions</h2>
-            <div id="task-list" class="space-y-4"></div>
-        </div>
-
-        <div id="tab-deposit" class="tab-content">
-            <h2 class="text-2xl font-black uppercase mb-6 italic">Vault</h2>
-            <div class="glass-card p-6 space-y-4">
-                <div class="p-5 rounded-2xl bg-white/5 border border-white/5 flex justify-between items-center">
-                    <div><h4 class="font-black text-white">1,000 ELITE</h4><p class="text-[10px] text-green-400 font-bold uppercase">100 PKR</p></div>
-                    <button onclick="alert('Contact Admin for verification')" class="bg-green-500 pro-btn px-6 py-3 rounded-xl text-[10px] font-black">Buy</button>
-                </div>
+            <div class="p-6">
+                <h2 class="text-2xl font-black italic uppercase mb-6 text-red-700">Mega Week Leaders</h2>
+                <div id="leaderboard-list" class="space-y-3">
+                    </div>
             </div>
         </div>
 
-        <div id="tab-profile" class="tab-content space-y-4">
-            <div class="glass-card p-6 flex items-center gap-5">
-                <img id="p-avatar" class="w-20 h-20 rounded-2xl border-2 border-white/10 bg-black/40">
-                <div class="flex-1">
-                    <h4 id="p-username" class="text-xl font-black uppercase tracking-tighter">AGENT</h4>
-                    <div class="xp-container h-2 mt-2"><div id="profile-xp-bar" class="xp-bar"></div></div>
-                </div>
-            </div>
-            <div class="glass-card p-6 text-center">
-                <p class="text-[10px] font-black opacity-40 uppercase mb-1">System Rank</p>
-                <h3 id="p-rank-display" class="text-5xl font-black italic">E</h3>
-            </div>
-            <button onclick="sb.auth.signOut().then(() => location.reload())" class="w-full text-red-500 font-black text-[10px] uppercase py-4">Terminate Link</button>
-        </div>
+    </div>
 
-        <div id="tab-admin" class="tab-content">
-            <h2 class="text-2xl font-black uppercase mb-6 italic text-[#7000FF]">Root</h2>
-            <div class="glass-card p-6 space-y-3 border-[#7000FF]/20">
-                <input type="text" id="admin-dep-user" placeholder="Target Username" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm">
-                <input type="number" id="admin-dep-pkr" placeholder="PKR Amount" class="w-full bg-black border border-white/10 p-4 rounded-xl text-sm">
-                <button onclick="adminProcessDeposit()" class="w-full bg-[#7000FF] text-white py-4 rounded-xl font-black text-xs pro-btn">Inject Tokens</button>
-            </div>
-        </div>
-
-    </main>
-
-    <nav class="fixed bottom-6 inset-x-6 h-20 glass-card flex justify-around items-center px-4 border-white/10 shadow-2xl z-50">
-        <button onclick="showTab('home', event)" class="nav-btn text-2xl text-[#00F9FF]">🏠</button>
-        <button onclick="showTab('events', event)" class="nav-btn text-2xl opacity-40">🏆</button>
-        <button onclick="showTab('tasks', event)" class="nav-btn text-2xl opacity-40">🛰️</button>
-        <button onclick="showTab('deposit', event)" class="nav-btn text-2xl opacity-40">💎</button>
-        <button onclick="showTab('profile', event)" class="nav-btn text-2xl opacity-40">👤</button>
-        <button id="admin-nav" onclick="showTab('admin', event)" class="nav-btn text-2xl opacity-40 hidden">⚙️</button>
+    <nav class="fixed bottom-0 inset-x-0 h-20 bg-white border-t flex justify-around items-center px-4">
+        <button onclick="viewMyProfile()" class="text-2xl opacity-40 nav-btn" id="nav-profile">👤</button>
+        <button onclick="showTab('events')" class="text-2xl opacity-40 nav-btn" id="nav-events">🏆</button>
+        <button onclick="alert('Chat Coming Soon')" class="text-2xl opacity-40">💬</button>
     </nav>
 
     <script>
         const SB_URL = "https://htngfzwclkqsffozxfuo.supabase.co";
         const SB_KEY = "sb_publishable_2LJdcMlfhcEyNl_EMUx-2w_Ms5ZtJ5g";
         const sb = supabase.createClient(SB_URL, SB_KEY);
-        let profile = null;
+        let myProfile = null;
 
-        // --- SPLASH CLOSER (Guaranteed 1s) ---
-        function closeSplash() {
-            const splash = document.getElementById('splash-screen');
-            if(splash) {
-                splash.classList.add('hidden');
-                setTimeout(() => splash.style.display = 'none', 500);
+        async function init() {
+            setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 1000);
+            
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) {
+                const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
+                myProfile = data;
+                viewMyProfile();
+                loadLeaderboard();
+            } else {
+                // If not logged in, you can add your login redirect here
+                alert("Please login first");
             }
         }
-        setTimeout(closeSplash, 1000); 
-
-        async function login() { await sb.auth.signInWithOAuth({ provider: 'google' }); }
 
         function calculateRank(dep) {
             const d = Number(dep) || 0;
             if (d >= 1000000) return 'S';
-            if (d >= 500000) return 'A';
-            if (d >= 100000) return 'B';
-            if (d >= 10000) return 'C';
             if (d >= 200) return 'D';
             return 'E';
         }
 
-        async function init() {
-            try {
-                const { data: { session } } = await sb.auth.getSession();
-                if (session) {
-                    const { data } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-                    if (data) {
-                        profile = data; 
-                        render(); loadTasks(); loadLeaderboard(); updateButtonUI();
-                        setInterval(updateMining, 1000);
-                        if (session.user.email === "sa7530006@gmail.com") document.getElementById('admin-nav').classList.remove('hidden');
-                    }
-                } else { 
-                    document.getElementById('auth-screen').classList.remove('hidden'); 
-                }
-            } catch (e) { console.error("Session Error", e); }
+        function viewMyProfile() {
+            if (!myProfile) return;
+            renderProfile(myProfile, true);
+            showTab('profile');
         }
 
-        function render() {
-            const rank = calculateRank(profile.total_deposits);
-            const name = profile.username || "AGENT_" + profile.id.slice(0,4);
-            document.getElementById('user-display-id').innerText = name;
-            document.getElementById('header-rank').innerText = "Rank " + rank;
-            document.getElementById('header-rank').className = `text-[9px] font-black border px-2 py-0.5 rounded uppercase rank-${rank}`;
-            document.getElementById('bal').innerText = Number(profile.tokens).toLocaleString();
-            document.getElementById('staked').innerText = Number(profile.staked_tokens).toLocaleString() + " STAKED";
-            document.getElementById('p-username').innerText = name;
-            document.getElementById('p-avatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${profile.id}`;
-            document.getElementById('p-rank-display').innerText = rank;
-            document.getElementById('p-rank-display').className = `text-5xl font-black italic rank-${rank}`;
+        async function viewOtherUser(userId) {
+            const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
+            if (data) {
+                renderProfile(data, false);
+                showTab('profile');
+            }
+        }
+
+        function renderProfile(user, isOwner) {
+            document.getElementById('view-username').innerText = user.username || "Agent";
+            document.getElementById('view-id').innerText = "ID: " + user.id.slice(0, 8);
+            document.getElementById('view-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+            document.getElementById('view-rank').innerText = calculateRank(user.total_deposits);
+            
+            // Hide/Show owner specific elements
+            const ownerControls = document.getElementById('owner-controls');
+            const visitorControls = document.getElementById('visitor-controls');
+
+            if (isOwner) {
+                ownerControls.classList.remove('hidden');
+                visitorControls.classList.add('hidden');
+                document.getElementById('view-pkr').innerText = user.total_deposits || 0;
+                document.getElementById('view-elite').innerText = user.tokens || 0;
+            } else {
+                ownerControls.classList.add('hidden');
+                visitorControls.classList.remove('hidden');
+            }
         }
 
         async function loadLeaderboard() {
             const { data } = await sb.from('profiles').select('username, total_deposits, id').order('total_deposits', { ascending: false }).limit(10);
-            if(data) {
-                document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `
-                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl">
-                        <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-black opacity-20">${i+1}</span>
-                            <p class="text-xs font-black uppercase">${u.username || 'Agent'}</p>
-                        </div>
-                        <p class="text-sm font-black rank-${calculateRank(u.total_deposits)}">${calculateRank(u.total_deposits)}</p>
-                    </div>`).join('');
-            }
-        }
-
-        async function loadTasks() {
-            const { data } = await sb.from('tiktok_tasks1').select('*');
             if (data) {
-                document.getElementById('task-list').innerHTML = data.map(t => `
-                    <div class="glass-card p-5 flex justify-between items-center">
-                        <div><p class="text-xs font-black uppercase">${t.description}</p></div>
-                        <button onclick="window.open('${t.link}', '_blank')" class="bg-[#00F9FF] text-black px-4 py-2 rounded-lg text-[10px] font-black">START</button>
+                document.getElementById('leaderboard-list').innerHTML = data.map((u, i) => `
+                    <div onclick="viewOtherUser('${u.id}')" class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100 active:scale-95 transition-transform">
+                        <div class="flex items-center gap-3">
+                            <span class="font-black text-gray-200 text-xl">#${i + 1}</span>
+                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${u.id}" class="w-10 h-10 rounded-full bg-gray-50">
+                            <div>
+                                <p class="font-bold text-sm">${u.username || 'Agent'}</p>
+                                <p class="text-[9px] uppercase font-bold text-teal-500">Rank ${calculateRank(u.total_deposits)}</p>
+                            </div>
+                        </div>
+                        <span class="text-red-600 font-black">VIEW</span>
                     </div>`).join('');
             }
         }
 
-        function updateButtonUI() {
-            const btn = document.getElementById('stake-btn');
-            const isStaked = Number(profile.staked_tokens) > 0;
-            btn.innerText = isStaked ? "Unstake All" : "Stake All";
-            btn.style.backgroundColor = isStaked ? "#f97316" : "#00F9FF";
-        }
-
-        async function handleStakeToggle() {
-            const isStaked = Number(profile.staked_tokens) > 0;
-            if (isStaked) {
-                await sb.from('profiles').update({ tokens: Number(profile.tokens) + Number(profile.staked_tokens), staked_tokens: 0 }).eq('id', profile.id);
-            } else {
-                if (profile.tokens <= 0) return;
-                await sb.from('profiles').update({ staked_tokens: profile.tokens, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', profile.id);
-            }
-            location.reload();
-        }
-
-        function updateMining() {
-            if (!profile?.staked_tokens) return;
-            const diff = (new Date() - new Date(profile.last_sync_time)) / 1000;
-            const earned = (profile.staked_tokens * 0.04 * diff) / 86400;
-            document.getElementById('yield').innerText = earned.toFixed(6);
-        }
-
-        async function harvest() { await sb.rpc('process_mining_claim'); location.reload(); }
-
-        function showTab(id, e) {
+        function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-'+id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.add('opacity-40'); b.classList.remove('text-[#00F9FF]'); });
-            e.currentTarget.classList.remove('opacity-40'); e.currentTarget.classList.add('text-[#00F9FF]');
+            document.getElementById('tab-' + tabId).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.add('opacity-40'));
+            const activeNav = document.getElementById('nav-' + tabId);
+            if(activeNav) activeNav.classList.remove('opacity-40');
+        }
+
+        async function logout() {
+            await sb.auth.signOut();
+            location.reload();
         }
 
         window.onload = init;
     </script>
 </body>
-                    </html>
+</html>
