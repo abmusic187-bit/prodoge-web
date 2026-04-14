@@ -57,14 +57,21 @@
 
         .pro-btn { transition: all 0.2s; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         .pro-btn:active { transform: scale(0.95); opacity: 0.8; }
+
+        /* Splash Transition */
+        #splash-screen {
+            position: fixed; inset: 0; z-index: 9999; background: #000D12;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s;
+        }
     </style>
 </head>
 <body class="pb-32">
 
-    <div id="splash-screen" class="fixed inset-0 z-[9999] bg-[#000D12] flex flex-col items-center justify-center transition-opacity duration-700">
+    <div id="splash-screen">
         <div class="pd-logo-pro mb-6">PD</div>
         <div class="w-32 h-1 xp-container">
-            <div class="xp-bar animate-[loading_2s_infinite]" style="width: 50%"></div>
+            <div class="xp-bar animate-[loading_1s_infinite]" style="width: 50%"></div>
         </div>
     </div>
 
@@ -120,8 +127,7 @@
                 <h2 class="text-2xl font-black uppercase italic">Mega Week</h2>
                 <span class="bg-red-500 text-white text-[9px] px-2 py-1 rounded-full font-black animate-pulse">LIVE</span>
             </div>
-            <div class="glass-card p-2 space-y-2" id="leaderboard-list">
-                </div>
+            <div class="glass-card p-2 space-y-2" id="leaderboard-list"></div>
         </div>
 
         <div id="tab-tasks" class="tab-content">
@@ -139,7 +145,7 @@
                     </div>
                     <button onclick="alert('Contact admin for 100 PKR Deposit')" class="bg-green-500 pro-btn px-6 py-3 rounded-xl text-[10px] font-black">100 PKR</button>
                 </div>
-                <p class="text-[10px] text-center opacity-30 italic">Deposits trigger hidden rank evaluation.</p>
+                <p class="text-[10px] text-center opacity-30 italic">Evaluations are processed every 12 hours.</p>
             </div>
         </div>
 
@@ -221,9 +227,16 @@
                     setInterval(updateMining, 1000);
                     if (session.user.email === "sa7530006@gmail.com") document.getElementById('admin-nav').classList.remove('hidden');
                 }
-            } else { document.getElementById('auth-screen').classList.remove('hidden'); }
-            setTimeout(() => document.getElementById('splash-screen').style.opacity = '0', 1000);
-            setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 1700);
+            } else { 
+                document.getElementById('auth-screen').classList.remove('hidden'); 
+            }
+            
+            // SPLASH CLOSE LOGIC: Exactly 1 second
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => splash.style.display = 'none', 500);
+            }, 1000);
         }
 
         function render() {
@@ -259,7 +272,7 @@
                             <p class="text-[10px] text-[#00F9FF] font-black mt-1">+${t.reward} ELITE | +50 XP</p>
                         </div>
                         <button onclick="runTask('${t.link}', ${t.reward}, ${t.id})" class="bg-[#00F9FF] text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase">Start</button>
-                    </div>`).join('') : "<p class='text-center opacity-30 text-xs py-10'>ALL MISSIONS CLEARED</p>";
+                    </div>`).join('') : "<p class='text-center opacity-30 text-xs py-10'>MISSIONS COMPLETED</p>";
             }
         }
 
@@ -267,7 +280,7 @@
             window.open(link, '_blank');
             document.getElementById('task-list').innerHTML = `
                 <div class="glass-card p-10 text-center animate-pulse">
-                    <p class="text-xs font-black uppercase text-[#00F9FF] mb-4">Verifying Mission...</p>
+                    <p class="text-xs font-black uppercase text-[#00F9FF] mb-4">Verifying Link...</p>
                     <button onclick="claim(${rew}, ${id})" class="bg-[#00F9FF] text-black px-8 py-3 rounded-xl font-black text-xs">Claim Reward</button>
                 </div>`;
         }
@@ -313,7 +326,7 @@
             if (isStaked) {
                 await sb.from('profiles').update({ tokens: Number(profile.tokens) + Number(profile.staked_tokens), staked_tokens: 0 }).eq('id', profile.id);
             } else {
-                if (profile.tokens <= 0) return alert("Insufficient Balance");
+                if (profile.tokens <= 0) return alert("Zero balance detected.");
                 await sb.from('profiles').update({ staked_tokens: profile.tokens, tokens: 0, last_sync_time: new Date().toISOString() }).eq('id', profile.id);
             }
             location.reload();
@@ -328,7 +341,7 @@
                     total_deposits: (user.total_deposits || 0) + pkr,
                     tokens: Number(user.tokens) + (pkr * 10) 
                 }).eq('id', user.id);
-                alert("Deposit Logged.");
+                alert("Deposit injection successful.");
             }
         }
 
@@ -347,7 +360,4 @@
         async function harvest() { await sb.rpc('process_mining_claim'); location.reload(); }
 
         function showTab(id, e) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-'+id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => { b.classList.add('opacity-40'); b.classList.remove('text-[#00F9FF]'); });
-            e.currentTarget.classList.remove('opacity-40'); e.currentT
+            document.querySelectorAll('.tab-content').forEach
